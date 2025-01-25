@@ -1,6 +1,4 @@
 
-
-
 DROP TABLE studies;
 DROP TABLE transcript;
 DROP TABLE validation;
