@@ -159,4 +159,10 @@ VALUES
 
 
 -- @block
-SELECT * FROM course;    
+SELECT * FROM course;  
+  
+-- @block
+SELECT * FROM degree;
+
+-- @block
+SELECT * FROM student
