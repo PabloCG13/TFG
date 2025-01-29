@@ -1,6 +1,5 @@
 import React from 'react';
 import perfil from './perfil.png'; // Import the image from src
-import { Link } from 'react-router-dom'; // Import Link to redirect
 
 const HomeHeader = () => {
   return (
@@ -18,16 +17,6 @@ const HomeHeader = () => {
         {/* Title */}
         <div style={titleStyle}>
           <h1>ProofEd</h1>
-        </div>
-
-        {/* Login button */}
-        <div>
-          <Link to="/login" style={loginButtonStyle}>Login</Link>
-        </div>
-
-        {/* Register button */}
-        <div>
-          <Link to="/register" style={registerButtonStyle}>Register</Link>
         </div>
       </div>
     </header>
@@ -66,32 +55,5 @@ const titleStyle = {
   flex: 1, 
   textAlign: 'center', 
 };
-
-/* Login button */
-const loginButtonStyle = {
-  backgroundColor: '#4CAF50', // Green
-  color: 'white',
-  padding: '10px 20px',
-  textDecoration: 'none',
-  borderRadius: '5px',
-  fontSize: '16px',
-  textAlign: 'center',
-  display: 'inline-block',
-  cursor: 'pointer',
-};
-/* Register button */
-const registerButtonStyle = {
-  backgroundColor: '#2196F3', // Blue
-  color: 'white',
-  padding: '10px 20px',
-  textDecoration: 'none',
-  borderRadius: '5px',
-  fontSize: '16px',
-  textAlign: 'center',
-  display: 'inline-block',
-  cursor: 'pointer',
-  marginLeft: '10px', // Add space between buttons
-};
-  
 
 export default HomeHeader;

@@ -8,7 +8,7 @@ const HomeFooter = () => {
   );
 };
 
-// Estilos en línea (opcional)
+// Styles
 const footerStyle = {
   background: '#282c34',
   color: 'white',

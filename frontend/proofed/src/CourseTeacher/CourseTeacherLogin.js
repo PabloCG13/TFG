@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom'; // Import Link to redirect to Course Teacher Sign In page
 
-const Login = () => {
+const CourseTeacherLogin = () => {
   
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -14,7 +15,7 @@ const Login = () => {
 
   return (
     <div style={loginPageStyle}>
-      <h2>Log In</h2>
+      <h2>Course Teacher Log In</h2>
       <form onSubmit={handleSubmit} style={formStyle}>
         <div style={inputGroupStyle}>
         <label htmlFor="username" style={labelStyle}>User:</label>
@@ -38,6 +39,12 @@ const Login = () => {
             style={inputStyle}
           />
         </div>
+
+        {/* Sign In Link */}
+        <div style={linkContainerStyle}>
+          <Link to="/CourseTeacher/CourseTeacherSignIn" style={linkStyle}>Sign In</Link>
+        </div>
+
         <button type="submit" style={submitButtonStyle}>Submit</button>
       </form>
     </div>
@@ -54,7 +61,7 @@ const loginPageStyle = {
   textAlign: 'center', // Center the text inside the form
 };
 
-/* Form*/
+/* Form */
 const formStyle = {
   display: 'flex',
   flexDirection: 'column',
@@ -98,4 +105,16 @@ const submitButtonStyle = {
   marginTop: '20px', // Add space between inputs and button
 };
 
-export default Login;
+/* Sign In */
+const linkContainerStyle = {
+  marginBottom: '10px', // Space between the link and button
+};
+  
+const linkStyle = {
+  color: '#007bff',
+  fontSize: '16px',
+  textDecoration: 'underline', // Makes the link underlined
+  cursor: 'pointer',
+};
+
+export default CourseTeacherLogin;
