@@ -46,9 +46,9 @@ const StudentLogin = () => {
         </div>
 
         {/* Redirect to Student Home Page on button click */}
-        <Link to="/Student/StudentPages/StudentHomePage/StudentHome">
-          <button type="submit" style={submitButtonStyle}>Submit</button>
-        </Link>
+        <div style={submitButtonStyle}>
+          <Link to= "/Student/StudentPages/StudentHomePage/StudentHome" style={submitButtonStyle}>Submit</Link>
+        </div>
       </form>
     </div>
   );

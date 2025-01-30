@@ -15,6 +15,11 @@ import UniversitySignIn from "./University/UniversitySignIn"; // Import Univesit
 
 import StudentHome from "./Student/StudentPages/StudentHomePage/StudentHome"; // Import Student Home Page
 
+import StudentTranscript from "./Student/StudentPages/StudentHomePage/StudentTranscriptPage/StudentTranscript"; // Import Student Transcript Page
+import StudentValidationList from "./Student/StudentPages/StudentHomePage/StudentValidationListPage/StudentValidationList"; // Import Student Validation List Page
+import StudentUniversityInformation from "./Student/StudentPages/StudentHomePage/StudentUniversityInformationPage/StudentUniversityInformation"; // Import Student University Information Page
+import StudentProfile from "./Student/StudentPages/StudentHomePage/StudentProfilePage/StudentProfile"; // Import Student Profile Page
+
 function App() {
   return (
     <Router>
@@ -49,6 +54,20 @@ function App() {
         {/* Student Home Page route */}
         <Route path="/Student/StudentPages/StudentHomePage/StudentHome" element={<StudentHome />} />
 
+
+        {/* Student Transcript Page route */}
+        <Route path="/Student/StudentPages/StudentHomePage/StudentTranscriptPage/StudentTranscript" element={<StudentTranscript />} />
+
+        {/* Student Validation List route */}
+        <Route path="/Student/StudentPages/StudentHomePage/StudentValidationListPage/StudentValidationList" element={<StudentValidationList />} />
+
+        {/* Student University Information route */}
+        <Route path="/Student/StudentPages/StudentHomePage/StudentUniversityInformationPage/StudentUniversityInformation" element={<StudentUniversityInformation />} />
+
+        {/* Student Profile route */}
+        <Route path="/Student/StudentPages/StudentHomePage/StudentProfilePage/StudentProfile" element={<StudentProfile />} />
+
+        
       </Routes>
     </Router>
   );

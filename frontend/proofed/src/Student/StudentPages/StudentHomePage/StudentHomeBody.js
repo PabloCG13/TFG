@@ -5,7 +5,7 @@ const StudentHomeBody= () => {
   return (
     <div style={containerStyle}>
       <Link
-        // to="/Student/StudentLogin" // Route where it links to
+        to="/Student/StudentPages/StudentHomePage/StudentTranscriptPage/StudentTranscript" // Route where it links to
         style={transcriptButtonStyle} 
         onMouseOver={(e) => Object.assign(e.target.style, hoverStyle)} 
         onMouseOut={(e) => Object.assign(e.target.style, transcriptButtonStyle)} 
@@ -13,7 +13,7 @@ const StudentHomeBody= () => {
       Transcript
       </Link>
       <Link 
-        // to="/CourseTeacher/CourseTeacherLogin" // Route where it links to
+        to="/Student/StudentPages/StudentHomePage/StudentValidationListPage/StudentValidationList" // Route where it links to
         style={validationListButtonStyle} 
         onMouseOver={(e) => Object.assign(e.target.style, hoverStyle)}
         onMouseOut={(e) => Object.assign(e.target.style, validationListButtonStyle)}
@@ -21,7 +21,7 @@ const StudentHomeBody= () => {
       Validation List
       </Link>
       <Link 
-        // to="/CoordinatorTeacher/CoordinatorTeacherLogin" // Route where it links to
+        to="/Student/StudentPages/StudentHomePage/StudentUniversityInformationPage/StudentUniversityInformation" // Route where it links to
         style={universityInformationButtonStyle} 
         onMouseOver={(e) => Object.assign(e.target.style, hoverStyle)}
         onMouseOut={(e) => Object.assign(e.target.style, universityInformationButtonStyle)}
@@ -29,7 +29,7 @@ const StudentHomeBody= () => {
       University Information
       </Link>
       <Link 
-        // to="/University/UniversityLogin" // Route where it links to
+        to="/Student/StudentPages/StudentHomePage/StudentProfilePage/StudentProfile" // Route where it links to
         style={profileButtonStyle} 
         onMouseOver={(e) => Object.assign(e.target.style, hoverStyle)}
         onMouseOut={(e) => Object.assign(e.target.style, profileButtonStyle)}
