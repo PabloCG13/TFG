@@ -1,5 +1,5 @@
 import React from 'react';
-import perfil from './perfil.png'; // Import the image from src
+import perfil from '../Logo/perfil.png'; // Import the image from Logo folder
 
 const HomeHeader = () => {
   return (

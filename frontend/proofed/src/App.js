@@ -13,6 +13,8 @@ import CourseTeacherSignIn from "./CourseTeacher/CourseTeacherSignIn"; // Import
 import CoordinatorTeacherSignIn from "./CoordinatorTeacher/CoordinatorTeacherSignIn"; // Import Coordinator Teacher Sign In
 import UniversitySignIn from "./University/UniversitySignIn"; // Import Univesity Sign In
 
+import StudentHome from "./Student/StudentPages/StudentHomePage/StudentHome"; // Import Student Home Page
+
 function App() {
   return (
     <Router>
@@ -44,7 +46,8 @@ function App() {
         {/* University Sign In route */}
         <Route path="/University/UniversitySignIn" element={<UniversitySignIn />} />
 
-
+        {/* Student Home Page route */}
+        <Route path="/Student/StudentPages/StudentHomePage/StudentHome" element={<StudentHome />} />
 
       </Routes>
     </Router>
