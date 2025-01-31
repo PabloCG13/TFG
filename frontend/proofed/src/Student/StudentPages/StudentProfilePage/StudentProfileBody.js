@@ -8,6 +8,4 @@ const StudentProfileBody= () => {
   );
 };
 
-
-
 export default StudentProfileBody;

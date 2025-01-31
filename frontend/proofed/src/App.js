@@ -13,12 +13,19 @@ import CourseTeacherSignIn from "./CourseTeacher/CourseTeacherSignIn"; // Import
 import CoordinatorTeacherSignIn from "./CoordinatorTeacher/CoordinatorTeacherSignIn"; // Import Coordinator Teacher Sign In
 import UniversitySignIn from "./University/UniversitySignIn"; // Import Univesity Sign In
 
-import StudentHome from "./Student/StudentPages/StudentHomePage/StudentHome"; // Import Student Home Page
+import StudentHome from "./Student/StudentPages/StudentHome"; // Import Student Home Page
 
-import StudentTranscript from "./Student/StudentPages/StudentHomePage/StudentTranscriptPage/StudentTranscript"; // Import Student Transcript Page
-import StudentValidationList from "./Student/StudentPages/StudentHomePage/StudentValidationListPage/StudentValidationList"; // Import Student Validation List Page
-import StudentUniversityInformation from "./Student/StudentPages/StudentHomePage/StudentUniversityInformationPage/StudentUniversityInformation"; // Import Student University Information Page
-import StudentProfile from "./Student/StudentPages/StudentHomePage/StudentProfilePage/StudentProfile"; // Import Student Profile Page
+import StudentTranscript from "./Student/StudentPages/StudentTranscriptPage/StudentTranscript"; // Import Student Transcript Page
+import StudentValidationList from "./Student/StudentPages/StudentValidationListPage/StudentValidationList"; // Import Student Validation List Page
+import StudentUniversityInformation from "./Student/StudentPages/StudentUniversityInformationPage/StudentUniversityInformation"; // Import Student University Information Page
+import StudentProfile from "./Student/StudentPages/StudentProfilePage/StudentProfile"; // Import Student Profile Page
+
+import CoordinatorTeacherHome from "./CoordinatorTeacher/CoordinatorTeacherPages/CoordinatorTeacherHome"; // Import Coordinator Teacher Home Page
+
+import CoordinatorTeacherValidationList from "./CoordinatorTeacher/CoordinatorTeacherPages/CoordinatorTeacherValidationListPage/CoordinatorTeacherValidationList"; // Import Coordinator Teacher Validation List Page
+import CoordinatorTeacherConfirmValidation from "./CoordinatorTeacher/CoordinatorTeacherPages/CoordinatorTeacherConfirmValidationsPage/CoordinatorTeacherConfirmValidations"; // Import Coordinator Teacher Confirm Validations Page
+import CoordinatorTeacherConfirmMarks from "./CoordinatorTeacher/CoordinatorTeacherPages/CoordinatorTeacherConfirmMarksPage/CoordinatorTeacherConfirmMarks"; // Import Coordinator Teacher Confirm Marks Page
+
 
 function App() {
   return (
@@ -26,6 +33,7 @@ function App() {
       <Routes>
         {/* Principal route: Home */}
         <Route path="/" element={<Home />} />
+
 
         {/* Student Login route */}
         <Route path="/Student/StudentLogin" element={<StudentLogin />} />
@@ -39,6 +47,7 @@ function App() {
         {/* University Login route */}
         <Route path="/University/UniversityLogin" element={<UniversityLogin />} />
 
+
         {/* Student Sign In route */}
         <Route path="/Student/StudentSignIn" element={<StudentSignIn />} />
 
@@ -51,23 +60,37 @@ function App() {
         {/* University Sign In route */}
         <Route path="/University/UniversitySignIn" element={<UniversitySignIn />} />
 
+
         {/* Student Home Page route */}
-        <Route path="/Student/StudentPages/StudentHomePage/StudentHome" element={<StudentHome />} />
+        <Route path="/Student/StudentPages/StudentHome" element={<StudentHome />} />
 
 
         {/* Student Transcript Page route */}
-        <Route path="/Student/StudentPages/StudentHomePage/StudentTranscriptPage/StudentTranscript" element={<StudentTranscript />} />
+        <Route path="/Student/StudentPages/StudentTranscriptPage/StudentTranscript" element={<StudentTranscript />} />
 
         {/* Student Validation List route */}
-        <Route path="/Student/StudentPages/StudentHomePage/StudentValidationListPage/StudentValidationList" element={<StudentValidationList />} />
+        <Route path="/Student/StudentPages/StudentValidationListPage/StudentValidationList" element={<StudentValidationList />} />
 
         {/* Student University Information route */}
-        <Route path="/Student/StudentPages/StudentHomePage/StudentUniversityInformationPage/StudentUniversityInformation" element={<StudentUniversityInformation />} />
+        <Route path="/Student/StudentPages/StudentUniversityInformationPage/StudentUniversityInformation" element={<StudentUniversityInformation />} />
 
         {/* Student Profile route */}
-        <Route path="/Student/StudentPages/StudentHomePage/StudentProfilePage/StudentProfile" element={<StudentProfile />} />
+        <Route path="/Student/StudentPages/StudentProfilePage/StudentProfile" element={<StudentProfile />} />
 
-        
+
+        {/* Coordinator Teacher Home Page route */}
+        <Route path="/CoordinatorTeacher/CoordinatorTeacherPages/CoordinatorTeacherHome" element={<CoordinatorTeacherHome />} />
+
+
+        {/* Coordinator Teacher Validation List Page route */}
+        <Route path="/CoordinatorTeacher/CoordinatorTeacherPages/CoordinatorTeacherValidationListPage/CoordinatorTeacherValidationList" element={<CoordinatorTeacherValidationList />} />
+
+        {/* Coordinator Teacher Confirm Validations Page route */}
+        <Route path="/CoordinatorTeacher/CoordinatorTeacherPages/CoordinatorTeacherConfirmValidationPage/CoordinatorTeacherConfirmValidation" element={<CoordinatorTeacherConfirmValidation />} />
+
+        {/* Coordinator Teacher Confirm Marks Page route */}
+        <Route path="/CoordinatorTeacher/CoordinatorTeacherPages/CoordinatorTeacherConfirmMarksPage/CoordinatorTeacherConfirmMarks" element={<CoordinatorTeacherConfirmMarks />} />
+
       </Routes>
     </Router>
   );

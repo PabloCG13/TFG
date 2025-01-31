@@ -44,7 +44,10 @@ const CoordinatorTeacherLogin = () => {
         <div style={linkContainerStyle}>
             <Link to="/CoordinatorTeacher/CoordinatorTeacherSignIn" style={linkStyle}>Sign In</Link>
         </div>
-        <button type="submit" style={submitButtonStyle}>Submit</button>
+        {/* Redirect to Student Home Page on button click */}
+        <div style={submitButtonStyle}>
+          <Link to= "/CoordinatorTeacher/CoordinatorTeacherPages/CoordinatorTeacherHome" style={submitButtonStyle}>Submit</Link>
+        </div>
       </form>
     </div>
   );

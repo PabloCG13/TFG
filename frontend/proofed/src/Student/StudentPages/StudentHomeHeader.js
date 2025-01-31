@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import perfil from '../../../Logo/perfil.png'; // Import the image from Logo folder
+import perfil from '../../Logo/perfil.png'; // Import the image from Logo folder
 
 const StudentHomeHeader = () => {
   // State to control modal visibility

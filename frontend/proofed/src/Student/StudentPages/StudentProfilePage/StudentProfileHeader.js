@@ -1,5 +1,5 @@
 import React from 'react';
-import perfil from '../../../../Logo/perfil.png'; // Import the image from Logo folder
+import perfil from '../../../Logo/perfil.png'; // Import the image from Logo folder
 
 const StudentProfileHeader = () => {
   return (

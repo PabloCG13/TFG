@@ -1,7 +1,7 @@
 import React from 'react';
-import perfil from '../../../../Logo/perfil.png'; // Import the image from Logo folder
+import perfil from '../../../Logo/perfil.png'; // Import the image from Logo folder
 
-const StudentValidationListHeader = () => {
+const StudentTranscriptHeader = () => {
   return (
     <header style={headerStyle}>
       <div style={containerStyle}>
@@ -16,7 +16,7 @@ const StudentValidationListHeader = () => {
 
         {/* Title */}
         <div style={titleStyle}>
-          <h1>Student Validation List</h1>
+          <h1>Student Transcript</h1>
         </div>
       </div>
     </header>
@@ -56,4 +56,4 @@ const titleStyle = {
   textAlign: 'center', 
 };
 
-export default StudentValidationListHeader;
+export default StudentTranscriptHeader;
