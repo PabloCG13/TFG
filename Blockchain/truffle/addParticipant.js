@@ -27,8 +27,9 @@ async function main() {
 
 
     
-    const studentName = "alumno_!";
+    const studentName = "alumno_1";
     const studentPass = "1234567hola";
+    const studentRole = 1;
     const universityAddress = "0x6562de21fA088731Aac85799e418Cb54F797Df35";
     const studentAddress = "0xdeEDCf74bD222e4AdED22d05056Ce99587Faa597";
 
@@ -38,7 +39,7 @@ async function main() {
 
     try {
        
-        const tx = await contract.methods.addParticipant(studentHash, studentAddress).send({ 
+        const tx = await contract.methods.addParticipant(studentHash, studentAddress, studentRole).send({ 
             from: universityAddress, 
             gas: 6721975  // Aumentar el límite de gas 
         });

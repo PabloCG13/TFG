@@ -1,14 +1,20 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
+import "./token.sol";
 contract tfg {
     struct Expediente {
-        address[] profesores;
-        mapping(address => bool) profesorExiste;
+        address[] teachers;
+        mapping(address => bool) teacherExists;
         string hash;
     }
 
-    mapping(address => string) public personToHash;
+    struct Person {
+        string hash;
+        uint role; // 0:does not exists, 1:student, 2:course coordinator, 3:degree coordinator
+    }
+    mapping(address => MiNFT) public validations;
+    mapping(address => Person) public personToHash;
     mapping(address => string) public universityToHash;
     mapping(address => Expediente) public studentToRecord;
     address private _owner;
@@ -24,7 +30,7 @@ contract tfg {
 
     modifier participantExists(address participant) {
         require(
-            bytes(personToHash[participant]).length != 0,
+            personToHash[participant].role != 0,
             "Participant does not exist"
         );
         _;
@@ -32,8 +38,41 @@ contract tfg {
 
     modifier participantNotExists(address participant) {
         require(
-            bytes(personToHash[participant]).length == 0,
+            personToHash[participant].role == 0,
             "Participant does not exist"
+        );
+        _;
+    }
+
+    modifier participantIsStudent(address participant) {
+        require(
+            personToHash[participant].role == 1,
+            "Participant is not a student"
+        );
+        _;
+    }
+
+    modifier participantIsCourseCoord(address participant) {
+        require(
+            personToHash[participant].role == 2,
+            "Participant is not a course Coordinator"
+        );
+        _;
+    }
+
+    modifier participantIsDegreeCoord(address participant) {
+        require(
+            personToHash[participant].role == 3,
+            "Participant is not a degree Coordinator"
+        );
+        _;
+    }
+
+    modifier participantIsTeacher(address participant) {
+        require(
+            personToHash[participant].role == 2 ||
+                personToHash[participant].role == 3,
+            "Participant is not a teacher"
         );
         _;
     }
@@ -67,10 +106,12 @@ contract tfg {
     }
 
     function addParticipant(
-        string memory hash,
-        address participant
+        string memory _hash,
+        address participant,
+        uint _role
     ) public universityExists(msg.sender) participantNotExists(participant) {
-        personToHash[participant] = hash;
+        personToHash[participant].hash = _hash;
+        personToHash[participant].role = _role;
         emit ParticipantAdded(
             "Se ha anadido un nuevo participante correctamente"
         );
@@ -89,36 +130,82 @@ contract tfg {
     ) public view participantExists(msg.sender) returns (bool) {
         bytes32 generatedHash = sha256(abi.encodePacked(user, passwd));
         return
-            keccak256(abi.encodePacked(personToHash[msg.sender])) ==
+            keccak256(abi.encodePacked(personToHash[msg.sender].hash)) ==
             generatedHash;
 
         /*keccak256(abi.encodePacked(personToHash[msg.sender])) ==
             keccak256(abi.encodePacked(user, passwd, "random_salt_value"));*/
     }
 
-    function addProfesor(address student, address profesor) public onlyOwner {
+    function consultUniversity(
+        string memory user,
+        string memory passwd
+    ) public view universityExists(msg.sender) returns (bool) {
+        bytes32 generatedHash = sha256(abi.encodePacked(user, passwd));
+        return
+            keccak256(abi.encodePacked(universityToHash[msg.sender])) ==
+            generatedHash;
+
+        /*keccak256(abi.encodePacked(personToHash[msg.sender])) ==
+            keccak256(abi.encodePacked(user, passwd, "random_salt_value"));*/
+    }
+
+    function addTeacherToTranscript(
+        address student,
+        address profesor
+    ) public universityExists(msg.sender) participantIsTeacher(profesor) {
         require(
-            !studentToRecord[student].profesorExiste[profesor],
-            "Profesor ya existe"
+            !studentToRecord[student].teacherExists[profesor],
+            "Teacher already added"
         );
-        studentToRecord[student].profesores.push(profesor);
-        studentToRecord[student].profesorExiste[profesor] = true;
+        studentToRecord[student].teachers.push(profesor);
+        studentToRecord[student].teacherExists[profesor] = true;
     }
 
     function getProfessors(
         address student
     ) public view returns (address[] memory) {
-        return studentToRecord[student].profesores;
+        return studentToRecord[student].teachers;
     }
 
-    function update(
+    function updateMark(
         string memory hash,
         address participant
-    ) public onlyOwner participantExists(participant) {
-        personToHash[participant] = hash;
+    )
+        public
+        participantIsTeacher(msg.sender)
+        participantIsStudent(participant)
+    {
+        personToHash[participant].hash = hash;
     }
 
-    function removeParticipant(address participant) public onlyOwner {
+    function removeParticipant(
+        address participant
+    ) public onlyOwner participantExists(participant) {
         delete personToHash[participant];
+    }
+
+    function addValidation(
+        string memory srcCourse,
+        string memory dstCourse,
+        uint8 month,
+        uint16 year
+    ) public participantIsDegreeCoord(msg.sender) {
+        MiNFT nf = new MiNFT(srcCourse, dstCourse, msg.sender);
+        nf.setValidityPeriod(month, year);
+        validations[msg.sender] = nf;
+    }
+
+    function transferValidations(
+        address origin,
+        address destination
+    )
+        public
+        universityExists(msg.sender)
+        participantIsDegreeCoord(origin)
+        participantIsDegreeCoord(destination)
+    {
+        MiNFT nf = validations[origin];
+        nf.transferOwnership(destination);
     }
 }
