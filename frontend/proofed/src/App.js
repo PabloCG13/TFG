@@ -28,6 +28,8 @@ import CoordinatorTeacherValidationList from "./CoordinatorTeacher/CoordinatorTe
 import CoordinatorTeacherConfirmValidation from "./CoordinatorTeacher/CoordinatorTeacherPages/CoordinatorTeacherConfirmValidationsPage/CoordinatorTeacherConfirmValidations"; // Import Coordinator Teacher Confirm Validations Page
 import CoordinatorTeacherConfirmMarks from "./CoordinatorTeacher/CoordinatorTeacherPages/CoordinatorTeacherConfirmMarksPage/CoordinatorTeacherConfirmMarks"; // Import Coordinator Teacher Confirm Marks Page
 
+import UniversityHome from "./University/UniversityPages/UniversityHome"; // Import University Home Page
+
 
 function App() {
   return (
@@ -96,6 +98,11 @@ function App() {
 
         {/* Coordinator Teacher Confirm Marks Page route */}
         <Route path="/CoordinatorTeacher/CoordinatorTeacherPages/CoordinatorTeacherConfirmMarksPage/CoordinatorTeacherConfirmMarks" element={<CoordinatorTeacherConfirmMarks />} />
+
+        
+        {/* University Home Page route */}
+        <Route path="/University/UniversityPages/UniversityHome" element={<UniversityHome />} />
+        
 
       </Routes>
     </Router>

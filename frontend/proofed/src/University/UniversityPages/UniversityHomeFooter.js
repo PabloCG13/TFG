@@ -1,6 +1,6 @@
 import React from 'react';
 
-const UniversityStudentsFooter = () => {
+const UniversityHomeFooter = () => {
   return (
     <footer style={footerStyle}>
       
@@ -19,4 +19,4 @@ const footerStyle = {
   width: '100%',
 };
 
-export default UniversityStudentsFooter;
+export default UniversityHomeFooter;

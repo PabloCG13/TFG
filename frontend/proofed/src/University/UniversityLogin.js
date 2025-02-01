@@ -45,7 +45,10 @@ const UniversityLogin = () => {
           <Link to="/University/UniversitySignIn" style={linkStyle}>Sign In</Link>
         </div>
 
-        <button type="submit" style={submitButtonStyle}>Submit</button>
+        {/* Redirect to University Home Page on button click */}
+        <div style={submitButtonStyle}>
+          <Link to= "/University/UniversityPages/UniversityHome" style={submitButtonStyle}>Submit</Link>
+        </div>
       </form>
     </div>
   );

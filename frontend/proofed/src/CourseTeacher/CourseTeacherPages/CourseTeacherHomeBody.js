@@ -177,7 +177,6 @@ const buttonStyle = {
 const mainContentStyle = {
   flex: 1,
   marginLeft: "20px",
-  
 };
 
 const tableContainer = {
