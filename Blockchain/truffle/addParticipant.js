@@ -10,7 +10,7 @@ const web3 = new Web3("http://127.0.0.1:7545");
 
 
 
-const contractAddress = "0x7E69c4d85b00B337d56FdB7ea208d7d318773798";
+const contractAddress = "0x7f49D3e0ce33Ca7D50A72f7D5f9C8740ad3D57Dc";
 
 
 const contract = new web3.eth.Contract(contractJson.abi, contractAddress);
@@ -18,7 +18,8 @@ const contract = new web3.eth.Contract(contractJson.abi, contractAddress);
 
 async function generateSHA256HashMessage(user, passwd) {
     const combinedString = user + passwd;
-    return crypto.createHash("sha256").update(combinedString).digest("hex");
+    const hash = crypto.createHash("sha256").update(combinedString).digest("hex");
+    return "0x"+hash;
 }
 
 

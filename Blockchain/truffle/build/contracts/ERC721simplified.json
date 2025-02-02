@@ -159,7 +159,7 @@
   "sourceMap": "",
   "deployedSourceMap": "",
   "source": "// SPDX-License-Identifier: GPL-3.0\r\npragma solidity ^0.8.19;\r\n\r\ninterface ERC721simplified {\r\n    // EVENTS\r\n    event Transfer(\r\n        address indexed _from,\r\n        address indexed _to,\r\n        uint256 indexed _tokenId\r\n    );\r\n    event Approval(\r\n        address indexed _owner,\r\n        address indexed _approved,\r\n        uint256 indexed _tokenId\r\n    );\r\n\r\n    // APPROVAL FUNCTIONS\r\n    function approve(address _approved, uint256 _tokenId) external payable;\r\n\r\n    // TRANSFER FUNCTION\r\n    function transferFrom(\r\n        address _from,\r\n        address _to,\r\n        uint256 _tokenId\r\n    ) external payable;\r\n\r\n    // VIEW FUNCTIONS (GETTERS)\r\n    function balanceOf(address _owner) external view returns (uint256);\r\n    function ownerOf(uint256 _tokenId) external view returns (address);\r\n    function getApproved(uint256 _tokenId) external view returns (address);\r\n}\r\n",
-  "sourcePath": "C:\\Users\\Agustin\\Desktop\\CarreraUCM\\TFG\\TFG\\Blockchain\\truffle\\contracts\\ERC721simplified.sol",
+  "sourcePath": "C:\\Users\\Agustin\\Desktop\\CarreraUCM\\TFG\\Tfg\\Blockchain\\truffle\\contracts\\ERC721simplified.sol",
   "ast": {
     "absolutePath": "project:/contracts/ERC721simplified.sol",
     "exportedSymbols": {
@@ -861,7 +861,7 @@
   },
   "networks": {},
   "schemaVersion": "3.4.16",
-  "updatedAt": "2025-02-01T11:50:11.405Z",
+  "updatedAt": "2025-02-02T16:21:45.309Z",
   "devdoc": {
     "kind": "dev",
     "methods": {},

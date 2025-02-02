@@ -1,0 +1,22 @@
+{
+    "name": "Pablo",
+    "dob": "13/08/2003",
+    "university": "UCM",
+    "subjects": [{
+        "FP 1": 8,
+        "erasmus": false
+    },{
+        "FP 2": 9,
+        "erasmus": false
+    }, {
+        "FP 1": 8,
+        "erasmus": false
+    },{
+        "AC ": -1,
+        "erasmus": true,
+        "asignatura de destino" : "IS"
+    }
+]
+       
+}
+

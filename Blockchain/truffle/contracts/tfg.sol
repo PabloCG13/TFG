@@ -3,7 +3,7 @@ pragma solidity ^0.8.19;
 
 import "./token.sol";
 contract tfg {
-    struct Expediente {
+    struct Transcript {
         address[] teachers;
         mapping(address => bool) teacherExists;
         string hash;
@@ -13,10 +13,12 @@ contract tfg {
         string hash;
         uint role; // 0:does not exists, 1:student, 2:course coordinator, 3:degree coordinator
     }
+
     mapping(address => MiNFT) public validations;
     mapping(address => Person) public personToHash;
+    // como saber que address le corresponde a cada persona: hacer otro mapa que tenga como clave el hash y como valor el address?
     mapping(address => string) public universityToHash;
-    mapping(address => Expediente) public studentToRecord;
+    mapping(address => Transcript) public studentToRecord;
     address private _owner;
 
     constructor() {
