@@ -12,33 +12,20 @@ const web3 = new Web3("http://127.0.0.1:7545");
 
 const contractAddress = "0x7C5E625431F1B5D0341F241aCB730c8Ee3EEADf7";
 
-
 const contract = new web3.eth.Contract(contractJson.abi, contractAddress);
-
-
-async function generateSHA256HashMessage(user, passwd) {
-    const combinedString = user + passwd;
-    const hash = crypto.createHash("sha256").update(combinedString).digest("hex");
-    return "0x"+hash;
-}
 
 
 async function main() {
     const accounts = await web3.eth.getAccounts();
     
-    const teacherName = "teacher_1";
-    const teacherPass = "987654321a";
-    const teacherRole = 3;
     const universityAddress = "0x6562de21fA088731Aac85799e418Cb54F797Df35";
     const teacherAddress = "0xb8b6F379B72c5a0ff295ba3A702FAA2cA5Ed7957";
+    const studentAddress = "0xdeEDCf74bD222e4AdED22d05056Ce99587Faa597";
 
-    // Generar hash SHA-256
-    const teacherHash = await generateSHA256HashMessage(teacherName, teacherPass);
-    console.log("Hash generado para el teacher:", teacherHash);
 
     try {
        
-        const tx = await contract.methods.addParticipant(teacherHash, teacherAddress, teacherRole).send({ 
+        const tx = await contract.methods.addTeacherToTranscript(studentAddress, teacherAddress).send({ 
             from: universityAddress, 
             gas: 6721975  // Aumentar el límite de gas 
         });
@@ -48,8 +35,10 @@ async function main() {
     }
 
     
-    const storedHash = await contract.methods.personToHash(teacherAddress).call();
+    const storedHash = await contract.methods.getAllowedTeachers(studentAddress).call();
     console.log("Hash de la universidad registrada en el contrato:", storedHash);
+
+    
 }
 
 main().catch(console.error);

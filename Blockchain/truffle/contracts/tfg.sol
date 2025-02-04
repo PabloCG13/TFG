@@ -14,7 +14,7 @@ contract tfg {
         uint role; // 0:does not exists, 1:student, 2:course coordinator, 3:degree coordinator
     }
 
-    mapping(address => MiNFT) public validations;
+    MiNFT public validations;
     mapping(address => Person) public personToHash;
     // como saber que address le corresponde a cada persona: hacer otro mapa que tenga como clave el hash y como valor el address?
     mapping(address => string) public universityToHash;
@@ -184,7 +184,7 @@ contract tfg {
         studentToRecord[student].teacherExists[profesor] = true;
     }
 
-    function getProfessors(
+    function getAllowedTeachers(
         address student
     ) public view returns (address[] memory) {
         return studentToRecord[student].teachers;
@@ -201,24 +201,45 @@ contract tfg {
         personToHash[participant].hash = hash;
     }
 
+    function updateTranscript(
+        string memory hash,
+        address participant
+    ) public universityExists(msg.sender) participantIsStudent(participant) {
+        personToHash[participant].hash = hash;
+    }
+
     function removeParticipant(
         address participant
     ) public onlyOwner participantExists(participant) {
         delete personToHash[participant];
     }
 
+    function createValidation() public onlyOwner {
+        validations = new MiNFT(msg.sender);
+    }
+
     function addValidation(
+        address degreeCoord,
         string memory srcCourse,
         string memory dstCourse,
         uint8 month,
         uint16 year
+    ) public onlyOwner participantIsDegreeCoord(degreeCoord) returns (uint) {
+        uint id = validations.mintNFT(degreeCoord, srcCourse, dstCourse);
+        validations.setValidityPeriod(id, month, year);
+        return id;
+    }
+
+    function updateValidation(
+        uint id,
+        uint8 month,
+        uint16 year
     ) public participantIsDegreeCoord(msg.sender) {
-        MiNFT nf = new MiNFT(srcCourse, dstCourse, msg.sender);
-        nf.setValidityPeriod(month, year);
-        validations[msg.sender] = nf;
+        validations.setValidityPeriod(id, month, year);
     }
 
     function transferValidations(
+        uint id,
         address origin,
         address destination
     )
@@ -227,7 +248,6 @@ contract tfg {
         participantIsDegreeCoord(origin)
         participantIsDegreeCoord(destination)
     {
-        MiNFT nf = validations[origin];
-        nf.transferOwnership(destination);
+        validations.transferValidity(id, origin, destination);
     }
 }
