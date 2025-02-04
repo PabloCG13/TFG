@@ -1,18 +1,21 @@
 import React, { useState } from "react";
 
 const CourseTeacherHomeBody = () => {
-  // State to store students data
+  // State to store students
   const [students, setStudents] = useState([
     { name: "Student 1", code: "123450", degree: "BS Computer Science", mark: "A" },
     { name: "Student 2", code: "123451", degree: "BS Computer Science", mark: "B" },
     { name: "Student 3", code: "123452", degree: "BS Computer Science", mark: "C" },
   ]);
 
-  // State to control modal visibility and selected student
+  // State to toggle grade display mode
+  const [viewMode, setViewMode] = useState("Letter");
+
+  // Modal state
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedStudent, setSelectedStudent] = useState(null);
 
-  // Function to open modal and set selected student
+  // Function to open modal
   const openModal = (student) => {
     setSelectedStudent({ ...student });
     setIsModalOpen(true);
@@ -23,12 +26,12 @@ const CourseTeacherHomeBody = () => {
     setIsModalOpen(false);
   };
 
-  // Function to update the student's grade
+  // Function to update student grade in modal
   const handleMarkChange = (event) => {
     setSelectedStudent({ ...selectedStudent, mark: event.target.value });
   };
 
-  // Function to confirm and save the new grade
+  // Function to confirm the new grade
   const handleConfirm = () => {
     setStudents((prevStudents) =>
       prevStudents.map((student) =>
@@ -36,6 +39,23 @@ const CourseTeacherHomeBody = () => {
       )
     );
     closeModal();
+  };
+
+  // Function to convert grades between "Letter" and "Numeric"
+  const convertMark = (mark) => {
+    const markMapping = {
+      A: 90,
+      B: 80,
+      C: 70,
+      D: 60,
+      F: 50,
+    };
+
+    if (viewMode === "Numeric") {
+      return markMapping[mark] !== undefined ? markMapping[mark] : mark;
+    } else {
+      return Object.keys(markMapping).find((key) => markMapping[key] === parseInt(mark)) || mark;
+    }
   };
 
   return (
@@ -51,56 +71,67 @@ const CourseTeacherHomeBody = () => {
         </div>
       </div>
 
-      {/* Main Content */}
+      {/* Main content */}
       <div style={mainContentStyle}>
         <div style={tableContainer}>
           <h2 style={tableTitle}>Course</h2>
-          <table style={tableStyle}>
-            <thead>
-              <tr>
-                <th>Student</th>
-                <th>Id</th>
-                <th>Degree</th>
-                <th>Mark</th>
-              </tr>
-            </thead>
-            <tbody>
-              {students.map((student, index) => (
-                <tr key={index}>
-                  <td>{student.name}</td>
-                  <td>{student.code}</td>
-                  <td>{student.degree}</td>
-                  <td>{student.mark}</td>
-                  <td>
-                    <button style={buttonStyle} onClick={() => openModal(student)}>
-                      Modify
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+
+          {/* Wrapper to align dropdown above "Mark" */}
+          <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: "10px", alignItems: "center" }}>
+          <label style={{ fontWeight: "bold", marginRight: "10px" }}>View grades as:</label>
+          <select style={{ ...inputStyle, width: "150px" }} value={viewMode} onChange={(e) => setViewMode(e.target.value)}>
+          <option value="Letter">Letter (A/B/C)</option>
+          <option value="Numeric">Numeric (0-100)</option>
+          </select>
         </div>
+
+        <table style={tableStyle}>
+          <thead>
+            <tr>
+              <th>Student</th>
+              <th>ID</th>
+              <th>Degree</th>
+              <th>Grade</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {students.map((student, index) => (
+              <tr key={index}>
+                <td>{student.name}</td>
+                <td>{student.code}</td>
+                <td>{student.degree}</td>
+                <td>{convertMark(student.mark)}</td>
+                <td>
+                  <button style={buttonStyle} onClick={() => openModal(student)}>
+                  Modify
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
+    </div>
 
-      {/* Modal */}
-      {isModalOpen && selectedStudent && (
-        <div style={modalOverlayStyle} onClick={closeModal}>
-          <div style={modalStyle} onClick={(e) => e.stopPropagation()}>
-            <h2>Modify Mark</h2>
+    {/* Modal */}
+    {isModalOpen && selectedStudent && (
+      <div style={modalOverlayStyle} onClick={closeModal}>
+        <div style={modalStyle} onClick={(e) => e.stopPropagation()}>
+           <h2>Modify Grade</h2>
 
-            <label style={labelStyle}>Name:</label>
-            <input type="text" value={selectedStudent.name} readOnly style={readOnlyInputStyle} />
+           <label style={labelStyle}>Name:</label>
+           <input type="text" value={selectedStudent.name} readOnly style={readOnlyInputStyle} />
 
-            <label style={labelStyle}>Code:</label>
-            <input type="text" value={selectedStudent.code} readOnly style={readOnlyInputStyle} />
+           <label style={labelStyle}>Code:</label>
+           <input type="text" value={selectedStudent.code} readOnly style={readOnlyInputStyle} />
 
-            <label style={labelStyle}>Mark:</label>
-            <input type="text" value={selectedStudent.mark} onChange={handleMarkChange} style={inputStyle} />
+           <label style={labelStyle}>Grade:</label>
+           <input type="text" value={selectedStudent.mark} onChange={handleMarkChange} style={inputStyle} />
 
-            <button style={confirmButtonStyle} onClick={handleConfirm}>
-              Confirm
-            </button>
+           <button style={confirmButtonStyle} onClick={handleConfirm}>
+            Confirm
+           </button>
           </div>
         </div>
       )}
@@ -197,7 +228,6 @@ const tableStyle = {
   textAlign: "center",
 };
 
-// Modal Styles
 const modalOverlayStyle = {
   position: "fixed",
   top: 0,
@@ -217,9 +247,6 @@ const modalStyle = {
   borderRadius: "8px",
   textAlign: "center",
   width: "400px",
-  display: "flex",
-  flexDirection: "column",
-  alignItems: "center",
 };
 
 const confirmButtonStyle = {
