@@ -126,17 +126,34 @@ contract tfg {
         return sha256(abi.encodePacked(user, passwd));
     }
 
+    function hexStringToBytes32(string memory s) public pure returns (bytes32) {
+        require(
+            bytes(s).length == 66,
+            "Hex string must be 66 chars (0x + 64 hex chars)"
+        );
+
+        bytes memory b = bytes(s);
+        bytes32 result;
+
+        assembly {
+            result := mload(add(b, 32))
+        }
+
+        return result;
+    }
+
+    function test() public view returns (bytes32) {
+        return hexStringToBytes32(universityToHash[msg.sender]);
+    }
+
     function consultParticipant(
         string memory user,
         string memory passwd
     ) public view participantExists(msg.sender) returns (bool) {
         bytes32 generatedHash = sha256(abi.encodePacked(user, passwd));
-        return
-            keccak256(abi.encodePacked(personToHash[msg.sender].hash)) ==
-            generatedHash;
+        bytes32 storedHash = hexStringToBytes32(personToHash[msg.sender].hash);
 
-        /*keccak256(abi.encodePacked(personToHash[msg.sender])) ==
-            keccak256(abi.encodePacked(user, passwd, "random_salt_value"));*/
+        return storedHash == generatedHash;
     }
 
     function consultUniversity(
@@ -144,11 +161,14 @@ contract tfg {
         string memory passwd
     ) public view universityExists(msg.sender) returns (bool) {
         bytes32 generatedHash = sha256(abi.encodePacked(user, passwd));
-        return
+        bytes32 storedHash = hexStringToBytes32(universityToHash[msg.sender]); // Convertir string a bytes32
+
+        return storedHash == generatedHash;
+        /* return
             keccak256(abi.encodePacked(universityToHash[msg.sender])) ==
             generatedHash;
 
-        /*keccak256(abi.encodePacked(personToHash[msg.sender])) ==
+        keccak256(abi.encodePacked(personToHash[msg.sender])) ==
             keccak256(abi.encodePacked(user, passwd, "random_salt_value"));*/
     }
 

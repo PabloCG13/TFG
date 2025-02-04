@@ -5,7 +5,9 @@ const { Web3 } = require("web3");
 // Configuración de Web3 y el contrato
 const web3 = new Web3("http://127.0.0.1:7545");
 const contractJson = require("./build/contracts/tfg.json");
-const contractAddress = "0x7f49D3e0ce33Ca7D50A72f7D5f9C8740ad3D57Dc";
+
+
+const contractAddress = "0xab804BAE97dD30Cf81d473aD16d1D219BA8C11d0";
 const contract = new web3.eth.Contract(contractJson.abi, contractAddress);
 
 // Dirección del coordinador

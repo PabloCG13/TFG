@@ -10,7 +10,7 @@
   "sourceMap": "412:1606:3:-:0;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;",
   "deployedSourceMap": "412:1606:3:-:0;;;;;;;;",
   "source": "// SPDX-License-Identifier: MIT\n// OpenZeppelin Contracts (last updated v5.1.0) (token/ERC721/utils/ERC721Utils.sol)\n\npragma solidity ^0.8.19;\n\nimport {IERC721Receiver} from \"./IERC721Receiver.sol\";\nimport {IERC721Errors} from \"./draft-IERC6093.sol\";\n\n/**\n * @dev Library that provide common ERC-721 utility functions.\n *\n * See https://eips.ethereum.org/EIPS/eip-721[ERC-721].\n *\n * _Available since v5.1._\n */\nlibrary ERC721Utils {\n    /**\n     * @dev Performs an acceptance check for the provided `operator` by calling {IERC721-onERC721Received}\n     * on the `to` address. The `operator` is generally the address that initiated the token transfer (i.e. `msg.sender`).\n     *\n     * The acceptance call is not executed and treated as a no-op if the target address doesn't contain code (i.e. an EOA).\n     * Otherwise, the recipient must implement {IERC721Receiver-onERC721Received} and return the acceptance magic value to accept\n     * the transfer.\n     */\n    function checkOnERC721Received(\n        address operator,\n        address from,\n        address to,\n        uint256 tokenId,\n        bytes memory data\n    ) internal {\n        if (to.code.length > 0) {\n            try\n                IERC721Receiver(to).onERC721Received(\n                    operator,\n                    from,\n                    tokenId,\n                    data\n                )\n            returns (bytes4 retval) {\n                if (retval != IERC721Receiver.onERC721Received.selector) {\n                    // Token rejected\n                    revert IERC721Errors.ERC721InvalidReceiver(to);\n                }\n            } catch (bytes memory reason) {\n                if (reason.length == 0) {\n                    // non-IERC721Receiver implementer\n                    revert IERC721Errors.ERC721InvalidReceiver(to);\n                } else {\n                    assembly (\"memory-safe\") {\n                        revert(add(32, reason), mload(reason))\n                    }\n                }\n            }\n        }\n    }\n}\n",
-  "sourcePath": "C:\\Users\\Agustin\\Desktop\\CarreraUCM\\TFG\\Tfg\\Blockchain\\truffle\\contracts\\ERC721Utils.sol",
+  "sourcePath": "C:\\Users\\Agustin\\Desktop\\CarreraUCM\\TFG\\tfg\\Blockchain\\truffle\\contracts\\ERC721Utils.sol",
   "ast": {
     "absolutePath": "project:/contracts/ERC721Utils.sol",
     "exportedSymbols": {
@@ -1031,7 +1031,7 @@
   },
   "networks": {},
   "schemaVersion": "3.4.16",
-  "updatedAt": "2025-02-02T16:21:45.306Z",
+  "updatedAt": "2025-02-04T10:20:42.977Z",
   "devdoc": {
     "details": "Library that provide common ERC-721 utility functions. See https://eips.ethereum.org/EIPS/eip-721[ERC-721]. _Available since v5.1._",
     "kind": "dev",
