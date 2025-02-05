@@ -37,11 +37,16 @@ contract MiNFT is ERC721, Ownable {
         return _tokenIdCounter;
     }
 
-    function setValidityPeriod(uint id, uint8 _month, uint16 _year) public {
+    function setValidityPeriod(
+        address sender,
+        uint id,
+        uint8 _month,
+        uint16 _year
+    ) public {
         require(_month >= 1 && _month <= 12, "invalid month");
         require(_year >= 1900 && _year <= 2100, "invalid year");
         require(
-            _getApproved(id) == msg.sender,
+            _getApproved(id) == sender,
             "This coordinator does not have that validation"
         );
 

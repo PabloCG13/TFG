@@ -10,7 +10,7 @@ const web3 = new Web3("http://127.0.0.1:7545");
 //const provider = new Web3.providers.HttpProvider("http://127.0.0.1:7545");
 //const web3 = new Web3(provider);
 
-const contractAddress = "0x7C5E625431F1B5D0341F241aCB730c8Ee3EEADf7";
+const contractAddress = "0xa32C254378997e56767f088661628bf07A7c2F7f";
 
 const contract = new web3.eth.Contract(contractJson.abi, contractAddress);
 
@@ -37,8 +37,6 @@ async function main() {
     
     const storedHash = await contract.methods.getAllowedTeachers(studentAddress).call();
     console.log("Hash de la universidad registrada en el contrato:", storedHash);
-
-    
 }
 
 main().catch(console.error);

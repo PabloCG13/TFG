@@ -3,7 +3,7 @@ const contractJson = require("./build/contracts/tfg.json");
 const { Web3 } = require("web3");
 
 const web3 = new Web3("http://127.0.0.1:7545");
-const contractAddress = "0x7C5E625431F1B5D0341F241aCB730c8Ee3EEADf7";
+const contractAddress = "0xa32C254378997e56767f088661628bf07A7c2F7f";
 const contract = new web3.eth.Contract(contractJson.abi, contractAddress);
 
 async function main() {
@@ -16,13 +16,13 @@ async function main() {
     console.log("Cuenta usada para la transacción:", universityAddress);
 
     try {
-        // Ejecutar `consultUniversity` y obtener el valor booleano
+        // Hash:
         //b9c39a42e45380720ab6f615189f5cb78c9282db6cca391123d7ff49882c46f3
 
         const aux = await contract.methods.calculateSHA256("ucm", "holaMundo123").call({ from: universityAddress });
         console.log("Hash que genera el contrato: ", aux);
 
-        const aux2 = await contract.methods.test().call({ from: universityAddress });
+        const aux2 = await contract.methods.test("ucm", "holaMundo123").call({ from: universityAddress });
         console.log("Hash que esta guardado en el contrato: ", aux2);
 
         const result = await contract.methods.consultUniversity("ucm", "holaMundo123").call({ from: universityAddress });

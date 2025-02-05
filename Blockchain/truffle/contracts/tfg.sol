@@ -126,24 +126,24 @@ contract tfg {
         return sha256(abi.encodePacked(user, passwd));
     }
 
-    function hexStringToBytes32(string memory s) public pure returns (bytes32) {
-        require(
-            bytes(s).length == 66,
-            "Hex string must be 66 chars (0x + 64 hex chars)"
-        );
-
-        bytes memory b = bytes(s);
-        bytes32 result;
-
-        assembly {
-            result := mload(add(b, 32))
-        }
-
-        return result;
+    function bytes32ToString(
+        bytes32 _bytes32
+    ) public pure returns (string memory) {
+        return string(abi.encodePacked("0x", _bytes32));
     }
 
-    function test() public view returns (bytes32) {
-        return hexStringToBytes32(universityToHash[msg.sender]);
+    function compareStrings(
+        string memory a,
+        string memory b
+    ) private pure returns (bool) {
+        return keccak256(abi.encodePacked(a)) == keccak256(abi.encodePacked(b));
+    }
+
+    function test(
+        string memory user,
+        string memory passwd
+    ) public pure returns (string memory) {
+        return bytes32ToString(calculateSHA256(user, passwd));
     }
 
     function consultParticipant(
@@ -151,9 +151,9 @@ contract tfg {
         string memory passwd
     ) public view participantExists(msg.sender) returns (bool) {
         bytes32 generatedHash = sha256(abi.encodePacked(user, passwd));
-        bytes32 storedHash = hexStringToBytes32(personToHash[msg.sender].hash);
+        string memory storedHash = bytes32ToString(generatedHash);
 
-        return storedHash == generatedHash;
+        return compareStrings(storedHash, personToHash[msg.sender].hash);
     }
 
     function consultUniversity(
@@ -161,9 +161,10 @@ contract tfg {
         string memory passwd
     ) public view universityExists(msg.sender) returns (bool) {
         bytes32 generatedHash = sha256(abi.encodePacked(user, passwd));
-        bytes32 storedHash = hexStringToBytes32(universityToHash[msg.sender]); // Convertir string a bytes32
+        string memory storedHash = bytes32ToString(generatedHash);
 
-        return storedHash == generatedHash;
+        return compareStrings(storedHash, universityToHash[msg.sender]); // Convertir string a bytes32
+
         /* return
             keccak256(abi.encodePacked(universityToHash[msg.sender])) ==
             generatedHash;
@@ -226,7 +227,8 @@ contract tfg {
         uint16 year
     ) public onlyOwner participantIsDegreeCoord(degreeCoord) returns (uint) {
         uint id = validations.mintNFT(degreeCoord, srcCourse, dstCourse);
-        validations.setValidityPeriod(id, month, year);
+
+        validations.setValidityPeriod(degreeCoord, id, month, year);
         return id;
     }
 
@@ -235,7 +237,7 @@ contract tfg {
         uint8 month,
         uint16 year
     ) public participantIsDegreeCoord(msg.sender) {
-        validations.setValidityPeriod(id, month, year);
+        validations.setValidityPeriod(msg.sender, id, month, year);
     }
 
     function transferValidations(
