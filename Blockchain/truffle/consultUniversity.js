@@ -11,8 +11,8 @@ async function main() {
     const universityAddress = "0x6562de21fA088731Aac85799e418Cb54F797Df35";
     const studentAddress = "0xdeEDCf74bD222e4AdED22d05056Ce99587Faa597";
 
-    0xb9c39a42e45380720ab6f615189f5cb78c9282db6cca391123d7ff49882c46f3
-    0xb9c39a42e45380720ab6f615189f5cb78c9282db6cca391123d7ff49882c46f3
+    //0xb9c39a42e45380720ab6f615189f5cb78c9282db6cca391123d7ff49882c46f3
+    //0xb9c39a42e45380720ab6f615189f5cb78c9282db6cca391123d7ff49882c46f3
     console.log("Cuenta usada para la transacción:", universityAddress);
 
     try {

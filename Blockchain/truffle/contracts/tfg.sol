@@ -126,10 +126,52 @@ contract tfg {
         return sha256(abi.encodePacked(user, passwd));
     }
 
+    function stringToBytes32(string memory s) public pure returns (bytes32) {
+        require(bytes(s).length == 66, "Invalid input length"); // "0x" + 64 hex chars
+
+        bytes memory b = bytes(s);
+        bytes32 result;
+
+        for (uint i = 0; i < 32; i++) {
+            result |=
+                bytes32(
+                    uint256(hexCharToByte(b[2 + i * 2])) *
+                        16 +
+                        uint256(hexCharToByte(b[3 + i * 2]))
+                ) >>
+                (i * 8);
+        }
+        return result;
+    }
+
+    function hexCharToByte(bytes1 c) private pure returns (uint8) {
+        if (c >= "0" && c <= "9") {
+            return uint8(c) - 48;
+        } else if (c >= "a" && c <= "f") {
+            return uint8(c) - 87;
+        } else if (c >= "A" && c <= "F") {
+            return uint8(c) - 55;
+        } else {
+            revert("Invalid hex character");
+        }
+    }
+
     function bytes32ToString(
         bytes32 _bytes32
     ) public pure returns (string memory) {
-        return string(abi.encodePacked("0x", _bytes32));
+        bytes memory s = new bytes(64);
+        bytes memory hexChars = "0123456789abcdef";
+
+        for (uint i = 0; i < 32; i++) {
+            s[i * 2] = hexChars[uint8(_bytes32[i]) >> 4]; // High nibble
+            s[i * 2 + 1] = hexChars[uint8(_bytes32[i]) & 0x0f]; // Low nibble
+        }
+
+        return string(abi.encodePacked("0x", s));
+    }
+
+    function test() public view returns (bytes32) {
+        return stringToBytes32(personToHash[msg.sender].hash);
     }
 
     function compareStrings(
@@ -138,14 +180,6 @@ contract tfg {
     ) private pure returns (bool) {
         return keccak256(abi.encodePacked(a)) == keccak256(abi.encodePacked(b));
     }
-
-    function test(
-        string memory user,
-        string memory passwd
-    ) public pure returns (string memory) {
-        return bytes32ToString(calculateSHA256(user, passwd));
-    }
-
     function consultParticipant(
         string memory user,
         string memory passwd
