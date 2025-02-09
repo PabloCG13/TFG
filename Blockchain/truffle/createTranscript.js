@@ -7,14 +7,14 @@ const web3 = new Web3("http://127.0.0.1:7545");
 const contractJson = require("./build/contracts/tfg.json");
 
 
-const contractAddress = "0xa32C254378997e56767f088661628bf07A7c2F7f";
+const contractAddress = "0x26Ba181AB99374e1b23d02B328961c1665Bd8666";
 const contract = new web3.eth.Contract(contractJson.abi, contractAddress);
 
-// Dirección del coordinador
-const coordAddress = "0xb8b6F379B72c5a0ff295ba3A702FAA2cA5Ed7957";
+// Dirección de la universidad
+const universityAddress = "0x44e7A1a2a828d234B01c4664a26930c477bf2b72";
 
 // Direccion del alumno
-const studentAddress = "0xdeEDCf74bD222e4AdED22d05056Ce99587Faa597";
+const studentAddress = "0x21AA8bac29c1b22a447BfB2d418C9A5B5cBaf282";
 
 // Función para generar SHA-256
 async function generateSHA256HashMessage(jsonData) {
@@ -31,16 +31,16 @@ async function main() {
 
         // Generar el hash SHA-256
         const hash = await generateSHA256HashMessage(jsonData);
-        console.log("🔹 Hash SHA-256 generado:", hash);
+        console.log("Transcript HASH:", hash);
 
 
-        // Enviar la transacción a `updateMark`
-        const tx = await contract.methods.updateMark(hash, studentAddress).send({
-            from: coordAddress,
+        // Enviar la transacción a `updateTranscript`
+        const tx = await contract.methods.updateTranscript(hash, studentAddress).send({
+            from: universityAddress,
             gas: 6721975
         });
 
-        console.log("Transacción exitosa:", tx.transactionHash);
+        console.log("Succesful transaction:", tx.transactionHash);
     } catch (error) {
         console.error("Error:", error);
     }

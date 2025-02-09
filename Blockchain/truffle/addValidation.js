@@ -8,7 +8,7 @@ const web3 = new Web3("http://127.0.0.1:7545");
 //const provider = new Web3.providers.HttpProvider("http://127.0.0.1:7545");
 //const web3 = new Web3(provider);
 
-const contractAddress = "0xa32C254378997e56767f088661628bf07A7c2F7f";
+const contractAddress = "0x26Ba181AB99374e1b23d02B328961c1665Bd8666";
 
 const contract = new web3.eth.Contract(contractJson.abi, contractAddress);
 
@@ -18,7 +18,7 @@ async function main() {
     const accounts = await web3.eth.getAccounts();
     const owner = accounts[0];
 
-    console.log("Cuenta usada para la transacción:", owner);
+    console.log("Super User:", owner);
 
     
     const srcCourse = "UCM INF TP1";
@@ -36,7 +36,7 @@ async function main() {
         });
         console.log("TokenID:", tx);
     } catch (error) {
-        console.error("Error en la transacción:", error);
+        console.error("Error:", error);
     }
 
 

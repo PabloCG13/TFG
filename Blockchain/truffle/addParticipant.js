@@ -10,7 +10,7 @@ const web3 = new Web3("http://127.0.0.1:7545");
 
 
 
-const contractAddress = "0xa32C254378997e56767f088661628bf07A7c2F7f";
+const contractAddress = "0x26Ba181AB99374e1b23d02B328961c1665Bd8666";
 
 
 const contract = new web3.eth.Contract(contractJson.abi, contractAddress);
@@ -24,34 +24,48 @@ async function generateSHA256HashMessage(user, passwd) {
 
 
 async function main() {
-    const accounts = await web3.eth.getAccounts();
-
+    //const accounts = await web3.eth.getAccounts();
 
     
-    const participantName = "alumno_1";
-    const participantPass = "1234567hola";
+    const participantName1 = "alumno_1_ucm";
+    const participantPass1 = "1234567hola";
+    const participantName2 = "alumno_1_bkl";
+    const participantPass2 = "bkl4567";
     const participantRole = 1;
-    const universityAddress = "0x6562de21fA088731Aac85799e418Cb54F797Df35";
-    const participantAddress = "0xdeEDCf74bD222e4AdED22d05056Ce99587Faa597";
+    const universityAddress1 = "0x6562de21fA088731Aac85799e418Cb54F797Df35";
+    const universityAddress2 = "0x44e7A1a2a828d234B01c4664a26930c477bf2b72";
+    
+    const participantAddress1 = "0xdeEDCf74bD222e4AdED22d05056Ce99587Faa597";
+    const participantAddress2 = "0x21AA8bac29c1b22a447BfB2d418C9A5B5cBaf282";
 
     // Generar hash SHA-256
-    const participantHash = await generateSHA256HashMessage(participantName, participantPass);
-    console.log("Hash generado para el student:", participantHash);
+    const participantHash1 = await generateSHA256HashMessage(participantName1, participantPass1);
+    console.log("First Student HASH:", participantHash1);
+    const participantHash2 = await generateSHA256HashMessage(participantName2, participantPass2);
+    console.log("Second Student HASH:", participantHash2);
 
     try {
        
-        const tx = await contract.methods.addParticipant(participantHash, participantAddress, participantRole).send({ 
-            from: universityAddress, 
+        const tx1 = await contract.methods.addParticipant(participantHash1, participantAddress1, participantRole).send({ 
+            from: universityAddress1, 
             gas: 6721975  // Aumentar el límite de gas 
         });
-        console.log("Transacción exitosa:", tx.transactionHash);
+        console.log("Succesful transaction::", tx1.transactionHash);
+
+        const tx2 = await contract.methods.addParticipant(participantHash2, participantAddress2, participantRole).send({ 
+            from: universityAddress2, 
+            gas: 6721975  // Aumentar el límite de gas 
+        });
+        console.log("Succesful transaction:", tx2.transactionHash);
     } catch (error) {
-        console.error("Error en la transacción:", error);
+        console.error("Error:", error);
     }
 
     
-    const storedHash = await contract.methods.personToHash(participantAddress).call();
-    console.log("Hash de la universidad registrada en el contrato:", storedHash);
+    const storedHash1 = await contract.methods.personToHash(participantAddress1).call();
+    console.log("First Student HASH:", storedHash1);
+    const storedHash2 = await contract.methods.personToHash(participantAddress2).call();
+    console.log("Second Student HASH:", storedHash2);
 }
 
 main().catch(console.error);

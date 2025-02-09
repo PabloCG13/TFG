@@ -20,16 +20,17 @@ contract MiNFT is ERC721, Ownable {
 
     mapping(uint => Validation) private validities;
 
-    constructor(address owner) ERC721("MiNFT", "MNFT") Ownable(msg.sender) {
+    constructor(address owner) ERC721("MiNFT", "MNFT") Ownable(owner) {
         _tokenIdCounter = 0;
-        _transferOwnership(owner);
     }
 
     function mintNFT(
+        address sender,
         address to,
         string memory _srcCourse,
         string memory _dstCourse
-    ) public onlyOwner returns (uint) {
+    ) public returns (uint) {
+        require(owner() == sender, "Not the super Owner");
         _tokenIdCounter++;
         _safeMint(to, _tokenIdCounter);
         validities[_tokenIdCounter].srcCourse = _srcCourse;
@@ -46,7 +47,7 @@ contract MiNFT is ERC721, Ownable {
         require(_month >= 1 && _month <= 12, "invalid month");
         require(_year >= 1900 && _year <= 2100, "invalid year");
         require(
-            _getApproved(id) == sender,
+            ownerOf(id) == sender,
             "This coordinator does not have that validation"
         );
 

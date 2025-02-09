@@ -10,7 +10,7 @@ const web3 = new Web3("http://127.0.0.1:7545");
 //const provider = new Web3.providers.HttpProvider("http://127.0.0.1:7545");
 //const web3 = new Web3(provider);
 
-const contractAddress = "0xa32C254378997e56767f088661628bf07A7c2F7f";
+const contractAddress = "0x26Ba181AB99374e1b23d02B328961c1665Bd8666";
 
 const contract = new web3.eth.Contract(contractJson.abi, contractAddress);
 
@@ -18,9 +18,9 @@ const contract = new web3.eth.Contract(contractJson.abi, contractAddress);
 async function main() {
     const accounts = await web3.eth.getAccounts();
     
-    const universityAddress = "0x6562de21fA088731Aac85799e418Cb54F797Df35";
-    const teacherAddress = "0xb8b6F379B72c5a0ff295ba3A702FAA2cA5Ed7957";
-    const studentAddress = "0xdeEDCf74bD222e4AdED22d05056Ce99587Faa597";
+    const universityAddress = "0x44e7A1a2a828d234B01c4664a26930c477bf2b72";
+    const teacherAddress = "0x7664f122DC9D62355d01585166111800466273cF";
+    const studentAddress = "0x21AA8bac29c1b22a447BfB2d418C9A5B5cBaf282";
 
 
     try {
@@ -29,14 +29,14 @@ async function main() {
             from: universityAddress, 
             gas: 6721975  // Aumentar el límite de gas 
         });
-        console.log("Transacción exitosa:", tx.transactionHash);
+        console.log("Succesful transaction:", tx.transactionHash);
     } catch (error) {
-        console.error("Error en la transacción:", error);
+        console.error("Error:", error);
     }
 
     
     const storedHash = await contract.methods.getAllowedTeachers(studentAddress).call();
-    console.log("Hash de la universidad registrada en el contrato:", storedHash);
+    console.log("Allowed teachers to modify transcript for student2:", storedHash);
 }
 
 main().catch(console.error);

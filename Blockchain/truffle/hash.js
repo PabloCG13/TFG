@@ -23,7 +23,7 @@ async function generateSHA256Hash(message) {
   }
 
   // Uso de la función
-  generateSHA256HashMessage("ucm", "holaMundo123").then(hash => console.log(hash));
+  generateSHA256HashMessage("fpTeacher", "UCMFP1TeaCH").then(hash => console.log(hash));
 
 /*function generateSHA256Hash(message) {
   return crypto.createHash('sha256').update(message).digest('hex');

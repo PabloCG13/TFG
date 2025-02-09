@@ -3,7 +3,7 @@ const contractJson = require("./build/contracts/tfg.json");
 const { Web3 } = require("web3");
 
 const web3 = new Web3("http://127.0.0.1:7545");
-const contractAddress = "0xa32C254378997e56767f088661628bf07A7c2F7f";
+const contractAddress = "0x26Ba181AB99374e1b23d02B328961c1665Bd8666";
 const contract = new web3.eth.Contract(contractJson.abi, contractAddress);
 
 async function main() {
@@ -13,27 +13,27 @@ async function main() {
 
     //0xb9c39a42e45380720ab6f615189f5cb78c9282db6cca391123d7ff49882c46f3
     //0xb9c39a42e45380720ab6f615189f5cb78c9282db6cca391123d7ff49882c46f3
-    console.log("Cuenta usada para la transacción:", universityAddress);
+    console.log("Account used:", universityAddress);
 
     try {
         // Hash:
         //b9c39a42e45380720ab6f615189f5cb78c9282db6cca391123d7ff49882c46f3
 
-        const aux = await contract.methods.calculateSHA256("ucm", "holaMundo123").call({ from: universityAddress });
-        console.log("Hash que genera el contrato: ", aux);
+        //const aux = await contract.methods.calculateSHA256("ucm", "holaMundo123").call({ from: universityAddress });
+        //console.log("Hash que genera el contrato: ", aux);
 
-        const aux2 = await contract.methods.test("ucm", "holaMundo123").call({ from: universityAddress });
-        console.log("Hash que esta guardado en el contrato: ", aux2);
+        //const aux2 = await contract.methods.test().call({ from: studentAddress });
+        //console.log("Hash que esta guardado en el contrato: ", aux2);
 
         const result = await contract.methods.consultUniversity("ucm", "holaMundo123").call({ from: universityAddress });
 
-        console.log("Resultado de consultUniversity:", result ? "True" : "False");
+        console.log("consultUniversity result:", result ? "True" : "False");
 
         const result2 = await contract.methods.consultParticipant("alumno_1", "1234567hola").call({ from: studentAddress });
 
-        console.log("Resultado de consultParticipant:", result2 ? "True" : "False");
+        console.log("consultParticipant result:", result2 ? "True" : "False");
     } catch (error) {
-        console.error("Error en la consulta:", error);
+        console.error("Error:", error);
     }
 }
 

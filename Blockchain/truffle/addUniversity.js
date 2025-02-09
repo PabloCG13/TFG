@@ -8,7 +8,7 @@ const web3 = new Web3("http://127.0.0.1:7545");
 //const provider = new Web3.providers.HttpProvider("http://127.0.0.1:7545");
 //const web3 = new Web3(provider);
 
-const contractAddress = "0xa32C254378997e56767f088661628bf07A7c2F7f";
+const contractAddress = "0x26Ba181AB99374e1b23d02B328961c1665Bd8666";
 
 
 const contract = new web3.eth.Contract(contractJson.abi, contractAddress);
@@ -28,28 +28,42 @@ async function main() {
     console.log("Cuenta usada para la transacción:", owner);
 
     
-    const universityName = "ucm";
-    const universityPass = "holaMundo123";
-    const universityAddress = "0x6562de21fA088731Aac85799e418Cb54F797Df35";
+    const universityName1 = "ucm";
+    const universityPass1 = "holaMundo123";
+    const universityAddress1 = "0x6562de21fA088731Aac85799e418Cb54F797Df35";
+    const universityName2 = "bkl";
+    const universityPass2 = "HelloWorld";
+    const universityAddress2 = "0x44e7A1a2a828d234B01c4664a26930c477bf2b72";
 
     // Generar hash SHA-256
-    const universityHash = await generateSHA256HashMessage(universityName, universityPass);
-    console.log("Hash generado para la universidad:", universityHash);
+    const universityHash1 = await generateSHA256HashMessage(universityName1, universityPass1);
+    console.log("First University HASH:", universityHash1);
+
+    const universityHash2 = await generateSHA256HashMessage(universityName2, universityPass2);
+    console.log("Second University HASH:", universityHash2);
 
     try {
        
-        const tx = await contract.methods.addUniversity(universityHash, universityAddress).send({ 
+        const tx1 = await contract.methods.addUniversity(universityHash1, universityAddress1).send({ 
             from: owner, 
             gas: 6721975  // Aumentar el límite de gas 
         });
-        console.log("Transacción exitosa:", tx.transactionHash);
+        console.log("Succesful transaction:", tx1.transactionHash);
+
+        const tx2 = await contract.methods.addUniversity(universityHash2, universityAddress2).send({ 
+            from: owner, 
+            gas: 6721975  // Aumentar el límite de gas 
+        });
+        console.log("Succesful transaction:", tx2.transactionHash);
     } catch (error) {
-        console.error("Error en la transacción:", error);
+        console.error("Error:", error);
     }
 
     
-    const storedHash = await contract.methods.universityToHash(universityAddress).call();
-    console.log("Hash de la universidad registrada en el contrato:", storedHash);
+    const storedHash1 = await contract.methods.universityToHash(universityAddress1).call();
+    console.log("First University HASH:", storedHash1);
+    const storedHash2 = await contract.methods.universityToHash(universityAddress2).call();
+    console.log("Second University HASH:", storedHash2);
 }
 
 main().catch(console.error);

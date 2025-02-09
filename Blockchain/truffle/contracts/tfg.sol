@@ -16,7 +16,6 @@ contract tfg {
 
     MiNFT public validations;
     mapping(address => Person) public personToHash;
-    // como saber que address le corresponde a cada persona: hacer otro mapa que tenga como clave el hash y como valor el address?
     mapping(address => string) public universityToHash;
     mapping(address => Transcript) public studentToRecord;
     address private _owner;
@@ -53,7 +52,7 @@ contract tfg {
         );
         _;
     }
-
+    /*
     modifier participantIsCourseCoord(address participant) {
         require(
             personToHash[participant].role == 2,
@@ -61,7 +60,7 @@ contract tfg {
         );
         _;
     }
-
+*/
     modifier participantIsDegreeCoord(address participant) {
         require(
             personToHash[participant].role == 3,
@@ -126,7 +125,7 @@ contract tfg {
         return sha256(abi.encodePacked(user, passwd));
     }
 
-    function stringToBytes32(string memory s) public pure returns (bytes32) {
+    /*   function stringToBytes32(string memory s) public pure returns (bytes32) {
         require(bytes(s).length == 66, "Invalid input length"); // "0x" + 64 hex chars
 
         bytes memory b = bytes(s);
@@ -155,7 +154,7 @@ contract tfg {
             revert("Invalid hex character");
         }
     }
-
+*/
     function bytes32ToString(
         bytes32 _bytes32
     ) public pure returns (string memory) {
@@ -170,10 +169,10 @@ contract tfg {
         return string(abi.encodePacked("0x", s));
     }
 
-    function test() public view returns (bytes32) {
+    /*  function test() public view returns (bytes32) {
         return stringToBytes32(personToHash[msg.sender].hash);
     }
-
+*/
     function compareStrings(
         string memory a,
         string memory b
@@ -260,7 +259,12 @@ contract tfg {
         uint8 month,
         uint16 year
     ) public onlyOwner participantIsDegreeCoord(degreeCoord) returns (uint) {
-        uint id = validations.mintNFT(degreeCoord, srcCourse, dstCourse);
+        uint id = validations.mintNFT(
+            msg.sender,
+            degreeCoord,
+            srcCourse,
+            dstCourse
+        );
 
         validations.setValidityPeriod(degreeCoord, id, month, year);
         return id;
@@ -274,7 +278,7 @@ contract tfg {
         validations.setValidityPeriod(msg.sender, id, month, year);
     }
 
-    function transferValidations(
+    function transferValidation(
         uint id,
         address origin,
         address destination
