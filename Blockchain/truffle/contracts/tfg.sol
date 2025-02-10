@@ -94,6 +94,14 @@ contract tfg {
         _;
     }
 
+    modifier doesTeacherHaveAccess(address student, address teacher) {
+        require(
+            studentToRecord[student].teacherExists[teacher] == true,
+            "Coordinator can not modify this transcript"
+        );
+        _;
+    }
+
     event ParticipantAdded(string message);
 
     function addUniversity(
@@ -231,15 +239,16 @@ contract tfg {
         public
         participantIsTeacher(msg.sender)
         participantIsStudent(participant)
+        doesTeacherHaveAccess(participant, msg.sender)
     {
-        personToHash[participant].hash = hash;
+        studentToRecord[participant].hash = hash;
     }
 
     function updateTranscript(
         string memory hash,
         address participant
     ) public universityExists(msg.sender) participantIsStudent(participant) {
-        personToHash[participant].hash = hash;
+        studentToRecord[participant].hash = hash;
     }
 
     function removeParticipant(
@@ -250,6 +259,10 @@ contract tfg {
 
     function createValidation() public onlyOwner {
         validations = new MiNFT(msg.sender);
+    }
+
+    function setValidation(address tk) public onlyOwner {
+        validations = MiNFT(tk);
     }
 
     function addValidation(
