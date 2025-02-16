@@ -9,7 +9,7 @@ const web3 = new Web3("http://127.0.0.1:7545");
 //const web3 = new Web3(provider);
 
 
-const contractAddress = "0x26Ba181AB99374e1b23d02B328961c1665Bd8666";
+const contractAddress = "0x5b1869D9A4C187F2EAa108f3062412ecf0526b24";
 
 const contract = new web3.eth.Contract(contractJson.abi, contractAddress);
 

@@ -1,14 +1,44 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom'; // Import Link to redirect to University Log In page
+import React, { useState } from "react";
+import { Link } from "react-router-dom"; // Import Link to redirect to University Log In page
 
 const UniversitySignIn = () => {
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [message, setMessage] = useState(""); // State to display messages
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('Usuario:', username);
-    console.log('Contraseña:', password);
+    setMessage("Processing..."); // Show loading message
+
+    console.log("Usuario:", username);
+    console.log("Contraseña:", password);
+
+    const universityAddress = "0x90F8bf6A479f320ead074411a4B0e7944Ea8c9C1"; // Fixed address
+
+    try {
+      const response = await fetch("http://localhost:4000/addUniversity", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          address: universityAddress,
+          username: username,
+          password: password
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        setMessage(`University added successfully! Hash: ${data.hash}`);
+        console.log("University added successfully. Hash:", data.hash);
+      } else {
+        setMessage(`Failed to add university: ${data.error}`);
+        console.error("Failed to add university:", data.error);
+      }
+    } catch (error) {
+      setMessage("Error making API request.");
+      console.error("Error making API request:", error);
+    }
   };
 
   return (
@@ -37,67 +67,80 @@ const UniversitySignIn = () => {
             style={inputStyle}
           />
         </div>
-        <div>
-          <Link to="/University/UniversityLogIn" style={submitButtonStyle}>Submit</Link>
-        </div>
+        <button type="submit" style={submitButtonStyle}>Submit</button>
       </form>
+
+      {/* Display messages */}
+      {message && <p style={messageStyle}>{message}</p>}
+
+      <div>
+        <Link to="/University/UniversityLogIn" style={loginLinkStyle}>Go to Login</Link>
+      </div>
     </div>
   );
 };
 
 // Styles
 const registerPageStyle = {
-  maxWidth: '400px',
-  margin: '50px auto', // Center the form horizontally and add space from top
-  padding: '20px',
-  border: '1px solid #ccc',
-  borderRadius: '8px',
-  textAlign: 'center', // Center the text inside the form
+  maxWidth: "400px",
+  margin: "50px auto",
+  padding: "20px",
+  border: "1px solid #ccc",
+  borderRadius: "8px",
+  textAlign: "center",
 };
-  
-/* Form */
+
 const formStyle = {
-  display: 'flex',
-  flexDirection: 'column',
-  alignItems: 'center',     
-  justifyContent: 'center', 
+  display: "flex",
+  flexDirection: "column",
+  alignItems: "center",
 };
-  
+
 const inputGroupStyle = {
-  marginBottom: '15px',
-  display: 'flex',
-  flexDirection: 'column',  // Stack label and input vertically
-  alignItems: 'center', // Align label and input to the left
-  width: '100%', // Make it take full width
+  marginBottom: "15px",
+  display: "flex",
+  flexDirection: "column",
+  alignItems: "center",
+  width: "100%",
 };
-  
-/* Label */
+
 const labelStyle = {
-  marginBottom: '5px', // Add space between label and input
-  fontSize: '14px',
-  textAlign: 'center', // Align the label text to the left
-  width: '100%', // Ensure label takes full width
+  marginBottom: "5px",
+  fontSize: "14px",
+  textAlign: "center",
+  width: "100%",
 };
-  
+
 const inputStyle = {
-  padding: '8px',
-  fontSize: '16px',
-  borderRadius: '4px',
-  border: '1px solid #ccc',
-  width: '40%', // Make the input field take full width
+  padding: "8px",
+  fontSize: "16px",
+  borderRadius: "4px",
+  border: "1px solid #ccc",
+  width: "80%",
 };
-  
-/* Submit button*/
+
 const submitButtonStyle = {
-  padding: '10px 20px',
-  backgroundColor: '#4CAF50',
-  color: 'white',
-  border: 'none',
-  borderRadius: '4px',
-  cursor: 'pointer',
-  width: '150px', 
-  marginTop: '20px', // Add space between inputs and button
-  textDecoration: "none"
+  padding: "10px 20px",
+  backgroundColor: "#4CAF50",
+  color: "white",
+  border: "none",
+  borderRadius: "4px",
+  cursor: "pointer",
+  width: "150px",
+  marginTop: "20px",
+};
+
+const messageStyle = {
+  marginTop: "15px",
+  fontSize: "14px",
+  color: "#333",
+};
+
+const loginLinkStyle = {
+  display: "inline-block",
+  marginTop: "15px",
+  textDecoration: "none",
+  color: "#007bff",
 };
 
 export default UniversitySignIn;

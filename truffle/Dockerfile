@@ -7,5 +7,9 @@ RUN npm install -g truffle
 
 RUN npm install web3
 
+RUN npm install nodemon -g
+
+RUN npm install express
+
 EXPOSE 8545
-CMD npm install && /bin/sh
+CMD npm install && npx nodemon blockchain_api.js && /bin/sh
