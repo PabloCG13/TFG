@@ -9,19 +9,21 @@ const regex = /const contractAddress = "0x[a-fA-F0-9]{40}";/;
 
 
 const files = [
-    "addUniversity.js",
-    "addParticipant.js",
-    "addCourseCoord.js",
-    "consultUniversity.js",
+    "test/addUniversity.js",
+    "test/addParticipant.js",
+    "test/addCourseCoord.js",
+    "test/consultUniversity.js",
     "createERC721.js",
-    "addTeacherToTranscript.js",
-    "modifyTranscriptHash.js",
-    "addValidation.js",
-    "createTranscript.js",
-    "transferValidation.js",
+    "test/addTeacherToTranscript.js",
+    "test/modifyTranscriptHash.js",
+    "test/addValidation.js",
+    "test/createTranscript.js",
+    "test/transferValidation.js",
     "addUni.js",
     "addPerson.js",
-    "consult.js"
+    "consult.js", 
+    "addTeacherToStudentTranscript.js",
+    "modifyTranscript.js"
 ];
 
 // Función para reemplazar la dirección en cada archivo
