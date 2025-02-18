@@ -2,18 +2,32 @@ import React, { useState } from "react";
 import { Link } from "react-router-dom"; // Import Link to redirect to University Log In page
 
 const UniversitySignIn = () => {
-  const [username, setUsername] = useState("");
+  const [user, setUser] = useState("");
+  const [name, setName] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [country, setCountry] = useState("");
+  const [city, setCity] = useState("");
   const [message, setMessage] = useState(""); // State to display messages
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // Basic validation for matching passwords
+    if (password !== confirmPassword) {
+      setMessage("Passwords do not match!");
+      return;
+    }
+
     setMessage("Processing..."); // Show loading message
 
-    console.log("Usuario:", username);
+    console.log("User:", user);
+    console.log("Name:", name);
+    console.log("País:", country);
+    console.log("Ciudad:", city);
     console.log("Contraseña:", password);
 
-    const universityAddress = "0x90F8bf6A479f320ead074411a4B0e7944Ea8c9C1"; // Fixed address
+    const universityAddress = "0xFFcf8FDEE72ac11b5c542428B35EEF5769C409f0"; // Fixed address
 
     try {
       const response = await fetch("http://localhost:4000/addUniversity", {
@@ -21,7 +35,7 @@ const UniversitySignIn = () => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           address: universityAddress,
-          username: username,
+          username: user,
           password: password
         }),
       });
@@ -46,12 +60,45 @@ const UniversitySignIn = () => {
       <h2>University Sign In</h2>
       <form onSubmit={handleSubmit} style={formStyle}>
         <div style={inputGroupStyle}>
-          <label htmlFor="username" style={labelStyle}>User:</label>
+          <label htmlFor="user" style={labelStyle}>User:</label>
           <input
             type="text"
-            id="username"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
+            id="user"
+            value={user}
+            onChange={(e) => setUser(e.target.value)}
+            required
+            style={inputStyle}
+          />
+        </div>
+        <div style={inputGroupStyle}>
+          <label htmlFor="name" style={labelStyle}>Name:</label>
+          <input
+            type="text"
+            id="name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            required
+            style={inputStyle}
+          />
+        </div>
+        <div style={inputGroupStyle}>
+          <label htmlFor="country" style={labelStyle}>Country:</label>
+          <input
+            type="text"
+            id="country"
+            value={country}
+            onChange={(e) => setCountry(e.target.value)}
+            required
+            style={inputStyle}
+          />
+        </div>
+        <div style={inputGroupStyle}>
+          <label htmlFor="city" style={labelStyle}>City:</label>
+          <input
+            type="text"
+            id="city"
+            value={city}
+            onChange={(e) => setCity(e.target.value)}
             required
             style={inputStyle}
           />
@@ -63,6 +110,17 @@ const UniversitySignIn = () => {
             id="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
+            required
+            style={inputStyle}
+          />
+        </div>
+        <div style={inputGroupStyle}>
+          <label htmlFor="confirmPassword" style={labelStyle}>Confirm Password:</label>
+          <input
+            type="password"
+            id="confirmPassword"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
             required
             style={inputStyle}
           />
@@ -142,5 +200,6 @@ const loginLinkStyle = {
   textDecoration: "none",
   color: "#007bff",
 };
+
 
 export default UniversitySignIn;
