@@ -46,7 +46,7 @@ async function modifyTranscript(file, addressStudent, address, type) {
     
             // Enviar la transacción a `updateMark`
             const tx = await contract.methods.updateMark(hash, studentAddress).send({
-                from: address,
+                from: modifierAddress,
                 gas: 6721975
             });
     
@@ -67,7 +67,7 @@ async function modifyTranscript(file, addressStudent, address, type) {
     
             // Enviar la transacción a `updateMark`
             const tx = await contract.methods.updateTranscript(hash, studentAddress).send({
-                from: address,
+                from: modifierAddress,
                 gas: 6721975
             });
     

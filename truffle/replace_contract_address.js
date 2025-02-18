@@ -23,7 +23,8 @@ const files = [
     "addPerson.js",
     "consult.js", 
     "addTeacherToStudentTranscript.js",
-    "modifyTranscript.js"
+    "modifyTranscript.js",
+    "blockchain_api.js"
 ];
 
 // Función para reemplazar la dirección en cada archivo
