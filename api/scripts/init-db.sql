@@ -7,7 +7,7 @@ CREATE TABLE IF NOT EXISTS university (
     uniCode VARCHAR(4) PRIMARY KEY,
     name VARCHAR(50) NOT NULL,
     location VARCHAR(30) NOT NULL,
-    hash VARCHAR(40) NOT NULL
+    hash VARCHAR(66) NOT NULL
 );
 
 -- Create teacher table
@@ -15,7 +15,7 @@ CREATE TABLE IF NOT EXISTS teacher (
     teacherId VARCHAR(10) PRIMARY KEY,
     name VARCHAR(50) NOT NULL,
     lastAccess TIMESTAMP,
-    hash VARCHAR(40) NOT NULL
+    hash VARCHAR(66) NOT NULL
 );
 
 -- Create degree table
@@ -36,7 +36,7 @@ CREATE TABLE IF NOT EXISTS student (
     dob DATE NOT NULL,
     lastAccess TIMESTAMP,
     transcriptHash VARCHAR(30) NOT NULL,
-    hash VARCHAR(40) NOT NULL
+    hash VARCHAR(66) NOT NULL
 );
 
 -- Create course table

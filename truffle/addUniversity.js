@@ -51,9 +51,11 @@ async function addUniversity(address, user, passwd) {
         });
 
         console.log("Successful transaction:", tx.transactionHash);
-        return universityHash;
+        const storedHash = await contract.methods.universityToHash(universityAddress).call();
+        return storedHash;
     } catch (error) {
         console.error("Error:", error);
+        return "Error";
     }
 }
 

@@ -7,7 +7,7 @@ const UniversityLogin = () => {
   const [message, setMessage] = useState(null); // State for error messages
   const navigate = useNavigate(); // Navigation hook
 
-  const universityAddress = "0xFFcf8FDEE72ac11b5c542428B35EEF5769C409f0"; // Fixed address
+  const universityAddress = "0xc8f2d6111bc7207c25eB4f944cb29F0E851a8541"; // Fixed address
 
   // Function to handle login
   const handleSubmit = async (e) => {
@@ -17,7 +17,7 @@ const UniversityLogin = () => {
       const response = await fetch("http://localhost:4000/consult", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ address: universityAddress, user, passwd, type: 1 }),
+        body: JSON.stringify({ address: universityAddress, user: user, passwd: passwd, type: 1 }),
       });
 
       const data = await response.json();

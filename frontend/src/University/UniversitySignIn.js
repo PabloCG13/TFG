@@ -27,7 +27,7 @@ const UniversitySignIn = () => {
     console.log("Ciudad:", city);
     console.log("Contraseña:", password);
 
-    const universityAddress = "0xFFcf8FDEE72ac11b5c542428B35EEF5769C409f0"; // Fixed address
+    const universityAddress = "0xc8f2d6111bc7207c25eB4f944cb29F0E851a8541"; // Fixed address
 
     try {
       const response = await fetch("http://localhost:4000/addUniversity", {
@@ -41,18 +41,52 @@ const UniversitySignIn = () => {
       });
 
       const data = await response.json();
+      
 
-      if (data.success) {
-        setMessage(`University added successfully! Hash: ${data.hash}`);
+      if (data.success && data.hash !== "Error") {
+        setMessage(`University added successfully to the Blockchain! Hash: ${data.hash}`);
         console.log("University added successfully. Hash:", data.hash);
+      
+
+      const universityHash = data.hash;
+      if(universityHash !== "Error"){
+        const dbResponse = await fetch("http://localhost:5000/api/universities", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+              uniCode: user,  
+              name: name,
+              location: `${city}, ${country}`,
+              hash: universityHash
+          }),
+      });
+
+      const dbData = await dbResponse.json();
+
+      if (dbData.success) {
+          setMessage(`University registered successfully! ID: ${dbData.university.uniCode}`);
+          console.log("Stored University:", dbData.university);
       } else {
+          setMessage(`Database error: ${dbData.error}`);
+          console.error("Database error:", dbData.error);
+      }
+      }
+
+    } else {
+      if(data.hash === "Error"){
+        setMessage(`Failed to add university: ${data.hash}`);
+        console.error("Failed to add university:", data.hash);
+      }else{
         setMessage(`Failed to add university: ${data.error}`);
         console.error("Failed to add university:", data.error);
       }
-    } catch (error) {
-      setMessage("Error making API request.");
-      console.error("Error making API request:", error);
+
     }
+    } catch (error) {
+        setMessage("API request failed.");
+        console.error("Error:", error);
+    }
+
   };
 
   return (

@@ -29,11 +29,12 @@ async function findFirstUnusedAccount() {
     return null;
 }
 
-async function addParticipant(address,user, passwd, role) {
+async function addParticipant(address, uni, user, passwd, role) {
     const participantName = user;
     const participantPass = passwd;
     const participantRole = role;
     const participantAddress = address;// await findFirstUnusedAccount();
+    const universityAddress = uni;
 
     if (!participantAddress) {
         console.error("No available address found.");
@@ -46,14 +47,16 @@ async function addParticipant(address,user, passwd, role) {
     try {
        
         const tx = await contract.methods.addParticipant(participantHash, participantAddress, participantRole).send({ 
-            from: universityAddress1, 
+            from: universityAddress, 
             gas: 6721975  // Aumentar el límite de gas 
         });
         
         console.log("Successful transaction:", tx.transactionHash);
-        return participantHash;
+        const storedHash = await contract.methods.personToHash(participantAddress).call();
+        return storedHash;
     } catch (error) {
         console.error("Error:", error);
+        return "Error";
     }
 }
 
