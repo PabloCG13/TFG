@@ -2,7 +2,7 @@ const fs = require("fs");
 const path = require("path");
 
 // Configura aquí la nueva dirección del contrato
-const NEW_CONTRACT_ADDRESS = "0x5b1869D9A4C187F2EAa108f3062412ecf0526b24";  //  CHANGE THIS ADDRESS
+const NEW_CONTRACT_ADDRESS = "0x2612Af3A521c2df9EAF28422Ca335b04AdF3ac66";  //  CHANGE THIS ADDRESS
 
 // Expresión regular para encontrar la línea de `contractAddress`
 const regex = /const contractAddress = "0x[a-fA-F0-9]{40}";/;
@@ -21,6 +21,7 @@ const files = [
     "test/transferValidation.js",
     "addUniversity.js",
     "addParticipant.js",
+    "changeParticipant.js",
     "consult.js", 
     "addTeacherToStudentTranscript.js",
     "modifyTranscript.js",
