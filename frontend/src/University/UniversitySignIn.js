@@ -27,7 +27,7 @@ const UniversitySignIn = () => {
     console.log("Ciudad:", city);
     console.log("Contraseña:", password);
 
-    const universityAddress = "0xd03ea8624C8C5987235048901fB614fDcA89b117"; // Fixed address
+    const universityAddress = "0xF75588126126DdF76bDc8aBA91a08f31d2567Ca5"; // Fixed address
 
     try {
       const response = await fetch("http://localhost:4000/addUniversity", {
@@ -63,9 +63,9 @@ const UniversitySignIn = () => {
 
       const dbData = await dbResponse.json();
       console.log(dbData);
-      if (dbData.uniCode) {
-          setMessage(`University registered successfully! ID: ${dbData.university.uniCode}`);
-          console.log("Stored University:", dbData.university);
+      if (dbResponse.ok) {
+          setMessage(`University registered successfully! ID: ${dbData.unicode}`);
+          console.log("Stored University:", dbData);
       } else {
           setMessage(`Failed to create a new entry in the Database error`);
           console.error("Database error:", dbData.error);

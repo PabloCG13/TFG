@@ -7,7 +7,7 @@ const UniversityLogin = () => {
   const [message, setMessage] = useState(null); // State for error messages
   const navigate = useNavigate(); // Navigation hook
 
-  const universityAddress = "0xd03ea8624C8C5987235048901fB614fDcA89b117"; // Fixed address
+  const universityAddress = "0xc0514C03D097fCbB77a74B4DA5b594bA473b6CE1"; // Fixed address
 
   // Function to handle login
   const handleSubmit = async (e) => {
@@ -23,7 +23,8 @@ const UniversityLogin = () => {
       const data = await response.json();
 
       if (data.success && data.result === true) {
-        navigate("/University/UniversityPages/UniversityHome"); // Redirect on success
+        console.log(response);
+        navigate(`/University/UniversityPages/UniversityHome/${user}`); // Redirect on success
       } else {
         setMessage("Invalid credentials. Please try again.");
       }

@@ -101,7 +101,7 @@ function App() {
 
         
         {/* University Home Page route */}
-        <Route path="/University/UniversityPages/UniversityHome" element={<UniversityHome />} />
+        <Route path="/University/UniversityPages/UniversityHome/:uniCode" element={<UniversityHome />} />
         
 
       </Routes>

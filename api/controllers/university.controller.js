@@ -41,6 +41,72 @@ exports.findOne = async (req, res) => {
     }
 };
 
+// Get all students enrolled in a given university
+exports.getStudents = async (req, res) => {
+    try {
+        const { uniCode } = req.params;
+        const students = await db.any(`
+            SELECT DISTINCT s.studentId, s.name, s.dob, s.lastAccess
+            FROM student s
+            JOIN studies st ON s.studentId = st.studentId
+            WHERE st.uniCode = $1;
+        `, [uniCode]);
+
+        res.status(200).json(students);
+    } catch (err) {
+        res.status(500).json({ message: err.message || "Some error occurred" });
+    }
+};
+
+// Get all teachers teaching at a given university
+exports.getTeachers = async (req, res) => {
+    try {
+        const { uniCode } = req.params;
+        const teachers = await db.any(`
+            SELECT DISTINCT t.teacherId, t.name, t.lastAccess
+            FROM teacher t
+            JOIN course c ON t.teacherId = c.teacherId
+            WHERE c.uniCode = $1;
+        `, [uniCode]);
+
+        res.status(200).json(teachers);
+    } catch (err) {
+        res.status(500).json({ message: err.message || "Some error occurred" });
+    }
+};
+
+// Get all degrees offered by a given university
+exports.getDegrees = async (req, res) => {
+    try {
+        const { uniCode } = req.params;
+        const degrees = await db.any(`
+            SELECT d.degreeId, d.name, d.teacherId
+            FROM degree d
+            WHERE d.uniCode = $1;
+        `, [uniCode]);
+
+        res.status(200).json(degrees);
+    } catch (err) {
+        res.status(500).json({ message: err.message || "Some error occurred" });
+    }
+};
+
+// Get all courses offered by a given university
+exports.getCourses = async (req, res) => {
+    try {
+        const { uniCode } = req.params;
+        const courses = await db.any(`
+            SELECT c.courseId, c.name, c.content, c.credits, c.period, c.teacherId
+            FROM course c
+            WHERE c.uniCode = $1;
+        `, [uniCode]);
+
+        res.status(200).json(courses);
+    } catch (err) {
+        res.status(500).json({ message: err.message || "Some error occurred" });
+    }
+};
+
 // Update a University by the code in the request
 exports.update = async (req, res) => {
     try {

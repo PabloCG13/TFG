@@ -8,6 +8,14 @@ module.exports = app => {
     router.get("/universities/", universities.findAll);
   
     router.get("/universities/:uniCode", universities.findOne);
+    
+    router.get("/universities/:uniCode/students", universities.getStudents);
+
+    router.get("/universities/:uniCode/teachers", universities.getTeachers);
+
+    router.get("/universities/:uniCode/degrees", universities.getDegrees);
+
+    router.get("/universities/:uniCode/courses", universities.getCourses);
   
     router.put("/universities/:uniCode", universities.update);
   
