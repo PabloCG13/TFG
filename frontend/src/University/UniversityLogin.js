@@ -7,7 +7,7 @@ const UniversityLogin = () => {
   const [message, setMessage] = useState(null); // State for error messages
   const navigate = useNavigate(); // Navigation hook
 
-  const universityAddress = "0xc0514C03D097fCbB77a74B4DA5b594bA473b6CE1"; // Fixed address
+  const universityAddress = "0x3E5e9111Ae8eB78Fe1CC3bb8915d5D461F3Ef9A9"; // Fixed address
 
   // Function to handle login
   const handleSubmit = async (e) => {

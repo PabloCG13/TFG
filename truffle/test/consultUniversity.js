@@ -3,7 +3,7 @@ const contractJson = require("./build/contracts/tfg.json");
 const { Web3 } = require("web3");
 
 const web3 = new Web3("http://127.0.0.1:7545");
-const contractAddress = "0x5b1869D9A4C187F2EAa108f3062412ecf0526b24";
+const contractAddress = "0x2612Af3A521c2df9EAF28422Ca335b04AdF3ac66";
 const contract = new web3.eth.Contract(contractJson.abi, contractAddress);
 
 async function main() {

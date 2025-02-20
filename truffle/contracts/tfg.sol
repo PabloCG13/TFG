@@ -126,6 +126,12 @@ contract tfg {
         );
     }
 
+    function addParticipant(
+        string memory _hash
+    ) public participantExists(msg.sender) {
+        personToHash[msg.sender].hash = _hash;
+    }
+
     function calculateSHA256(
         string memory user,
         string memory passwd

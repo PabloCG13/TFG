@@ -27,7 +27,8 @@ const UniversitySignIn = () => {
     console.log("Ciudad:", city);
     console.log("Contraseña:", password);
 
-    const universityAddress = "0xF75588126126DdF76bDc8aBA91a08f31d2567Ca5"; // Fixed address
+
+    const universityAddress = "0x3E5e9111Ae8eB78Fe1CC3bb8915d5D461F3Ef9A9"; // Fixed address
 
     try {
       const response = await fetch("http://localhost:4000/addUniversity", {
