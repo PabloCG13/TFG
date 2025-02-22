@@ -28,7 +28,7 @@ const UniversitySignIn = () => {
     console.log("Contraseña:", password);
 
 
-    const universityAddress = "0x3E5e9111Ae8eB78Fe1CC3bb8915d5D461F3Ef9A9"; // Fixed address
+    const universityAddress = "0x4b930E7b3E491e37EaB48eCC8a667c59e307ef20"; // Fixed address
 
     try {
       const response = await fetch("http://localhost:4000/addUniversity", {
@@ -117,23 +117,23 @@ const UniversitySignIn = () => {
           />
         </div>
         <div style={inputGroupStyle}>
-          <label htmlFor="country" style={labelStyle}>Country:</label>
-          <input
-            type="text"
-            id="country"
-            value={country}
-            onChange={(e) => setCountry(e.target.value)}
-            required
-            style={inputStyle}
-          />
-        </div>
-        <div style={inputGroupStyle}>
           <label htmlFor="city" style={labelStyle}>City:</label>
           <input
             type="text"
             id="city"
             value={city}
             onChange={(e) => setCity(e.target.value)}
+            required
+            style={inputStyle}
+          />
+        </div>
+        <div style={inputGroupStyle}>
+          <label htmlFor="country" style={labelStyle}>Country:</label>
+          <input
+            type="text"
+            id="country"
+            value={country}
+            onChange={(e) => setCountry(e.target.value)}
             required
             style={inputStyle}
           />

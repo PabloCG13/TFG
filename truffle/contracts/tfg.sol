@@ -126,7 +126,11 @@ contract tfg {
         );
     }
 
-    function addParticipant(
+    function getParticipantHash(address participant) public view participantExists(participant) returns(string memory){
+        return personToHash[participant].hash;
+    }
+
+    function changeParticipant(
         string memory _hash
     ) public participantExists(msg.sender) {
         personToHash[msg.sender].hash = _hash;
