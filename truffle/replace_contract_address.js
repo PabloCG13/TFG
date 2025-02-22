@@ -23,8 +23,10 @@ const files = [
     "addParticipant.js",
     "changeParticipant.js",
     "consult.js", 
-    "addTeacherToStudentTranscript.js",
+    "addTeacherToTranscript.js",
     "modifyTranscript.js",
+    "addValidation.js",
+    "transferValidation.js",
     "blockchain_api.js"
 ];
 

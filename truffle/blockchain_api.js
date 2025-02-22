@@ -3,8 +3,11 @@ const cors = require("cors");
 const { addUniversity } = require("./addUniversity"); // Keep addUniversity.js in backend
 const { addParticipant } = require("./addParticipant");
 const { changeParticipant } = require("./changeParticipant");
-const { consult } = require("./consult")
-const { modifyTranscript } = require("./modifyTranscript")
+const { consult } = require("./consult");
+const { addTeacherToTranscript } = require("./addTeacherToTranscript") 
+const { modifyTranscript } = require("./modifyTranscript");
+const { addValidation } = require("./addValidation");
+const { transferValidation } = require("./transferValidation");
 
 
 const crypto = require("crypto");
@@ -55,9 +58,6 @@ app.post("/addParticipant", async (req, res) => {
         if (result === "Error" || result === null) {
             return res.status(500).json({ error: "Failed to add participant" });
         }
-        const formattedResult = JSON.parse(JSON.stringify(result, (key, value) => 
-            typeof value === 'bigint' ? value.toString():value
-        ));
 
         res.json({ success: true, hash: result });
     } catch (error) {
@@ -106,10 +106,29 @@ app.post("/consult", async (req, res) => {
     }
 });
 
-app.post("/modifyTranscript", async (req, res) => {
-    const { file, addressStudent, address, type } = req.body;
-    
+app.post("/addTeacherToTranscript", async (req, res) => {
     try {
+        const { addressTeacher, addressUniversity, addressStudent } = req.body;
+
+        if(!addressTeacher || !addressUniversity || !addressStudent ) {
+            return res.status(400).json({ error: "Missing required fields" });
+        }
+
+        const result = await addTeacherToTranscript(addressTeacher, addressUniversity, addressStudent);
+        res.status(200).json({ success: true, result });
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+app.post("/modifyTranscript", async (req, res) => {
+    try {
+        const { file, addressStudent, address, type } = req.body;
+
+        if(!file || !addressStudent || !address || !type) {
+            return res.status(400).json({ error: "Missing required fields" });
+        }
+
         const result = await modifyTranscript(file, addressStudent, address, type);
         res.status(200).json({ success: true, result });
     } catch (error) {
@@ -117,7 +136,37 @@ app.post("/modifyTranscript", async (req, res) => {
     }
 });
 
-// 🚀 Run Blockchain Initialization Function Before Starting the Server
+app.post("/addValidation", async (req, res) => {
+    try {
+        const { address, srcCourse, dstCourse, month, year } = req.body;
+
+        if(!address || !srcCourse || !dstCourse || !month || !year) {
+            return res.status(400).json({ error: "Missing required fields" });
+        }
+
+        const result = await addValidation(address, srcCourse, dstCourse, month, year);
+        res.status(200).json({ success: true, result });
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+app.post("/transferValidation", async (req, res) => {
+    try {
+        const { file, addressStudent, address, type } = req.body;
+
+        if(!file || !addressStudent || !address || !type) {
+            return res.status(400).json({ error: "Missing required fields" });
+        }
+
+        const result = await transferValidation(file, addressStudent, address, type);
+        res.status(200).json({ success: true, result });
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// Run Blockchain Initialization Function Before Starting the Server
 async function initializeBlockchain() {
     try {
         const accounts = await web3.eth.getAccounts();
@@ -135,7 +184,7 @@ async function initializeBlockchain() {
     }
 }
 
-// 🌟 Call this function when the server starts
+// Call this function when the server starts
 initializeBlockchain().then(() => {
     const PORT = 4000;
     app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));
