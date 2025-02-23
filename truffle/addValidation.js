@@ -8,11 +8,11 @@ const contractAddress = "0xaf5C4C6C7920B4883bC6252e9d9B8fE27187Cf68";
 const contract = new web3.eth.Contract(contractJson.abi, contractAddress);
 
 
-async function addValidation(address, srcCourse, dstCourse, month, year) {
-    const srcCourse = srcCourse;
-    const dstCourse = dstCourse;
-    const month = month;
-    const year = year;
+async function addValidation(address, srcCour, dstCour, _month, _year) {
+    const srcCourse = srcCour;
+    const dstCourse = dstCour;
+    const month = _month;
+    const year = _year;
     const teacherAddress = address;// await findFirstUnusedAccount();
 
     try {

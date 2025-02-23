@@ -138,13 +138,13 @@ app.post("/modifyTranscript", async (req, res) => {
 
 app.post("/addValidation", async (req, res) => {
     try {
-        const { address, srcCourse, dstCourse, month, year } = req.body;
+        const { address, srcCour, dstCour, _month, _year } = req.body;
 
-        if(!address || !srcCourse || !dstCourse || !month || !year) {
+        if(!address || !srcCour || !dstCour || !_month || !_year) {
             return res.status(400).json({ error: "Missing required fields" });
         }
 
-        const result = await addValidation(address, srcCourse, dstCourse, month, year);
+        const result = await addValidation(address, srcCour, dstCour, _month, _year);
         res.status(200).json({ success: true, result });
     } catch (error) {
         res.status(500).json({ success: false, error: error.message });
@@ -153,13 +153,13 @@ app.post("/addValidation", async (req, res) => {
 
 app.post("/transferValidation", async (req, res) => {
     try {
-        const { file, addressStudent, address, type } = req.body;
+        const { uniAddress, degreeAddr, newDegreeAddr, id } = req.body;
 
-        if(!file || !addressStudent || !address || !type) {
+        if(!uniAddress || !degreeAddr || !newDegreeAddr || !id) {
             return res.status(400).json({ error: "Missing required fields" });
         }
 
-        const result = await transferValidation(file, addressStudent, address, type);
+        const result = await transferValidation(uniAddress, degreeAddr, newDegreeAddr, id);
         res.status(200).json({ success: true, result });
     } catch (error) {
         res.status(500).json({ success: false, error: error.message });
