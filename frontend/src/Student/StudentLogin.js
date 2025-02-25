@@ -1,35 +1,67 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom'; // Import Link to redirect to Student Sign In page
+import { Link, useNavigate } from 'react-router-dom'; // Import useNavigate for controlled redirection
 
 const StudentLogin = () => {
-  
-  const [username, setUsername] = useState('');
+  const [studentId, setStudentId] = useState('');
   const [password, setPassword] = useState('');
+  const [message, setMessage] = useState(null); // State for error messages
+  const navigate = useNavigate(); // Navigation hook
 
-  // Method that handles the login form
-  const handleSubmit = (e) => {
-    e.preventDefault(); 
-    console.log('Usuario:', username); // Prints user
-    console.log('Contraseña:', password); // Prints password
+  const universityAddress = "0x3E5e9111Ae8eB78Fe1CC3bb8915d5D461F3Ef9A9"; // Fixed address
+
+  // Function to handle login
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    try {
+      const response = await fetch("http://localhost:4000/consult", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ 
+          address: universityAddress, 
+          user: studentId, 
+          passwd: password, 
+          type: 2 // Set to 2 for student
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.success && data.result === true) {
+        console.log(response);
+        // Navigate to Student Home Page on successful login
+        navigate(`/Student/StudentPages/StudentHome/${studentId}`, {
+          state: { studentId, universityAddress }
+        }); 
+      } else {
+        setMessage("Invalid credentials. Please try again.");
+      }
+    } catch (error) {
+      console.error("Error making API request:", error);
+      setMessage("Server error. Please try again later.");
+    }
   };
 
   return (
     <div style={loginPageStyle}>
       <h2>Student Log In</h2>
+
+      {message && <p style={errorStyle}>{message}</p>} {/* Show error message */}
+
       <form onSubmit={handleSubmit} style={formStyle}>
         <div style={inputGroupStyle}>
-        <label htmlFor="username" style={labelStyle}>User:</label>
+          <label htmlFor="studentId" style={labelStyle}>User:</label>
           <input
             type="text"
-            id="username"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
+            id="studentId"
+            value={studentId}
+            onChange={(e) => setStudentId(e.target.value)}
             required
             style={inputStyle}
           />
         </div>
         <div style={inputGroupStyle}>
-        <label htmlFor="password" style={labelStyle}>Password:</label>
+          <label htmlFor="password" style={labelStyle}>Password:</label>
           <input
             type="password"
             id="password"
@@ -45,10 +77,8 @@ const StudentLogin = () => {
           <Link to="/Student/StudentSignIn" style={linkStyle}>Sign In</Link>
         </div>
 
-        {/* Redirect to Student Home Page on button click */}
-        <div style={submitButtonStyle}>
-          <Link to= "/Student/StudentPages/StudentHome" style={submitButtonStyle}>Submit</Link>
-        </div>
+        {/* Submit button */}
+        <button type="submit" style={submitButtonStyle}>Submit</button>
       </form>
     </div>
   );
@@ -57,35 +87,33 @@ const StudentLogin = () => {
 // Styles
 const loginPageStyle = {
   maxWidth: '400px',
-  margin: '50px auto', // Center the form horizontally and add space from top
+  margin: '50px auto',
   padding: '20px',
   border: '1px solid #ccc',
   borderRadius: '8px',
-  textAlign: 'center', // Center the text inside the form
+  textAlign: 'center',
 };
 
-/* Form*/
 const formStyle = {
   display: 'flex',
   flexDirection: 'column',
-  alignItems: 'center',     
-  justifyContent: 'center', 
+  alignItems: 'center',
+  justifyContent: 'center',
 };
 
 const inputGroupStyle = {
   marginBottom: '15px',
   display: 'flex',
-  flexDirection: 'column',  // Stack label and input vertically
-  alignItems: 'center', // Align label and input to the left
-  width: '100%', // Make it take full width
+  flexDirection: 'column',
+  alignItems: 'center',
+  width: '100%',
 };
 
-/* Label */
 const labelStyle = {
-  marginBottom: '5px', // Add space between label and input
+  marginBottom: '5px',
   fontSize: '14px',
-  textAlign: 'center', // Align the label text to the left
-  width: '100%', // Ensure label takes full width
+  textAlign: 'center',
+  width: '100%',
 };
 
 const inputStyle = {
@@ -93,10 +121,9 @@ const inputStyle = {
   fontSize: '16px',
   borderRadius: '4px',
   border: '1px solid #ccc',
-  width: '40%', // Make the input field take full width
+  width: '40%',
 };
 
-/* Submit button*/
 const submitButtonStyle = {
   padding: '10px 20px',
   backgroundColor: '#4CAF50',
@@ -104,20 +131,24 @@ const submitButtonStyle = {
   border: 'none',
   borderRadius: '4px',
   cursor: 'pointer',
-  width: '150px', 
-  marginTop: '20px', // Add space between inputs and button
+  width: '150px',
+  marginTop: '20px',
 };
 
-/* Sign In */
 const linkContainerStyle = {
-  marginBottom: '10px', // Space between the link and button
+  marginBottom: '10px',
 };
-  
+
 const linkStyle = {
   color: '#007bff',
   fontSize: '16px',
-  textDecoration: 'underline', // Makes the link underlined
+  textDecoration: 'underline',
   cursor: 'pointer',
+};
+
+const errorStyle = {
+  color: 'red',
+  fontWeight: 'bold',
 };
 
 export default StudentLogin;
