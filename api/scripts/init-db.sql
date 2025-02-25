@@ -34,6 +34,7 @@ CREATE TABLE IF NOT EXISTS student (
     studentId VARCHAR(4) PRIMARY KEY,
     name VARCHAR(50) NOT NULL,
     dob DATE NOT NULL,
+    dni VARCHAR(9) NOT NULL,
     lastAccess TIMESTAMP,
     transcriptHash VARCHAR(30) NOT NULL,
     hash VARCHAR(66) NOT NULL

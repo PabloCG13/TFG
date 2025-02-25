@@ -3,12 +3,12 @@ const db = require("../config/db.js"); // Import pg-promise instance
 // Create student
 exports.create = async (req, res) => { //TODO lastAccess shouldnt be inserted; check if the values $4 syntax is correct 
     try {
-        const { studentId, name, dob, transcriptHash, hash } = req.body;
+        const { studentId, name, dob, dni, transcriptHash, hash } = req.body;
         const query = `
-            INSERT INTO student (studentId, name, dob, transcriptHash, hash)
-            VALUES ($1, $2, $3, $4, $5) RETURNING *;
+            INSERT INTO student (studentId, name, dob, dni, transcriptHash, hash)
+            VALUES ($1, $2, $3, $4, $5, $6) RETURNING *;
         `;
-        const student = await db.one(query, [studentId, name, dob, transcriptHash, hash]);
+        const student = await db.one(query, [studentId, name, dob, dni, transcriptHash, hash]);
         res.status(201).json(student);
     } catch (err) {
         res.status(500).json({ error: err.message });
