@@ -113,8 +113,8 @@ SELECT 'U001', 'CS101', 'Computer Science', 'T001'
 WHERE NOT EXISTS (SELECT 1 FROM degree WHERE uniCode = 'U001' AND degreeId = 'CS101');
 
 -- Insert student if not exists
-INSERT INTO student (studentId, name, dob, lastAccess, transcriptHash, hash)
-SELECT 'S001', 'Jane Smith', TO_DATE('15/03/2000', 'DD/MM/YYYY'), NULL, 'transhash123', 'hashabc'
+INSERT INTO student (studentId, name, dob, dni, lastAccess, transcriptHash, hash)
+SELECT 'S001', 'Jane Smith', TO_DATE('15/03/2000', 'DD/MM/YYYY'), "0123456J", NULL, 'transhash123', 'hashabc'
 WHERE NOT EXISTS (SELECT 1 FROM student WHERE studentId = 'S001');
 
 -- Insert course if not exists

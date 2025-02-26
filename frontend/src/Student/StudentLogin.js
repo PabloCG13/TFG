@@ -7,7 +7,7 @@ const StudentLogin = () => {
   const [message, setMessage] = useState(null); // State for error messages
   const navigate = useNavigate(); // Navigation hook
 
-  const universityAddress = "0x3E5e9111Ae8eB78Fe1CC3bb8915d5D461F3Ef9A9"; // Fixed address
+  const participantAddress = "0xf8eA26C3800D074a11bf814dB9a0735886C90197"; // Fixed address
 
   // Function to handle login
   const handleSubmit = async (e) => {
@@ -18,7 +18,7 @@ const StudentLogin = () => {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ 
-          address: universityAddress, 
+          address: participantAddress, 
           user: studentId, 
           passwd: password, 
           type: 2 // Set to 2 for student
@@ -31,7 +31,7 @@ const StudentLogin = () => {
         console.log(response);
         // Navigate to Student Home Page on successful login
         navigate(`/Student/StudentPages/StudentHome/${studentId}`, {
-          state: { studentId, universityAddress }
+          state: { studentId, participanttAddress: participantAddress }
         }); 
       } else {
         setMessage("Invalid credentials. Please try again.");
