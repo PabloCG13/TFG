@@ -20,7 +20,7 @@ app.use(express.urlencoded({ extended: true }));
 
 // simple route
 app.get("/", (req, res) => {
-  res.json({ message: "Welcome to bezkoder application." });
+  res.json({ message: "API connected and working" });
 });
 
 require("./routes/universities.routes")(app);
@@ -31,6 +31,7 @@ require("./routes/courses.routes")(app);
 require("./routes/validations.routes")(app);
 require("./routes/transcripts.routes")(app);
 require("./routes/studies.routes")(app);
+require("./routes/addresses.routes")(app);
 
 // set port, listen for requests
 const PORT = 5000;
