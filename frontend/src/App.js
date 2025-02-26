@@ -83,11 +83,11 @@ function App() {
 
 
         {/* Course Teacher Home Page route */}
-        <Route path="/CourseTeacher/CourseTeacherPages/CourseTeacherHome" element={<CourseTeacherHome />} />
+        <Route path="/CourseTeacher/CourseTeacherPages/CourseTeacherHome/:teacherId" element={<CourseTeacherHome />} />
 
 
         {/* Coordinator Teacher Home Page route */}
-        <Route path="/CoordinatorTeacher/CoordinatorTeacherPages/CoordinatorTeacherHome" element={<CoordinatorTeacherHome />} />
+        <Route path="/CoordinatorTeacher/CoordinatorTeacherPages/CoordinatorTeacherHome/:teacherId" element={<CoordinatorTeacherHome />} />
 
 
         {/* Coordinator Teacher Validation List Page route */}

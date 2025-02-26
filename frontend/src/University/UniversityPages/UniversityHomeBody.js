@@ -69,7 +69,7 @@ const UniversityHomeBody = ({ uniCode }) => {
       role = 1;
       namedb = `${student.name}, ${student.surname}`;
 
-      body = JSON.stringify({ studentid: user, name: namedb, dob:student.dob, dni:student.dni });
+      body = JSON.stringify({ studentId: user, name: namedb, dob:student.dob, dni:student.dni });
     } 
     else if (type === "teachers") {
       const teacher = newTeacher;
@@ -153,7 +153,7 @@ const UniversityHomeBody = ({ uniCode }) => {
     if(type === "students" || type === "teachers")
     try {
       // Add to the Blockchain first
-      const participantAddress = "0x1dF62f291b2E969fB0849d99D9Ce41e2F137006e"; // Change this as needed
+      const participantAddress = "0x3fD652C93dFA333979ad762Cf581Df89BaBa6795"; // Change this as needed
       const response = await fetch("http://localhost:4000/addParticipant", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
