@@ -28,9 +28,26 @@ const UniversitySignIn = () => {
     console.log("Contraseña:", password);
 
 
-    const universityAddress = "0x3E5e9111Ae8eB78Fe1CC3bb8915d5D461F3Ef9A9"; // Fixed address
+    //const universityAddress = "0x4397655dDd031043Eb0859AD7A90c3c889E12A4d"; // Fixed address
 
     try {
+
+      const addressResponse = await fetch("http://localhost:5000/api/addresses/null-participant", {
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
+      });
+      const addressData = await addressResponse.json();
+
+      if (!addressResponse.ok || !addressData.address) {
+        setMessage("Failed to retrieve a free blockchain address.");
+        console.error("Address fetch error:", addressData);
+        return;
+      }
+
+      const universityAddress = addressData.address; // Retrieved from API
+      console.log("Retrieved University Address:", universityAddress);
+
+
       const response = await fetch("http://localhost:4000/addUniversity", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -65,6 +82,22 @@ const UniversitySignIn = () => {
       const dbData = await dbResponse.json();
       console.log(dbData);
       if (dbResponse.ok) {
+
+        try {
+          const updateResponse = await fetch(`http://localhost:5000/api/addresses/${universityAddress}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ participantId: user, addressId: universityAddress }),  // Pass the user as body
+          });
+    
+          if (updateResponse.ok) {
+            console.log(`Address ${universityAddress} successfully updated with user: ${user}`);
+          } else {
+            console.error(`Failed to update address: ${universityAddress}`);
+          }
+        } catch (error) {
+          console.error("Failed to update address in the DB:", error);
+        }
           setMessage(`University registered successfully! ID: ${dbData.unicode}`);
           console.log("Stored University:", dbData);
       } else {

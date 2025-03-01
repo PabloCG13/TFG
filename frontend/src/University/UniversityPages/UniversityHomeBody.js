@@ -173,6 +173,29 @@ const UniversityHomeBody = ({ uniCode }) => {
         console.log("User added successfully. Hash:", data.hash);
         // TODO test API conectivity
         // After successfully adding to the Blockchain, add to the backend
+
+        // if(type ==="students"){
+
+
+        //   const transcriptResponse = await fetch("http://localhost:4000/modifyTranscript", {
+        //     method: "POST",
+        //     headers: { "Content-Type": "application/json" },
+        //     body: JSON.stringify({
+        //         file: JSON.parse(body),  // File data from the original request
+        //         addressStudent: participantAddress,
+        //         address: universityAddress,
+        //         type: 2
+        //     }),
+        // });
+
+        // const transcriptData = await transcriptResponse.json();
+
+        // if (transcriptResponse.ok) {
+        //     console.log("Transcript modified successfully:", transcriptData);
+        // } else {
+        //     console.error("Failed to modify transcript:", transcriptData.error);
+        // }
+        // }
         const dbResponse = await fetch(`http://localhost:5000/api/${type}`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
