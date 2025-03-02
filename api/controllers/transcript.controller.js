@@ -25,6 +25,21 @@ exports.findAll = async (req, res) => {
     }
 };
 
+exports.findStudent = async (req,res) => {
+    try{
+        const { studentId } = req.params;
+        const transcripts = await db.any(`SELECT * FROM transcript WHERE studentId = $1`, [studentId]);
+        
+        if (transcripts.length === 0) {
+            return res.status(404).json({ message: "No courses found for this student" });
+        }
+
+        res.status(200).json(transcripts);
+    } catch (err) {
+        res.status(500).json({ message: err.message || "Some error occurred" });
+    }
+}
+
 // Get one transcript by code
 exports.findOne = async (req, res) => {
     try {

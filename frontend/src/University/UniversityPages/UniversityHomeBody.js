@@ -23,9 +23,11 @@ const UniversityHomeBody = ({ uniCode }) => {
   const location =  useLocation();
   const { universityAddress } = location.state || {}; // Extract data
 
-  const [selectedStudentId, setSelectedStudentId] = useState(null);
-  const [selectedCourseId, setSelectedCourseId] = useState(null);  // Added for storing selected course
-
+  const [selectedStudent, setSelectedStudent] = useState(""); 
+  const [selectedDegreeId, setSelectedDegreeId] = useState(""); 
+  const [selectedCourseId, setSelectedCourseId] = useState("");
+  const [selectedTeacherId, setSelectedTeacherId] = useState("");
+  const [selectedStudentAddress, setSelectedStudentAddress] = useState("");
 
   useEffect(() => {
     if (!uniCode) return;
@@ -155,7 +157,9 @@ const UniversityHomeBody = ({ uniCode }) => {
     if(type === "students" || type === "teachers")
     try {
       // Add to the Blockchain first
-      const participantAddress = "0xBcA6ebD43DCB10851F398b4CB8FbAdE3133b2c45"; // Change this as needed
+      const participantAddress = "0xA2A628f4eEE25F5b02B0688Ad9c1290e2e9A3D9e"; // Change this as needed
+      setSelectedStudentAddress({ pAddress: participantAddress});
+      console.log(selectedStudentAddress);
       const response = await fetch("http://localhost:4000/addParticipant", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -177,8 +181,6 @@ const UniversityHomeBody = ({ uniCode }) => {
         // After successfully adding to the Blockchain, add to the backend
 
         if(type ==="students"){
-
-
           const transcriptResponse = await fetch("http://localhost:4000/modifyTranscript", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -193,13 +195,22 @@ const UniversityHomeBody = ({ uniCode }) => {
         const transcriptData = await transcriptResponse.json();
 
         if (transcriptResponse.ok) {
-            console.log("Transcript modified successfully:", transcriptData);
-            const dbResponse = await fetch(`http://localhost:5000/api/${type}`, {
+          console.log("Transcript modified successfully:", transcriptData);
+          const dbResponseTranscript = await fetch(`http://localhost:5000/api/${type}`, {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({ ...JSON.parse(body), hash: data.hash, transcriptHash: transcriptData}), // Añadir hash al body
           });
-          newItem = await dbResponse.json();
+          newItem = await dbResponseTranscript.json();   
+
+          const dbResponseStudies = await fetch(`http://localhost:5000/api/studies`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ studentId: newStudent.studentid, uniCode: uniCode, degreeId: newStudent.degreeid}), // Añadir hash al body
+          }); 
+          const test = await dbResponseStudies.json(); 
+          console.log(test);
+
         } else {
             console.error("Failed to modify transcript:", transcriptData.error);
         }
@@ -221,11 +232,29 @@ const UniversityHomeBody = ({ uniCode }) => {
           console.error("Failed to add user:", data.error);
         }
       }
+      /*
+      try {
+        const updateResponse = await fetch(`http://localhost:5000/api/addresses/${participantAddress}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ participantId: user, addressId: participantAddress }),  // Pass the user as body
+        });
+  
+        if (updateResponse.ok) {
+          console.log(`Address ${participantAddress} successfully updated with user: ${user}`);
+        } else {
+          console.error(`Failed to update address: ${participantAddress}`);
+        }
+      } catch (error) {
+        console.error("Failed to update address in the DB:", error);
+      }
+      */
     } catch (error) {
       setMessage("API request failed.");
       console.error("Error:", error);
     }
-
+  
+    console.log("NEW ITEM:", newItem);
     // Update state after successful addition to the DB
     switch (type) {
       case "students":
@@ -239,34 +268,144 @@ const UniversityHomeBody = ({ uniCode }) => {
         setNewTeacher({ teacherid: "", name:"", surname:"", role: "", password: "", confirmPassword: ""});
         break;
       case "courses":
-        setCourses([...courses, newItem]);
+        setCourses([...courses, newCourse]);
         setShowCourseForm(false);
         setNewCourse({ degreeid:"", courseid:"", name:"", content:"", credits:"", period:"", teacherid:""});
         break;
       case "degrees":
-        setDegrees([...degrees, newItem]);
+        setDegrees([...degrees, newDegree]);
         setShowDegreeForm(false);
         setNewDegree({ degreeid:"", name:"", teacherid:""});
         break; 
       default:
         console.warn(`No state update handler for type: ${type}`);
     }
+    
     setNewEntry(""); // Reset input in all cases
   };
-  /*
-  const handleStudentToCourse = async (type) => {
-    const dbResponse = await fetch("http://localhost:5000/api/courses", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-            uniCode: uniCode, 
-            
-            provisional: 0,
-            teacherId: degree.teacherid
-        }),
+
+  const handleStudentToCourse = async ({ degreeId, courseId, studentId, year, teacherId }) => {
+    const dbResponse = await fetch("http://localhost:5000/api/transcripts", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        uniCode: uniCode,
+        degreeId: degreeId,
+        courseId: courseId,
+        studentId: studentId, // You can include the student ID here if needed in the request body
+        academicYear: year,
+        provisional: 0, // Assuming provisional is still part of the request
+        teacherId: teacherId,
+      }),
+    });
+    /*
+    // Handle the response from the database (optional)
+    if (dbResponse.ok) {
+      const responseJson = await dbResponse.json();
+      console.log('Course assignment response:', responseJson);
+    } else {
+      throw new Error('Failed to assign course');
+    }
+
+    try {
+      // Step 1: Fetch the teacher's blockchain address from the database
+      const dbResponseTranscript = await fetch(`http://localhost:5000/api/transcripts/${studentId}`, {
+          method: "GET",
+          headers: { "Content-Type": "application/json" },
+      });
+
+      if (!dbResponseTranscript.ok) {
+        throw new Error(`Failed to fetch teacher address. Status: ${dbResponseTranscript.status}`);
+      }
+
+      const transcriptHash = await dbResponseTranscript.json();
+      console.log(transcriptHash);
+
+      const dbResponse = await fetch(`http://localhost:5000/api/addresses/participant/${teacherId}`, {
+          method: "GET",
+          headers: { "Content-Type": "application/json" },
+      });
+  
+      if (!dbResponse.ok) {
+          throw new Error(`Failed to fetch teacher address. Status: ${dbResponse.status}`);
+      }
+  
+      const dbData = await dbResponse.json();
+  
+      if (!dbData.addressid) {
+          setMessage("No blockchain address found for this user. Please contact support.");
+          console.error("Database error:", dbData);
+          return; // Stop execution
+      }
+  
+      const teacherAddress = dbData.addressid;
+      console.log("Fetched Address from DB:", teacherAddress);
+  
+      // Step 2: Modify transcript on the blockchain
+      const transcriptResponse = await fetch("http://localhost:4000/modifyTranscript", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+              file: transcriptHash, //cambiar por el return de la llamada a la db del transcript de un estudiante
+              addressStudent: selectedStudentAddress,
+              address: universityAddress,
+              type: 2,
+          }),
+      });
+  
+      if (!transcriptResponse.ok) {
+          throw new Error(`Failed to modify transcript. Status: ${transcriptResponse.status}`);
+      }
+  
+      const transcriptData = await transcriptResponse.json();
+      console.log("Transcript modified successfully:", transcriptData);
+  
+      //  Step 3: Update student record in the database
+      const updateResponse = await fetch(`http://localhost:5000/api/students/${studentId}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ transcriptHash: transcriptData }),
+      });
+  
+      if (!updateResponse.ok) {
+          throw new Error(`Failed to update student ${studentId}. Status: ${updateResponse.status}`);
+      }
+  
+      const updateData = await updateResponse.json();
+      console.log(`Student ${studentId} updated successfully with transcriptHash:`, updateData);
+  
+      // Step 4: Add teacher to transcript on the blockchain
+      const teacherTranscriptResponse = await fetch("http://localhost:4000/addTeacherToTranscript", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+              addressTeacher: teacherAddress,
+              addressUniversity: universityAddress,
+              addressStudent: selectedStudentAddress,
+          }),
+      });
+  
+      if (!teacherTranscriptResponse.ok) {
+          throw new Error(`Failed to add teacher to transcript. Status: ${teacherTranscriptResponse.status}`);
+      }
+  
+      const teacherTranscriptData = await teacherTranscriptResponse.json();
+      console.log("Teacher successfully added to transcript:", teacherTranscriptData);
+  } catch (error) {
+      console.error("Error:", error.message);
+      setMessage(error.message); // Display error to the user
+  }
+  */
+  };
+
+  // Function to handle the "Asign Coure" button click
+  const handleAssignCourse = (student) => {
+    setSelectedStudent({
+      studentId: student.studentid,
+      studentName: student.name,
     });
   };
-  */
+
 
   return (
     <div style={containerStyle}>
@@ -299,7 +438,7 @@ const UniversityHomeBody = ({ uniCode }) => {
                   <td>{student.dob}</td>
                    
                   <td>
-                  <button onClick={() => setSelectedStudentId(student.studentid)}> Assign Course </button>
+                  <button onClick={() => handleAssignCourse(student)}> Assign Course </button>
                   </td>
                   
                   </tr>
@@ -402,17 +541,80 @@ const UniversityHomeBody = ({ uniCode }) => {
           </div>
         )}
           
-        {selectedStudentId && ( 
-        <div> 
-          <h3>Select Course for Student</h3> 
-          <select onChange={(e) => setNewStudent({...newCourse, courseid: e.target.value })} style={inputStyle}>
-          <option value="" disabled>Select a course</option> 
-          {courses.map((course) => ( 
-            <option key={course.courseid} value={course.courseid}>{course.name}
-            </option> ))} 
-          </select> 
-        </div> )}
+        {/* Section to select the course for the student */} 
+        {selectedStudent && ( 
+          <div style={formContainerStyle}> 
+            <h3 style={formTitleStyle}> Select Course for {selectedStudent.studentName} </h3> 
+              {/* Course selection dropdown */} 
+              <div style={formGroupStyle}> 
+                <label htmlFor="course" style={labelStyle}> Select a Course </label> 
+                <select 
+                  id="course" 
+                  onChange={(e) => { 
+                    const selectedCourseId = e.target.value; 
+                    const selectedCourse = courses.find(course => course.courseid === selectedCourseId); 
+                    
+                    if (selectedCourse) { 
+                      setSelectedDegreeId(selectedCourse.degreeid); 
+                      setSelectedCourseId(selectedCourseId);
+                      setSelectedTeacherId(selectedCourse.teacherid); 
+                    } 
+                  }} 
+                  style={inputStyle} 
+                  required 
+              > 
+                <option value="" disabled>Select a course</option> 
+                {courses.map((course) => ( 
+                  <option key={course.courseid} value={course.courseid}> {course.name} </option> 
+                ))} 
+              </select> 
+            </div> 
+            
+            {/* Year input field */} 
+            <div style={formGroupStyle}> 
+              <label htmlFor="year" style={labelStyle}> Year: </label> 
+              <input 
+                type="number" 
+                id="year" value={newStudent.year || ""} 
+                onChange={(e) => setNewStudent({ ...newStudent, year: e.target.value })} 
+                style={inputStyle} 
+                placeholder="Enter year" 
+                required 
+              /> 
+            </div>    
+          
+            {/* Submit button */} 
+            <div style={submitButtonContainerStyle}> 
+              <button onClick={() => { 
+                // Extract values from selectedStudentId, selectedDegreeId and selectedTeacherId 
+                const degreeId = selectedDegreeId;
+                const courseId = selectedCourseId;
+                const studentId = selectedStudent.studentId; 
+                const { year } = newStudent; 
+                const teacherId = selectedTeacherId;
         
+                try { 
+                  handleStudentToCourse({ 
+                    degreeId: degreeId,
+                    courseId: courseId,
+                    studentId: studentId, 
+                    year: year, 
+                    teacherId: teacherId, 
+                }); 
+                
+                console.log('Course assigned successfully'); 
+                // Reset form or close modal after submit (optional) 
+                setSelectedStudent(null); 
+                // Reset the selected student (optional) 
+                setNewStudent({}); 
+                } catch (error) { 
+                  console.error('Error assigning student to course:', error); 
+                } 
+              }}  style={buttonStyle}> Submit </button> 
+            </div>
+            
+        </div> )}
+
         {showTeacherForm && (
           <div style={modalStyle}>
             <div style={formStyle}>
@@ -485,5 +687,11 @@ const tableStyle = { width: "100%", borderCollapse: "collapse", textAlign: "left
 const modalStyle = { position: "fixed", top: 0, left: 0, width: "100%", height: "100%", background: "rgba(0, 0, 0, 0.5)", display: "flex", justifyContent: "center", alignItems: "center" };
 const formStyle = { background: "white", padding: "20px", borderRadius: "5px", display: "flex", flexDirection: "column", gap: "10px" };
 const inputStyle = { padding: "8px", border: "1px solid #333", borderRadius: "4px" };
+const buttonStyle = { backgroundColor: '#4CAF50', color: 'white',  padding: '10px 20px', border: 'none', borderRadius: '5px', cursor: 'pointer', fontSize: '16px', transition: 'background-color 0.3s ease'};
+const formContainerStyle = { maxWidth: '1000px', margin: 'auto', padding: '20px', border: '1px solid #ccc', borderRadius: '8px',boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)'};
+const formTitleStyle = {textAlign: 'center', marginBottom: '20px'};
+const formGroupStyle = {marginBottom: '15px'};
+const labelStyle = {fontWeight: 'bold',marginBottom: '5px',display: 'block'};
+const submitButtonContainerStyle = {textAlign: 'center'};
 
 export default UniversityHomeBody;

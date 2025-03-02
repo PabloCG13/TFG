@@ -6,6 +6,8 @@ module.exports = app => {
     router.post("/transcripts/", transcripts.create);
   
     router.get("/transcripts/", transcripts.findAll);
+
+    router.get("/transcripts/:studentId", transcripts.findStudent);
   
     router.get("/transcripts/:uniCode/:degreeId/:courseId/:studentId/:academicYear", transcripts.findOne);
   

@@ -96,7 +96,7 @@ exports.getCourses = async (req, res) => {
     try {
         const { uniCode } = req.params;
         const courses = await db.any(`
-            SELECT c.courseId, c.name, c.content, c.credits, c.period, c.teacherId
+            SELECT c.degreeId, c.courseId, c.name, c.content, c.credits, c.period, c.teacherId
             FROM course c
             WHERE c.uniCode = $1;
         `, [uniCode]);
