@@ -7,14 +7,14 @@ const UniversityLogin = () => {
   const [message, setMessage] = useState(null); // State for error messages
   const navigate = useNavigate(); // Navigation hook
 
-  //const universityAddress = "0x4397655dDd031043Eb0859AD7A90c3c889E12A4d"; // Fixed address
+  // const universityAddress = "0xBC2cf859f671B78BA42EBB65Deb31Cc7fEc07019"; // Fixed address
 
   // Function to handle login
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     try {
-
+      
     const dbResponse = await fetch(`http://localhost:5000/api/addresses/participant/${user}`, {
       method: "GET",
       headers: { "Content-Type": "application/json" },
@@ -22,15 +22,15 @@ const UniversityLogin = () => {
 
     const dbData = await dbResponse.json();
 
-    if (!dbResponse.ok || !dbData.addressId) {
+    if (!dbResponse.ok || !dbData.addressid) {
       setMessage("No blockchain address found for this user. Please contact support.");
       console.error("Database error:", dbData);
       return; // Stop execution if no address is found
     }
 
-    const universityAddress = dbData.addressId; // Extract address from the database response
+    const universityAddress = dbData.addressid; // Extract address from the database response
     console.log("Fetched Address from DB:", universityAddress);
-
+ 
       const response = await fetch("http://localhost:4000/consult", {
         method: "POST",
         headers: { "Content-Type": "application/json" },

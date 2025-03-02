@@ -30,10 +30,11 @@ exports.findOne = async (req, res) => {
     try {
         const { addressId } = req.params;
         const address = await db.oneOrNone("SELECT * FROM address WHERE addressId = $1;", [addressId]);
-
-        if (!address) {
+        console.log("Address: ", address);
+        
+        /*if (!address) {
             return res.status(404).json({ message: "address not found" });
-        }
+        }*/
 
         res.status(200).json(address);
     } catch (err) {
@@ -62,7 +63,7 @@ exports.getAddressByParticipant = async (req, res) => {
 };
 
 // Get any address where participantId is NULL. Retrieves any free address.
-exports.getNullAddress = async (req, res) => {
+exports.getNullParticipant = async (req, res) => {
     try {
         const address = await db.oneOrNone(`
             SELECT addressId 
@@ -70,11 +71,12 @@ exports.getNullAddress = async (req, res) => {
             WHERE participantId IS NULL 
             LIMIT 1;
         `);
-
+        console.log("Address: ", address);
+        /*
         if (!address) {
             return res.status(404).json({ message: "No address with NULL participantId found" });
         }
-
+        */
         res.status(200).json(address);
     } catch (err) {
         res.status(500).json({ message: err.message || "Some error occurred" });
