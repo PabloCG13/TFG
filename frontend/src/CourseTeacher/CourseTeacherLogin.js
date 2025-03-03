@@ -7,13 +7,29 @@ const CourseTeacherLogin = () => {
   const [message, setMessage] = useState(null); // State for error messages
   const navigate = useNavigate(); // Navigation hook
 
-  const participantAddress = "0x325A621DeA613BCFb5B1A69a7aCED0ea4AfBD73A"; // Fixed address
+  //const participantAddress = "0x325A621DeA613BCFb5B1A69a7aCED0ea4AfBD73A"; // Fixed address
 
   // Function to handle login
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     try {
+
+      const dbResponse = await fetch(`http://localhost:5000/api/addresses/participant/${teacherId}`, {
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
+      });
+  
+      const dbData = await dbResponse.json();
+  
+      if (!dbResponse.ok || !dbData.addressid) {
+        setMessage("No blockchain address found for this user. Please contact support.");
+        console.error("Database error:", dbData);
+        return; // Stop execution if no address is found
+      }
+  
+      const participantAddress = dbData.addressid; // Extract address from the database response
+      console.log("Fetched Address from DB:", participantAddress);
       const response = await fetch("http://localhost:4000/consult", {
         method: "POST",
         headers: { "Content-Type": "application/json" },

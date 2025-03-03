@@ -66,7 +66,7 @@ function App() {
 
 
         {/* Student Home Page route */}
-        <Route path="/Student/StudentPages/StudentHome" element={<StudentHome />} />
+        <Route path="/Student/StudentPages/StudentHome/:studentId" element={<StudentHome />} />
 
 
         {/* Student Transcript Page route */}

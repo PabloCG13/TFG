@@ -28,7 +28,7 @@ const UniversitySignIn = () => {
     console.log("Contraseña:", password);
 
 
-    const universityAddress = "0x3fD652C93dFA333979ad762Cf581Df89BaBa6795"; // Fixed address
+    const universityAddress = "0x709F7Ae06Fe93be48FbB90FFDDd69e2746FA8506"; // Fixed address
 
     try {
       /*

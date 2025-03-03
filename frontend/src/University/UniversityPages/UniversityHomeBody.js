@@ -157,7 +157,7 @@ const UniversityHomeBody = ({ uniCode }) => {
     if(type === "students" || type === "teachers")
     try {
       // Add to the Blockchain first
-      const participantAddress = "0xA2A628f4eEE25F5b02B0688Ad9c1290e2e9A3D9e"; // Change this as needed
+      const participantAddress = "0xb45dE3796b206793E8aD3509202Da91D35E9A6d9"; // Change this as needed
       setSelectedStudentAddress({ pAddress: participantAddress});
       console.log(selectedStudentAddress);
       const response = await fetch("http://localhost:4000/addParticipant", {
@@ -232,8 +232,10 @@ const UniversityHomeBody = ({ uniCode }) => {
           console.error("Failed to add user:", data.error);
         }
       }
-      /*
+      
       try {
+        console.log("User:", user);
+        console.log("address:", participantAddress);
         const updateResponse = await fetch(`http://localhost:5000/api/addresses/${participantAddress}`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
@@ -248,7 +250,7 @@ const UniversityHomeBody = ({ uniCode }) => {
       } catch (error) {
         console.error("Failed to update address in the DB:", error);
       }
-      */
+      
     } catch (error) {
       setMessage("API request failed.");
       console.error("Error:", error);
@@ -285,29 +287,36 @@ const UniversityHomeBody = ({ uniCode }) => {
   };
 
   const handleStudentToCourse = async ({ degreeId, courseId, studentId, year, teacherId }) => {
-    const dbResponse = await fetch("http://localhost:5000/api/transcripts", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        uniCode: uniCode,
-        degreeId: degreeId,
-        courseId: courseId,
-        studentId: studentId, // You can include the student ID here if needed in the request body
-        academicYear: year,
-        provisional: 0, // Assuming provisional is still part of the request
-        teacherId: teacherId,
-      }),
-    });
-    /*
-    // Handle the response from the database (optional)
-    if (dbResponse.ok) {
-      const responseJson = await dbResponse.json();
-      console.log('Course assignment response:', responseJson);
-    } else {
-      throw new Error('Failed to assign course');
-    }
 
+    console.log("degreeID desde la funcion:", degreeId);
+    console.log("courseID desde la funcion:", courseId);
+    console.log("studentID desde la funcion:", studentId);
+    console.log("Year desde la funcion:", year);
+    console.log("teacherId desde la funcion:",teacherId);
     try {
+
+      const dbResponse = await fetch("http://localhost:5000/api/transcripts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          uniCode: uniCode,
+          degreeId: degreeId,
+          courseId: courseId,
+          studentId: studentId, // You can include the student ID here if needed in the request body
+          academicYear: year,
+          provisional: 0, // Assuming provisional is still part of the request
+          teacherId: teacherId,
+        }),
+      });
+      
+      // Handle the response from the database (optional)
+      if (dbResponse.ok) {
+        const responseJson = await dbResponse.json();
+        console.log('Course assignment response:', responseJson);
+      } else {
+        throw new Error('Failed to assign course');
+      }
+
       // Step 1: Fetch the teacher's blockchain address from the database
       const dbResponseTranscript = await fetch(`http://localhost:5000/api/transcripts/${studentId}`, {
           method: "GET",
@@ -315,22 +324,22 @@ const UniversityHomeBody = ({ uniCode }) => {
       });
 
       if (!dbResponseTranscript.ok) {
-        throw new Error(`Failed to fetch teacher address. Status: ${dbResponseTranscript.status}`);
+        throw new Error(`Failed to fetch transcript. Status: ${dbResponseTranscript.status}`);
       }
 
       const transcriptHash = await dbResponseTranscript.json();
-      console.log(transcriptHash);
+      console.log("Got this transcript: ", transcriptHash);
 
-      const dbResponse = await fetch(`http://localhost:5000/api/addresses/participant/${teacherId}`, {
+      const dbResponseTeacher = await fetch(`http://localhost:5000/api/addresses/participant/${teacherId}`, {
           method: "GET",
           headers: { "Content-Type": "application/json" },
       });
   
-      if (!dbResponse.ok) {
-          throw new Error(`Failed to fetch teacher address. Status: ${dbResponse.status}`);
+      if (!dbResponseTeacher.ok) {
+          throw new Error(`Failed to fetch teacher address. Status: ${dbResponseTeacher.status}`);
       }
   
-      const dbData = await dbResponse.json();
+      const dbData = await dbResponseTeacher.json();
   
       if (!dbData.addressid) {
           setMessage("No blockchain address found for this user. Please contact support.");
@@ -340,14 +349,33 @@ const UniversityHomeBody = ({ uniCode }) => {
   
       const teacherAddress = dbData.addressid;
       console.log("Fetched Address from DB:", teacherAddress);
-  
+
+      const dbResponseStudent = await fetch(`http://localhost:5000/api/addresses/participant/${studentId}`, {
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
+    });
+
+    if (!dbResponseStudent.ok) {
+        throw new Error(`Failed to fetch teacher address. Status: ${dbResponseStudent.status}`);
+    }
+
+    const dbDataSt = await dbResponseStudent.json();
+
+    if (!dbDataSt.addressid) {
+        setMessage("No blockchain address found for this user. Please contact support.");
+        console.error("Database error:", dbDataSt);
+        return; // Stop execution
+    }
+
+    const studentAddress = dbDataSt.addressid;
+    console.log("Fetched Address from DB:", studentAddress);
       // Step 2: Modify transcript on the blockchain
       const transcriptResponse = await fetch("http://localhost:4000/modifyTranscript", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
               file: transcriptHash, //cambiar por el return de la llamada a la db del transcript de un estudiante
-              addressStudent: selectedStudentAddress,
+              addressStudent: studentAddress,
               address: universityAddress,
               type: 2,
           }),
@@ -395,7 +423,6 @@ const UniversityHomeBody = ({ uniCode }) => {
       console.error("Error:", error.message);
       setMessage(error.message); // Display error to the user
   }
-  */
   };
 
   // Function to handle the "Asign Coure" button click
@@ -592,7 +619,11 @@ const UniversityHomeBody = ({ uniCode }) => {
                 const studentId = selectedStudent.studentId; 
                 const { year } = newStudent; 
                 const teacherId = selectedTeacherId;
-        
+                console.log("degreeID:", degreeId);
+                console.log("courseID:", courseId);
+                console.log("studentID:", studentId);
+                console.log("Year:", year);
+                console.log("teacherId:",teacherId);
                 try { 
                   handleStudentToCourse({ 
                     degreeId: degreeId,
