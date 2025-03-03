@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom'; // Import Link to redirect
 
-const StudentHomeBody= () => {
+const StudentHomeBody= ({studentId}) => {
   return (
     <div style={containerStyle}>
       <Link

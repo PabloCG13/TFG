@@ -25,6 +25,22 @@ exports.findAll = async (req, res) => {
     }
 };
 
+// Get one course by teacherId
+exports.findTeachersCourse = async (req, res) => {
+    try {
+        const { teacherId } = req.params;
+        const course = await db.oneOrNone("SELECT * FROM course WHERE teacherId = $1", [teacherId]);
+
+        if (!course) {
+            return res.status(404).json({ message: "Course not found" });
+        }
+
+        res.status(200).json(course);
+    } catch (err) {
+        res.status(500).json({ message: err.message || "Some error occurred" });
+    }
+};
+
 // Get one course by code
 exports.findOne = async (req, res) => {
     try {

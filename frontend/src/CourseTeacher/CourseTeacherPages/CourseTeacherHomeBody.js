@@ -1,6 +1,31 @@
 import React, { useState } from "react";
 
-const CourseTeacherHomeBody = () => {
+const CourseTeacherHomeBody = ({teacherId}) => {
+  /* 
+  Call to the courses that the teacher gives
+      
+      const dbResponseTranscript = await fetch(`http://localhost:5000/api/courses/${teacherId}`, {
+          method: "GET",
+          headers: { "Content-Type": "application/json" },
+      });
+
+      if (!dbResponseTranscript.ok) {
+        throw new Error(`Failed to fetch transcript. Status: ${dbResponseTranscript.status}`);
+      }
+
+      const course = await dbResponseTranscript.json();
+      console.log("Got this course: ", course);
+
+  */
+
+  /*
+  Call to get the teacher data for the profile:
+    fetch(`http://localhost:5000/api/teacher/${teacherId}`)
+      .then((response) => response.json())
+      .then((data) => setTeacher(data))
+      .catch((error) => console.error("Error fetching teacher info:", error));
+  */
+
   // State to store students
   const [students, setStudents] = useState([
     { name: "Student 1", code: "123450", degree: "BS Computer Science", mark: "A" },
