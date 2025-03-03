@@ -28,14 +28,11 @@ const UniversitySignIn = () => {
     console.log("Contraseña:", password);
 
 
-    const universityAddress = "0x709F7Ae06Fe93be48FbB90FFDDd69e2746FA8506"; // Fixed address
+    // const universityAddress = "0x709F7Ae06Fe93be48FbB90FFDDd69e2746FA8506"; // Fixed address
 
-    try {
-      /*
-      const addressResponse = await fetch(`http://localhost:5000/api/addresses/null-participant`); //, {
-        //method: "GET",
-        //headers: { "Content-Type": "application/json" },
-      //});
+    try { 
+      const addressResponse = await fetch(`http://localhost:5000/api/addresses/any-participant/null-participant`); 
+        
       const addressData = await addressResponse.json();
       console.log("Addressdata: ", addressData);
       if (!addressResponse.ok || !addressData.addressid) {
@@ -46,7 +43,7 @@ const UniversitySignIn = () => {
       
       const universityAddress = addressData.addressid; // Retrieved from API
       console.log("Retrieved University Address:", universityAddress);
-      */
+      
       const response = await fetch("http://localhost:4000/addUniversity", {
         method: "POST",
         headers: { "Content-Type": "application/json" },

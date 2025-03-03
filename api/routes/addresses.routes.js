@@ -16,7 +16,7 @@ module.exports = app => {
     router.get("/addresses/participant/:participantId", addresses.getAddressByParticipant);
 
     // Get one address that is currently free
-    router.get("/addresses/null-participant", addresses.getNullParticipant);
+    router.get("/addresses/any-participant/null-participant", addresses.getNullParticipant);
 
     // Update an address by its id
     router.put("/addresses/:addressId", addresses.update);

@@ -40,6 +40,22 @@ exports.findStudent = async (req,res) => {
     }
 }
 
+exports.findStudentsInCourse = async (req,res) => {
+	try{
+    	const { courseId } = req.params;
+    	const transcripts = await db.any(`SELECT * FROM transcript WHERE courseId = $1`, [courseId]);
+   	 
+    	if (transcripts.length === 0) {
+        	return res.status(404).json({ message: "No courses found for this student" });
+    	}
+
+    	res.status(200).json(transcripts);
+	} catch (err) {
+    	res.status(500).json({ message: err.message || "Some error occurred" });
+	}
+}
+
+
 // Get one transcript by code
 exports.findOne = async (req, res) => {
     try {
@@ -109,3 +125,4 @@ exports.delete = async (req, res) => {
         res.status(500).json({ message: err.message || "Some error occurred" });
     }
 };
+

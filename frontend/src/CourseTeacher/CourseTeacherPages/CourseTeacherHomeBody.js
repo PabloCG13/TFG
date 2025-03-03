@@ -1,9 +1,25 @@
 import React, { useState } from "react";
 
 const CourseTeacherHomeBody = ({teacherId}) => {
-  /* 
-  Call to the courses that the teacher gives
-      
+  /*
+  useEffect(() => {
+    if (!teacherId) return;
+
+    const dbResponseTranscript = fetch(`http://localhost:5000/api/courses/${teacherId}`)     
+    .then((response) => response.json())
+    .then((data) => setStudents(data))
+    .catch((error) => console.error("Error fetching students:", error));
+
+      if (!dbResponseTranscript.ok) {
+        throw new Error(`Failed to fetch transcript. Status: ${dbResponseTranscript.status}`);
+      }
+
+      const course = dbResponseTranscript.json();
+      console.log("Got this course: ", course);  
+  }, [teacherId]);
+  */
+  //Call to the courses that the teacher gives
+      /*
       const dbResponseTranscript = await fetch(`http://localhost:5000/api/courses/${teacherId}`, {
           method: "GET",
           headers: { "Content-Type": "application/json" },
@@ -15,8 +31,22 @@ const CourseTeacherHomeBody = ({teacherId}) => {
 
       const course = await dbResponseTranscript.json();
       console.log("Got this course: ", course);
+      /*
+      const dbResponseTranscript = await fetch(`http://localhost:5000/api/transcripts/${studentId}`, {
+         method: "GET",
+         headers: { "Content-Type": "application/json" },
+     });
 
-  */
+
+     if (!dbResponseTranscript.ok) {
+       throw new Error(`Failed atuto fetch transcript. Status: ${dbResponseTranscript.sts}`);
+     }
+
+
+     const transcriptHash = await dbResponseTranscript.json();
+     console.log("Got this transcript: ", transcriptHash);
+     */
+     
 
   /*
   Call to get the teacher data for the profile:

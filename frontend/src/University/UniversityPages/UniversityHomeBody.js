@@ -157,7 +157,22 @@ const UniversityHomeBody = ({ uniCode }) => {
     if(type === "students" || type === "teachers")
     try {
       // Add to the Blockchain first
-      const participantAddress = "0xb45dE3796b206793E8aD3509202Da91D35E9A6d9"; // Change this as needed
+      //const participantAddress = "0xFFcf8FDEE72ac11b5c542428B35EEF5769C409f0"; // Change this as needed
+      
+      const addressResponse = await fetch(`http://localhost:5000/api/addresses/any-participant/null-participant`); 
+        
+      const addressData = await addressResponse.json();
+      console.log("Addressdata: ", addressData);
+      if (!addressResponse.ok || !addressData.addressid) {
+        setMessage("Failed to retrieve a free blockchain address.");
+        console.error("Address fetch error:", addressData);
+        return;
+      }
+      
+      const participantAddress = addressData.addressid; // Retrieved from API
+      console.log("Retrieved participant Address:", participantAddress);
+      
+
       setSelectedStudentAddress({ pAddress: participantAddress});
       console.log(selectedStudentAddress);
       const response = await fetch("http://localhost:4000/addParticipant", {

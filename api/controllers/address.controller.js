@@ -71,19 +71,16 @@ exports.getNullParticipant = async (req, res) => {
             WHERE participantId IS NULL 
             LIMIT 1;
         `);
-        console.log("Address: ", address);
-        /*
+        
         if (!address) {
             return res.status(404).json({ message: "No address with NULL participantId found" });
         }
-        */
+        
         res.status(200).json(address);
     } catch (err) {
         res.status(500).json({ message: err.message || "Some error occurred" });
     }
 };
-
-
 
 // Update an address by the id in the request
 exports.update = async (req, res) => {
