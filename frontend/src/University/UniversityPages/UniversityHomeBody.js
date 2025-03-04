@@ -138,17 +138,17 @@ const UniversityHomeBody = ({ uniCode }) => {
             period: course.period,
             teacherId: course.teacherid
         }),
-    });
+      });
 
-    const dbData = await dbResponse.json();
-    console.log(dbData);
-    if (dbResponse.ok) {
+      const dbData = await dbResponse.json();
+      console.log(dbData);
+      if (dbResponse.ok) {
         setMessage(`Course registered successfully! ID: ${dbData.degreeid}`);
         console.log("Stored Course:", dbData);
-    } else {
+      } else {
         setMessage(`Failed to create a new entry in the Database error`);
         console.error("Database error:", dbData.error);
-    }
+      }
     }
     else {
       if (!newEntry) return;

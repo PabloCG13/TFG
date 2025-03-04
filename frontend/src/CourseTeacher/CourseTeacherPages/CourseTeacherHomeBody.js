@@ -1,23 +1,118 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
 const CourseTeacherHomeBody = ({teacherId}) => {
+  const [courses, setCourses] = useState([]);
+  const [newCourse, setNewCourse] = useState({ degreeid:"", courseid:"", name:"", content:"", credits:"", period:"", teacherid:""});
+  const [newEntry, setNewEntry] = useState("");
+  const [message, setMessage] = useState(''); 
+  useEffect(() => {
+    if (!teacherId) return;
+
+    // First fetch: Get course IDs
+    fetch(`http://localhost:5000/api/courses/${teacherId}`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`Failed to fetch courses. Status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (Array.isArray(data)) {
+                const courseIds = data.map(course => course.courseid);
+                setCourses(courseIds); // Store course IDs
+                console.log("Extracted course IDs:", courseIds);
+
+                // Second fetch: Get students for each course ID
+                courseIds.forEach(courseId => {
+                    fetch(`http://localhost:5000/api/transcripts/students-in-course/${courseId}`)
+                        .then(response => {
+                            if (!response.ok) {
+                                throw new Error(`Failed to fetch students for course ${courseId}. Status: ${response.status}`);
+                            }
+                            return response.json();
+                        })
+                        .then(studentData => {
+                            console.log(`Students in course ${courseId}:`, studentData);
+                        })
+                        .catch(error => console.error(`Error fetching students for course ${courseId}:`, error));
+                });
+            } else {
+                console.error("Unexpected response format:", data);
+            }
+        })
+        .catch(error => console.error("Error fetching courses:", error));
+
+}, [teacherId]);
+
   /*
   useEffect(() => {
     if (!teacherId) return;
 
-    const dbResponseTranscript = fetch(`http://localhost:5000/api/courses/${teacherId}`)     
+    const dbResponseTranscript = fetch(`http://localhost:5000/api/courses/students-in-course/${teacherId}`)     
     .then((response) => response.json())
-    .then((data) => setStudents(data))
-    .catch((error) => console.error("Error fetching students:", error));
+    .then((data) => setCourses(data))
+    .catch((error) => console.error("Error fetching courses:", error));
+    console.log("Course:", courses.courseid);
 
-      if (!dbResponseTranscript.ok) {
-        throw new Error(`Failed to fetch transcript. Status: ${dbResponseTranscript.status}`);
-      }
+    if (!dbResponseTranscript.ok) {
+      throw new Error(`Failed to fetch transcript. Status: ${dbResponseTranscript.status}`);
+    }
 
-      const course = dbResponseTranscript.json();
-      console.log("Got this course: ", course);  
+    const course = dbResponseTranscript.json();
+    console.log("Got this course: ", course);  
   }, [teacherId]);
+
+  const handleAddEntry = async (type) => {
+
+    if(type==="courses"){
+      const course = newCourse;
+      if (!course.teacherid || !course.name || !course.degreeid || !course.content || !course.credits || !course.period) {
+        alert("Please enter a valid ID, degree coordinator and name");
+        return;
+      }
+      
+      const dbResponse = await fetch("http://localhost:5000/api/courses", { // TODO check if needed all fields
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ 
+            degreeId: course.degreeid, 
+            courseId: course.courseid,
+            name: course.name,
+            content: course.content,
+            credits: course.credits,
+            period: course.period,
+            teacherId: course.teacherid
+        }),
+      });
+
+      const dbData = await dbResponse.json();
+      console.log(dbData);
+      if (dbResponse.ok) {
+        setMessage(`Course registered successfully! ID: ${dbData.degreeid}`); // TODO change message
+        console.log("Stored Course:", dbData);
+      } else {
+        setMessage(`Failed to create a new entry in the Database error`);
+        console.error("Database error:", dbData.error);
+      }
+    }
+    else {
+      if (!newEntry) return;
+    }
+
+    console.log("NEW ITEM:", newCourse);
+    // Update state after successful addition to the DB
+    switch (type) {
+      case "courses":
+        setCourses([...courses, newCourse]);
+        setNewCourse({ degreeid:"", courseid:"", name:"", content:"", credits:"", period:"", teacherid:""});
+        break;
+      default:
+        console.warn(`No state update handler for type: ${type}`);
+    }
+    setNewEntry(""); // Reset input in all cases
+  };
   */
+  
   //Call to the courses that the teacher gives
       /*
       const dbResponseTranscript = await fetch(`http://localhost:5000/api/courses/${teacherId}`, {
