@@ -4,7 +4,7 @@ const { Web3 } = require("web3");
 
 // Set up Web3 connection
 const web3 = new Web3("http://ganache:8545"); // Change if necessary
-const contractAddress = "0xaf5C4C6C7920B4883bC6252e9d9B8fE27187Cf68";
+const contractAddress = "0x67B5656d60a809915323Bf2C40A8bEF15A152e3e";
 const contract = new web3.eth.Contract(contractJson.abi, contractAddress);
 
 async function generateSHA256HashMessage(user, passwd) {
@@ -50,7 +50,7 @@ async function changeParticipant(address, user, passwd) {
         });
         
         console.log("Successful transaction:", tx.transactionHash);
-        const storedHash = await contract.methods.personToHash(participantAddress).call();
+        const storedHash = await contract.methods.getParticipantHash(participantAddress).call();
         return storedHash;
     } catch (error) {
         console.error("Error:", error);

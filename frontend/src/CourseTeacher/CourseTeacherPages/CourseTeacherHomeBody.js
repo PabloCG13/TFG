@@ -1,13 +1,28 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { useLocation } from 'react-router-dom';
 
 const CourseTeacherHomeBody = ({teacherId}) => {
-  const [courses, setCourses] = useState([]);
+  const [selectedYear, setSelectedYear] = useState("All");
+  const [students, setStudents] = useState([]);
+  const [teacher, setTeacher] = useState([]);
   const [newCourse, setNewCourse] = useState({ degreeid:"", courseid:"", name:"", content:"", credits:"", period:"", teacherid:""});
   const [newEntry, setNewEntry] = useState("");
   const [message, setMessage] = useState(''); 
   const location =  useLocation();
   const { participantAddress } = location.state || {}; // Extract data
+  const [oldPasswd, setOldPasswd] = useState('');
+  const [newPasswd, setNewPasswd] = useState('');
+  
+  // State to toggle grade display mode
+  const [viewMode, setViewMode] = useState("Letter");
+
+  // Modal state
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedStudent, setSelectedStudent] = useState(null);
+  
+  const filteredStudents = selectedYear === "All" 
+    ? students 
+    : students.filter(student => student.academicyear === selectedYear);
 
   useEffect(() => {
     if (!teacherId) return;
@@ -39,132 +54,21 @@ const CourseTeacherHomeBody = ({teacherId}) => {
             }
             return response.json();
         })
-        .then((studentData) => setCourses(studentData))
+        .then((studentData) => setStudents(studentData))
         .catch(error => console.error("Error:", error));
-
-}, [teacherId]);
-
-
-  /*
-  useEffect(() => {
-    if (!teacherId) return;
-
-    const dbResponseTranscript = fetch(`http://localhost:5000/api/courses/students-in-course/${teacherId}`)     
-    .then((response) => response.json())
-    .then((data) => setCourses(data))
-    .catch((error) => console.error("Error fetching courses:", error));
-    console.log("Course:", courses.courseid);
-
-    if (!dbResponseTranscript.ok) {
-      throw new Error(`Failed to fetch transcript. Status: ${dbResponseTranscript.status}`);
-    }
-
-    const course = dbResponseTranscript.json();
-    console.log("Got this course: ", course);  
-  }, [teacherId]);
-
-  const handleAddEntry = async (type) => {
-
-    if(type==="courses"){
-      const course = newCourse;
-      if (!course.teacherid || !course.name || !course.degreeid || !course.content || !course.credits || !course.period) {
-        alert("Please enter a valid ID, degree coordinator and name");
-        return;
-      }
-      
-      const dbResponse = await fetch("http://localhost:5000/api/courses", { // TODO check if needed all fields
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ 
-            degreeId: course.degreeid, 
-            courseId: course.courseid,
-            name: course.name,
-            content: course.content,
-            credits: course.credits,
-            period: course.period,
-            teacherId: course.teacherid
-        }),
-      });
-
-      const dbData = await dbResponse.json();
-      console.log(dbData);
-      if (dbResponse.ok) {
-        setMessage(`Course registered successfully! ID: ${dbData.degreeid}`); // TODO change message
-        console.log("Stored Course:", dbData);
-      } else {
-        setMessage(`Failed to create a new entry in the Database error`);
-        console.error("Database error:", dbData.error);
-      }
-    }
-    else {
-      if (!newEntry) return;
-    }
-
-    console.log("NEW ITEM:", newCourse);
-    // Update state after successful addition to the DB
-    switch (type) {
-      case "courses":
-        setCourses([...courses, newCourse]);
-        setNewCourse({ degreeid:"", courseid:"", name:"", content:"", credits:"", period:"", teacherid:""});
-        break;
-      default:
-        console.warn(`No state update handler for type: ${type}`);
-    }
-    setNewEntry(""); // Reset input in all cases
-  };
-  */
-  
-  //Call to the courses that the teacher gives
-      /*
-      const dbResponseTranscript = await fetch(`http://localhost:5000/api/courses/${teacherId}`, {
-          method: "GET",
-          headers: { "Content-Type": "application/json" },
-      });
-
-      if (!dbResponseTranscript.ok) {
-        throw new Error(`Failed to fetch transcript. Status: ${dbResponseTranscript.status}`);
-      }
-
-      const course = await dbResponseTranscript.json();
-      console.log("Got this course: ", course);
-      /*
-      const dbResponseTranscript = await fetch(`http://localhost:5000/api/transcripts/${studentId}`, {
-         method: "GET",
-         headers: { "Content-Type": "application/json" },
-     });
-
-
-     if (!dbResponseTranscript.ok) {
-       throw new Error(`Failed atuto fetch transcript. Status: ${dbResponseTranscript.sts}`);
-     }
-
-
-     const transcriptHash = await dbResponseTranscript.json();
-     console.log("Got this transcript: ", transcriptHash);
-     */
-     
-
-  /*
-  Call to get the teacher data for the profile:
-    fetch(`http://localhost:5000/api/teacher/${teacherId}`)
+	//Call to get the teacher data for the profile:
+    fetch(`http://localhost:5000/api/teachers/${teacherId}`)
       .then((response) => response.json())
       .then((data) => setTeacher(data))
       .catch((error) => console.error("Error fetching teacher info:", error));
-  */
+      
+}, [teacherId]);
+  	
+  //};
+  const years = useMemo(() => {
+  	return [...new Set(students.map(student => student.academicyear))];
+  }, [students]);
 
-  // State to store students
-  const [students, setStudents] = useState([
-    { name: "Student 1", code: "123450", degree: "BS Computer Science", mark: "A" },
-    { name: "Student 2", code: "123451", degree: "BS Computer Science", mark: "B" },
-    { name: "Student 3", code: "123452", degree: "BS Computer Science", mark: "C" },
-  ]);
-
-  // State to toggle grade display mode
-  const [viewMode, setViewMode] = useState("Letter");
-
-  // Modal state
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedStudent, setSelectedStudent] = useState(null);
 
   // Function to open modal
   const openModal = (student) => {
@@ -183,14 +87,133 @@ const CourseTeacherHomeBody = ({teacherId}) => {
   };
 
   // Function to confirm the new grade
-  const handleConfirm = () => {
-    setStudents((prevStudents) =>
-      prevStudents.map((student) =>
-        student.code === selectedStudent.code ? selectedStudent : student
-      )
-    );
+  const handleConfirm = async () => {
+  
+    const dbResponse = await fetch(`http://localhost:5000/api/transcripts/${selectedStudent.unicode}/${selectedStudent.degreeid}/${selectedStudent.courseid}/${selectedStudent.studentid}/${selectedStudent.academicyear}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          provisional: 1, // Assuming provisional is still part of the request
+          mark: selectedStudent.mark,
+        }),
+      });
+    // Handle the response from the database (optional)
+      if (dbResponse.ok) {
+        const responseJson = await dbResponse.json();
+        console.log('New mark updated response:', responseJson);
+      } else {
+        throw new Error('Failed to update mark');
+      }
+
+    const dbResponseAddress = await fetch(`http://localhost:5000/api/addresses/participant/${selectedStudent.studentid}`);
+  
+      if (!dbResponseAddress.ok) {
+          throw new Error(`Failed to fetch student address. Status: ${dbResponseAddress.status}`);
+      }
+  
+      const dbData = await dbResponseAddress.json();
+      console.log("Student address:", dbData);
+      
+      const dbResponseTranscript = await fetch(`http://localhost:5000/api/transcripts/${selectedStudent.studentid}`);
+
+      if (!dbResponseTranscript.ok) {
+        throw new Error(`Failed to fetch transcript. Status: ${dbResponseTranscript.status}`);
+      }
+
+      const transcriptHash = await dbResponseTranscript.json();
+      console.log("Got this transcript: ", transcriptHash);
+      
+      
+       // Step 2: Modify transcript on the blockchain
+      const transcriptResponse = await fetch("http://localhost:4000/modifyTranscript", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+              file: transcriptHash,
+              addressStudent: dbResponseAddress,
+              address: participantAddress,
+              type: 1,
+          }),
+      });
+  
+      if (!transcriptResponse.ok) {
+          throw new Error(`Failed to modify transcript. Status: ${transcriptResponse.status}`);
+      }
+  
+      const transcriptData = await transcriptResponse.json();
+      console.log("Transcript modified successfully:", transcriptData);
+      
+       const updateResponse = await fetch(`http://localhost:5000/api/students/${selectedStudent.studentid}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ transcriptHash: transcriptData }),
+      });
+  
+      if (!updateResponse.ok) {
+          throw new Error(`Failed to update student ${selectedStudent.studentid}. Status: ${updateResponse.status}`);
+      }
+  
+      const updateData = await updateResponse.json();
+      console.log(`Student ${selectedStudent.studentid} updated successfully with transcriptHash:`, updateData);
+ 
+      
     closeModal();
   };
+
+  // Function to change the password
+  const changePasswordCall = async () => {
+
+
+    try {
+      const response = await fetch("http://localhost:4000/consult", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          address: participantAddress,
+          user: teacherId,
+          passwd: oldPasswd,
+          type: 2 
+        }),
+      });
+
+      const data = await response.json();
+      console.log(data);
+      if (data.success && data.result === true) {
+        const response = await fetch("http://localhost:4000/changeParticipant", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          address: participantAddress,
+          user: teacherId,
+          passwd: newPasswd
+        }),
+      });
+      const participantData = await response.json();
+    console.log(participantData);
+      const teacherHash = participantData.hash;
+      if(teacherHash !== "Error"){
+        const dbResponse = await fetch(`http://localhost:5000/api/teachers/${teacherId}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+              hash: teacherHash
+          }),
+      });
+
+      const dbData = await dbResponse.json();
+      console.log(dbData);
+      
+      
+      } else {
+        setMessage("Invalid credentials. Please try again.");
+      }
+}
+    } catch (error) {
+      console.error("Error making API request:", error);
+      setMessage("Server error. Please try again later.");
+    }
+  };
+
 
   // Function to convert grades between "Letter" and "Numeric"
   const convertMark = (mark) => {
@@ -216,9 +239,11 @@ const CourseTeacherHomeBody = ({teacherId}) => {
         <div style={profileContainer}>
           <div style={profileImage}></div>
           <h2 style={profileTitle}>PROFILE</h2>
-          <input type="text" placeholder="Name" style={inputStyle} />
-          <input type="password" placeholder="Password" style={inputStyle} />
-          <button style={buttonStyle}>Modify</button>
+          <h2 style={profileTitle}>ID = {teacher.teacherid}</h2>
+          <h2 style={profileTitle}>NAME = {teacher.name}</h2>
+          <input type="password" placeholder="Old password" style={inputStyle} value={oldPasswd} onChange={(e) => setOldPasswd(e.target.value)}/>
+          <input type="password" placeholder="New password" style={inputStyle} value={newPasswd} onChange={(e) => setNewPasswd(e.target.value)} />
+          <button onClick={changePasswordCall} style={buttonStyle}>Modify password</button > 
         </div>
       </div>
 
@@ -235,24 +260,34 @@ const CourseTeacherHomeBody = ({teacherId}) => {
           <option value="Numeric">Numeric (0-100)</option>
           </select>
         </div>
-
+	<label htmlFor="yearFilter">Filter by Academic Year: </label>
+      <select
+        id="yearFilter"
+        value={selectedYear}
+        onChange={(e) => setSelectedYear(e.target.value)}
+      >
+        <option value="All">All</option>
+        {years.map((year, index) => (
+          <option key={index} value={year}>{year}</option>
+        ))}
+      </select>
         <table style={tableStyle}>
           <thead>
             <tr>
-              <th>Student</th>
               <th>ID</th>
               <th>Degree</th>
               <th>Grade</th>
+              <th>Provisional</th>
               <th>Action</th>
             </tr>
           </thead>
           <tbody>
-            {students.map((student, index) => (
+            {filteredStudents.map((student, index) => (
               <tr key={index}>
-                <td>{student.name}</td>
-                <td>{student.code}</td>
-                <td>{student.degree}</td>
+                <td>{student.studentid}</td>
+                <td>{student.degreeid}</td>
                 <td>{convertMark(student.mark)}</td>
+                <td>{student.provisional} HACER CHECKBOX AQUI</td>
                 <td>
                   <button style={buttonStyle} onClick={() => openModal(student)}>
                   Modify
@@ -271,11 +306,9 @@ const CourseTeacherHomeBody = ({teacherId}) => {
         <div style={modalStyle} onClick={(e) => e.stopPropagation()}>
            <h2>Modify Grade</h2>
 
-           <label style={labelStyle}>Name:</label>
-           <input type="text" value={selectedStudent.name} readOnly style={readOnlyInputStyle} />
 
-           <label style={labelStyle}>Code:</label>
-           <input type="text" value={selectedStudent.code} readOnly style={readOnlyInputStyle} />
+           <label style={labelStyle}>Student ID:</label>
+           <input type="text" value={selectedStudent.studentid} readOnly style={readOnlyInputStyle} />
 
            <label style={labelStyle}>Grade:</label>
            <input type="text" value={selectedStudent.mark} onChange={handleMarkChange} style={inputStyle} />

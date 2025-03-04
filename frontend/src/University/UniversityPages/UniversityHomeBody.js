@@ -333,10 +333,7 @@ const UniversityHomeBody = ({ uniCode }) => {
       }
 
       // Step 1: Fetch the teacher's blockchain address from the database
-      const dbResponseTranscript = await fetch(`http://localhost:5000/api/transcripts/${studentId}`, {
-          method: "GET",
-          headers: { "Content-Type": "application/json" },
-      });
+      const dbResponseTranscript = await fetch(`http://localhost:5000/api/transcripts/${studentId}`);
 
       if (!dbResponseTranscript.ok) {
         throw new Error(`Failed to fetch transcript. Status: ${dbResponseTranscript.status}`);
@@ -345,10 +342,7 @@ const UniversityHomeBody = ({ uniCode }) => {
       const transcriptHash = await dbResponseTranscript.json();
       console.log("Got this transcript: ", transcriptHash);
 
-      const dbResponseTeacher = await fetch(`http://localhost:5000/api/addresses/participant/${teacherId}`, {
-          method: "GET",
-          headers: { "Content-Type": "application/json" },
-      });
+      const dbResponseTeacher = await fetch(`http://localhost:5000/api/addresses/participant/${teacherId}`);
   
       if (!dbResponseTeacher.ok) {
           throw new Error(`Failed to fetch teacher address. Status: ${dbResponseTeacher.status}`);
@@ -365,10 +359,7 @@ const UniversityHomeBody = ({ uniCode }) => {
       const teacherAddress = dbData.addressid;
       console.log("Fetched Address from DB:", teacherAddress);
 
-      const dbResponseStudent = await fetch(`http://localhost:5000/api/addresses/participant/${studentId}`, {
-        method: "GET",
-        headers: { "Content-Type": "application/json" },
-    });
+      const dbResponseStudent = await fetch(`http://localhost:5000/api/addresses/participant/${studentId}`);
 
     if (!dbResponseStudent.ok) {
         throw new Error(`Failed to fetch teacher address. Status: ${dbResponseStudent.status}`);
