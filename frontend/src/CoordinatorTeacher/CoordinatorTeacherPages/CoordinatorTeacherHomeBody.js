@@ -1,7 +1,11 @@
 import React from 'react';
 import { Link } from 'react-router-dom'; // Import Link to redirect
+import { useLocation } from 'react-router-dom';
 
-const CoordinatorTeacherHomeBody= () => {
+const CoordinatorTeacherHomeBody= ({teacherId}) => {
+
+  const location =  useLocation();
+  const { participantAddress } = location.state || {}; // Extract data
   return (
     <div style={containerStyle}>
       <Link

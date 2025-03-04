@@ -1,14 +1,17 @@
 import React, { useState, useEffect } from "react";
+import { useLocation } from 'react-router-dom';
 
 const CourseTeacherHomeBody = ({teacherId}) => {
   const [courses, setCourses] = useState([]);
   const [newCourse, setNewCourse] = useState({ degreeid:"", courseid:"", name:"", content:"", credits:"", period:"", teacherid:""});
   const [newEntry, setNewEntry] = useState("");
   const [message, setMessage] = useState(''); 
+  const location =  useLocation();
+  const { participantAddress } = location.state || {}; // Extract data
+
   useEffect(() => {
     if (!teacherId) return;
 
-    // First fetch: Get course IDs
     fetch(`http://localhost:5000/api/courses/${teacherId}`)
         .then(response => {
             if (!response.ok) {
@@ -17,32 +20,30 @@ const CourseTeacherHomeBody = ({teacherId}) => {
             return response.json();
         })
         .then(data => {
-            if (Array.isArray(data)) {
-                const courseIds = data.map(course => course.courseid);
-                setCourses(courseIds); // Store course IDs
-                console.log("Extracted course IDs:", courseIds);
-
-                // Second fetch: Get students for each course ID
-                courseIds.forEach(courseId => {
-                    fetch(`http://localhost:5000/api/transcripts/students-in-course/${courseId}`)
-                        .then(response => {
-                            if (!response.ok) {
-                                throw new Error(`Failed to fetch students for course ${courseId}. Status: ${response.status}`);
-                            }
-                            return response.json();
-                        })
-                        .then(studentData => {
-                            console.log(`Students in course ${courseId}:`, studentData);
-                        })
-                        .catch(error => console.error(`Error fetching students for course ${courseId}:`, error));
-                });
-            } else {
-                console.error("Unexpected response format:", data);
+            // Extract ONLY the 'courseid' field
+            const courseId = data.courseid;  // Assuming the API always returns a single object
+            if (!courseId) {
+                throw new Error("courseid is missing in API response");
             }
+
+            console.log("Extracted course ID:", courseId);
+
+            // Now fetch students for this courseId
+            return fetch(`http://localhost:5000/api/transcripts/students-in-course/${courseId}`);
         })
-        .catch(error => console.error("Error fetching courses:", error));
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`Failed to fetch students. Status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(studentData => {
+            console.log(`Students in course:`, studentData);
+        })
+        .catch(error => console.error("Error:", error));
 
 }, [teacherId]);
+
 
   /*
   useEffect(() => {
