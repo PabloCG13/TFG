@@ -42,8 +42,8 @@ exports.findStudent = async (req,res) => {
 
 exports.findStudentsInCourse = async (req,res) => {
 	try{
-    	const { courseId } = req.params;
-    	const transcripts = await db.any(`SELECT * FROM transcript WHERE courseId = $1`, [courseId]);
+    	const { uniCode, degreeId, courseId } = req.params;
+    	const transcripts = await db.any(`SELECT * FROM transcript WHERE uniCode = $1 AND degreeId = $2 AND courseId = $3;`, [uniCode, degreeId, courseId]);
    	 
     	if (transcripts.length === 0) {
         	return res.status(404).json({ message: "No courses found for this student" });

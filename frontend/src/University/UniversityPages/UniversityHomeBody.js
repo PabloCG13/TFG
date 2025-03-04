@@ -585,7 +585,8 @@ const UniversityHomeBody = ({ uniCode }) => {
           
         {/* Section to select the course for the student */} 
         {selectedStudent && ( 
-          <div style={formContainerStyle}> 
+          <div style={modalStyle}> 
+           <div style={formStyle}> 
             <h3 style={formTitleStyle}> Select Course for {selectedStudent.studentName} </h3> 
               {/* Course selection dropdown */} 
               <div style={formGroupStyle}> 
@@ -658,7 +659,8 @@ const UniversityHomeBody = ({ uniCode }) => {
                 } 
               }}  style={buttonStyle}> Submit </button> 
             </div>
-            
+            <button onClick ={() => setSelectedStudent(false)}>Cancel</button>
+          </div>
         </div> )}
 
         {showTeacherForm && (

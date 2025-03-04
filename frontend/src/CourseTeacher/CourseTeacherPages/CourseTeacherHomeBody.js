@@ -22,6 +22,8 @@ const CourseTeacherHomeBody = ({teacherId}) => {
         .then(data => {
             // Extract ONLY the 'courseid' field
             const courseId = data.courseid;  // Assuming the API always returns a single object
+            const degreeId = data.degreeid;
+            const uniCode = data.unicode;
             if (!courseId) {
                 throw new Error("courseid is missing in API response");
             }
@@ -29,7 +31,7 @@ const CourseTeacherHomeBody = ({teacherId}) => {
             console.log("Extracted course ID:", courseId);
 
             // Now fetch students for this courseId
-            return fetch(`http://localhost:5000/api/transcripts/students-in-course/${courseId}`);
+            return fetch(`http://localhost:5000/api/transcripts/students-in-course/${uniCode}/${degreeId}/${courseId}`);
         })
         .then(response => {
             if (!response.ok) {
@@ -37,9 +39,7 @@ const CourseTeacherHomeBody = ({teacherId}) => {
             }
             return response.json();
         })
-        .then(studentData => {
-            console.log(`Students in course:`, studentData);
-        })
+        .then((studentData) => setCourses(studentData))
         .catch(error => console.error("Error:", error));
 
 }, [teacherId]);
