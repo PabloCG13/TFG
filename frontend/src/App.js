@@ -70,16 +70,16 @@ function App() {
 
 
         {/* Student Transcript Page route */}
-        <Route path="/Student/StudentPages/StudentTranscriptPage/StudentTranscript" element={<StudentTranscript />} />
+        <Route path="/Student/StudentPages/StudentTranscriptPage/StudentTranscript/:studentId" element={<StudentTranscript />} />
 
         {/* Student Validation List route */}
-        <Route path="/Student/StudentPages/StudentValidationListPage/StudentValidationList" element={<StudentValidationList />} />
+        <Route path="/Student/StudentPages/StudentValidationListPage/StudentValidationList/:studentId" element={<StudentValidationList />} />
 
         {/* Student University Information route */}
-        <Route path="/Student/StudentPages/StudentUniversityInformationPage/StudentUniversityInformation" element={<StudentUniversityInformation />} />
+        <Route path="/Student/StudentPages/StudentUniversityInformationPage/StudentUniversityInformation/:studentId" element={<StudentUniversityInformation />} />
 
         {/* Student Profile route */}
-        <Route path="/Student/StudentPages/StudentProfilePage/StudentProfile" element={<StudentProfile />} />
+        <Route path="/Student/StudentPages/StudentProfilePage/StudentProfile/:studentId" element={<StudentProfile />} />
 
 
         {/* Course Teacher Home Page route */}

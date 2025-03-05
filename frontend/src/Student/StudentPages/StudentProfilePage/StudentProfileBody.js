@@ -1,6 +1,6 @@
 import React from 'react';
 
-const StudentProfileBody= () => {
+const StudentProfileBody= ({studentId}) => {
   return (
     <div>
       <p> Student Profile</p>

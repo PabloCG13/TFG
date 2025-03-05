@@ -27,7 +27,6 @@ const UniversityHomeBody = ({ uniCode }) => {
   const [selectedDegreeId, setSelectedDegreeId] = useState(""); 
   const [selectedCourseId, setSelectedCourseId] = useState("");
   const [selectedTeacherId, setSelectedTeacherId] = useState("");
-  const [selectedStudentAddress, setSelectedStudentAddress] = useState("");
 
   useEffect(() => {
     if (!uniCode) return;
@@ -173,8 +172,6 @@ const UniversityHomeBody = ({ uniCode }) => {
       console.log("Retrieved participant Address:", participantAddress);
       
 
-      setSelectedStudentAddress({ pAddress: participantAddress});
-      console.log(selectedStudentAddress);
       const response = await fetch("http://localhost:4000/addParticipant", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -417,7 +414,7 @@ const UniversityHomeBody = ({ uniCode }) => {
           body: JSON.stringify({
               addressTeacher: teacherAddress,
               addressUniversity: universityAddress,
-              addressStudent: selectedStudentAddress,
+              addressStudent: studentAddress,
           }),
       });
   
@@ -433,7 +430,7 @@ const UniversityHomeBody = ({ uniCode }) => {
   }
   };
 
-  // Function to handle the "Asign Coure" button click
+  // Function to handle the "Assign Coure" button click
   const handleAssignCourse = (student) => {
     setSelectedStudent({
       studentId: student.studentid,
@@ -489,13 +486,15 @@ const UniversityHomeBody = ({ uniCode }) => {
             <button onClick={() => setShowTeacherForm(true)}>Add Teacher</button>
             <table style={tableStyle}>
               <thead>
-                <tr><th>NAME</th><th>ID</th></tr>
+                <tr><th>NAME</th><th>ID</th><th>Degree/Course Title</th><th>Degree/Course ID</th></tr>
               </thead>
               <tbody>
                 {teachers.map((teacher) => (
                   <tr key={teacher.teacherid}>
                     <td>{teacher.name || "N/A"}</td>
                     <td>{teacher.teacherid}</td>
+                    <td>{teacher.coursename}</td>
+                    <td>{teacher.courseid}</td>
                   </tr>
                 ))}
               </tbody>

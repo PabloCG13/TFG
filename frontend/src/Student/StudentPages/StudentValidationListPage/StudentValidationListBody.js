@@ -1,6 +1,6 @@
 import React from 'react';
 
-const StudentValidationListBody= () => {
+const StudentValidationListBody= ({studentId}) => {
   return (
     <div>
       <p> Student Validation List</p>

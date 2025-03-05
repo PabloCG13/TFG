@@ -1,6 +1,6 @@
 import React from 'react';
 
-const StudentTranscriptBody= () => {
+const StudentTranscriptBody= ({studentId}) => {
 /* Call to get all the coursesss in which the student is enrolled
       const dbResponseTranscript = await fetch(`http://localhost:5000/api/transcripts/${studentId}`, {
           method: "GET",

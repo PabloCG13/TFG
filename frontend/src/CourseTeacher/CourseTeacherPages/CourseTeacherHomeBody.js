@@ -84,6 +84,7 @@ const CourseTeacherHomeBody = ({teacherId}) => {
   // Function to update student grade in modal
   const handleMarkChange = (event) => {
     setSelectedStudent({ ...selectedStudent, mark: event.target.value });
+    //setStudents({...selectedStudent, mark: event.target.value });
   };
 
   // Function to confirm the new grade
@@ -130,7 +131,7 @@ const CourseTeacherHomeBody = ({teacherId}) => {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
               file: transcriptHash,
-              addressStudent: dbResponseAddress,
+              addressStudent: dbData.addressid,
               address: participantAddress,
               type: 1,
           }),
@@ -142,7 +143,7 @@ const CourseTeacherHomeBody = ({teacherId}) => {
   
       const transcriptData = await transcriptResponse.json();
       const transcriptHashModified = transcriptData.hash;
-      console.log("Transcript modified successfully:", transcriptData);
+      console.log("Transcript modified successfully:", transcriptHashModified);
       
        const updateResponse = await fetch(`http://localhost:5000/api/students/${selectedStudent.studentid}`, {
           method: "PUT",

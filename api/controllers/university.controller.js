@@ -63,10 +63,15 @@ exports.getTeachers = async (req, res) => {
     try {
         const { uniCode } = req.params;
         const teachers = await db.any(`
-            SELECT DISTINCT t.teacherId, t.name, t.lastAccess
+            SELECT DISTINCT t.teacherId, t.name, t.lastAccess, c.courseId, c.name as courseName
             FROM teacher t
             JOIN course c ON t.teacherId = c.teacherId
-            WHERE c.uniCode = $1;
+            WHERE c.uniCode = $1
+            UNION
+            SELECT DISTINCT t.teacherId, t.name, t.lastAccess, d.degreeId, d.name as degreeName
+            FROM teacher t
+            JOIN degree d ON t.teacherId = d.teacherId
+            WHERE d.uniCode = $1;
         `, [uniCode]);
 
         res.status(200).json(teachers);

@@ -5,7 +5,7 @@ const StudentHomeBody= ({studentId}) => {
   return (
     <div style={containerStyle}>
       <Link
-        to="/Student/StudentPages/StudentTranscriptPage/StudentTranscript" // Route where it links to
+        to={`/Student/StudentPages/StudentTranscriptPage/StudentTranscript/${studentId}`} // Route where it links to
         style={transcriptButtonStyle} 
         onMouseOver={(e) => Object.assign(e.target.style, hoverStyle)} 
         onMouseOut={(e) => Object.assign(e.target.style, transcriptButtonStyle)} 
@@ -13,7 +13,7 @@ const StudentHomeBody= ({studentId}) => {
       Transcript
       </Link>
       <Link 
-        to="/Student/StudentPages/StudentValidationListPage/StudentValidationList" // Route where it links to
+        to={`/Student/StudentPages/StudentValidationListPage/StudentValidationList/${studentId}`} // Route where it links to
         style={validationListButtonStyle} 
         onMouseOver={(e) => Object.assign(e.target.style, hoverStyle)}
         onMouseOut={(e) => Object.assign(e.target.style, validationListButtonStyle)}
@@ -21,7 +21,7 @@ const StudentHomeBody= ({studentId}) => {
       Validation List
       </Link>
       <Link 
-        to="/Student/StudentPages/StudentUniversityInformationPage/StudentUniversityInformation" // Route where it links to
+        to={`/Student/StudentPages/StudentUniversityInformationPage/StudentUniversityInformation/${studentId}`} // Route where it links to
         style={universityInformationButtonStyle} 
         onMouseOver={(e) => Object.assign(e.target.style, hoverStyle)}
         onMouseOut={(e) => Object.assign(e.target.style, universityInformationButtonStyle)}
@@ -29,7 +29,7 @@ const StudentHomeBody= ({studentId}) => {
       University Information
       </Link>
       <Link 
-        to="/Student/StudentPages/StudentProfilePage/StudentProfile" // Route where it links to
+        to={`/Student/StudentPages/StudentProfilePage/StudentProfile/${studentId}`} // Route where it links to
         style={profileButtonStyle} 
         onMouseOver={(e) => Object.assign(e.target.style, hoverStyle)}
         onMouseOut={(e) => Object.assign(e.target.style, profileButtonStyle)}
