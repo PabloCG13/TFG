@@ -6,6 +6,8 @@ module.exports = app => {
     router.post("/studies/", studies.create);
   
     router.get("/studies/", studies.findAll);
+
+    router.get("/studies/:studentId", studies.findUniAndDegree);
   
     router.get("/studies/:studentId/:uniCode/:degreeId", studies.findOne);
   

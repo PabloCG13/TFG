@@ -41,6 +41,21 @@ exports.findOne = async (req, res) => {
     }
 };
 
+exports.findUniAndDegree = async (req, res) => {
+    try {
+        const { studentId } = req.params;
+        const studies = await db.oneOrNone("SELECT * FROM studies WHERE studentId = $1", [studentId]);
+
+        if (!studies) {
+            return res.status(404).json({ message: "Studies not found" });
+        }
+
+        res.status(200).json(studies);
+    } catch (err) {
+        res.status(500).json({ message: err.message || "Some error occurred" });
+    }
+};
+
 // Update a studies by the code in the request
 exports.update = async (req, res) => {
     try {
