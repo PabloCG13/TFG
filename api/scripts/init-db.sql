@@ -36,7 +36,7 @@ CREATE TABLE IF NOT EXISTS student (
     dob DATE NOT NULL,
     dni VARCHAR(9) NOT NULL,
     lastAccess TIMESTAMP,
-    transcriptHash VARCHAR(30) NOT NULL,
+    transcriptHash VARCHAR(66) NOT NULL,
     hash VARCHAR(66) NOT NULL
 );
 

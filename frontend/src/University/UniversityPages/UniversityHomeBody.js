@@ -208,13 +208,14 @@ const UniversityHomeBody = ({ uniCode }) => {
         });
 
         const transcriptData = await transcriptResponse.json();
+        const transcriptHash = transcriptData.hash;
 
         if (transcriptResponse.ok) {
-          console.log("Transcript modified successfully:", transcriptData);
+          console.log("Transcript modified successfully:", transcriptHash);
           const dbResponseTranscript = await fetch(`http://localhost:5000/api/${type}`, {
               method: "POST",
               headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ ...JSON.parse(body), hash: data.hash, transcriptHash: transcriptData}), // Añadir hash al body
+              body: JSON.stringify({ ...JSON.parse(body), hash: data.hash, transcriptHash: transcriptHash}), // Añadir hash al body
           });
           newItem = await dbResponseTranscript.json();   
 
@@ -392,13 +393,14 @@ const UniversityHomeBody = ({ uniCode }) => {
       }
   
       const transcriptData = await transcriptResponse.json();
-      console.log("Transcript modified successfully:", transcriptData);
+      const transcriptHashModified = transcriptData.hash;
+      console.log("Transcript modified successfully:", transcriptHashModified);
   
       //  Step 3: Update student record in the database
       const updateResponse = await fetch(`http://localhost:5000/api/students/${studentId}`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ transcriptHash: transcriptData }),
+          body: JSON.stringify({ transcriptHash: transcriptHashModified }),
       });
   
       if (!updateResponse.ok) {

@@ -261,6 +261,10 @@ contract tfg {
         studentToRecord[participant].hash = hash;
     }
 
+    function getTranscriptHash(address participant) public view participantIsStudent(participant) returns(string memory){
+        return studentToRecord[participant].hash;
+    }
+
     function removeParticipant(
         address participant
     ) public onlyOwner participantExists(participant) {

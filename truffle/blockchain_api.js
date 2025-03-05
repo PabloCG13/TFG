@@ -16,7 +16,7 @@ const { Web3 } = require("web3");
 
 // Set up Web3 connection
 const web3 = new Web3("http://ganache:8545"); // Change if necessary
-const contractAddress = "0xaf5C4C6C7920B4883bC6252e9d9B8fE27187Cf68";
+const contractAddress = "0x254dffcd3277C0b1660F6d42EFbB754edaBAbC2B";
 const contract = new web3.eth.Contract(contractJson.abi, contractAddress);
 
 const app = express();
@@ -130,7 +130,7 @@ app.post("/modifyTranscript", async (req, res) => {
         }
 
         const result = await modifyTranscript(file, addressStudent, address, type);
-        res.status(200).json({ success: true, result });
+        res.status(200).json({ success: true, hash: result });
     } catch (error) {
         res.status(500).json({ success: false, error: error.message });
     }

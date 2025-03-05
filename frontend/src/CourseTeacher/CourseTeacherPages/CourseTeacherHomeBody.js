@@ -141,12 +141,13 @@ const CourseTeacherHomeBody = ({teacherId}) => {
       }
   
       const transcriptData = await transcriptResponse.json();
+      const transcriptHashModified = transcriptData.hash;
       console.log("Transcript modified successfully:", transcriptData);
       
        const updateResponse = await fetch(`http://localhost:5000/api/students/${selectedStudent.studentid}`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ transcriptHash: transcriptData }),
+          body: JSON.stringify({ transcriptHash: transcriptHashModified }),
       });
   
       if (!updateResponse.ok) {
