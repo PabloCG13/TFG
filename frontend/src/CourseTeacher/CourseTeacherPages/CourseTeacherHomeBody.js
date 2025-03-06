@@ -333,10 +333,14 @@ const containerStyle = {
 };
 
 const sidebarStyle = {
-  width: "250px",
-  background: "#ddd",
+  width: "300px",
+  backgroundColor: "#2c3e50",
+  color: "white",
+  display: "flex",
+  flexDirection: "column",
+  alignItems: "center",
   padding: "20px",
-  textAlign: "center",
+  boxShadow: "4px 0 10px rgba(0, 0, 0, 0.1)",
 };
 
 const profileContainer = {
@@ -344,11 +348,12 @@ const profileContainer = {
   flexDirection: "column",
   alignItems: "center",
   width: "100%",
-};
+ };
+ 
 
 const profileImage = {
-  width: "100px",
-  height: "100px",
+  width: "200px",
+  height: "200px",
   borderRadius: "50%",
   background: "#888",
   marginBottom: "10px",
@@ -363,9 +368,10 @@ const profileTitle = {
 const inputStyle = {
   width: "100%",
   padding: "10px",
-  margin: "5px 0",
+  margin: "10px 0",
   borderRadius: "5px",
-  border: "1px solid #ccc",
+  border: "1px solid #bdc3c7",
+  fontSize: "16px",
 };
 
 const readOnlyInputStyle = {
