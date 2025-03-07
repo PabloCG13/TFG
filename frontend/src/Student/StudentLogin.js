@@ -48,7 +48,7 @@ const StudentLogin = () => {
         console.log(response);
         // Navigate to Student Home Page on successful login
         navigate(`/Student/StudentPages/StudentHome/${studentId}`, {
-          state: { studentId, participanttAddress: participantAddress }
+          state: { studentId, participantAddress: participantAddress }
         }); 
       } else {
         setMessage("Invalid credentials. Please try again.");

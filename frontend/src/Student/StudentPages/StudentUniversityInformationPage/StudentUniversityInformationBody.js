@@ -1,6 +1,10 @@
 import React from 'react';
+import { useLocation } from 'react-router-dom';
 
 const StudentUniversityInformationBody= ({studentId}) => {
+
+    const location = useLocation();
+    const { participantAddress } = location.state || {}; // Extract participantAddress
 
   /* // Get the info about the degree in whcih the student studies
     fetch(`http://localhost:5000/api/studies/${studentId}`)

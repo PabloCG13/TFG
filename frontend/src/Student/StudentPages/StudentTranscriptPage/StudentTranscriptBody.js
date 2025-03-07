@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 
 const StudentTranscriptBody= ({studentId}) => {
   
   const [studentCourse, setStudentCourses] = useState([]);
-
+  const location = useLocation();
+  const { participantAddress } = location.state || {}; // Extract participantAddress
   
   useEffect(() => {
     //Call to get all the courses in which the student is enrolled

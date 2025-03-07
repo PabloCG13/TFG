@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 
 const StudentProfileBody = ({ studentId }) => {
   // State to store student data
@@ -6,8 +7,10 @@ const StudentProfileBody = ({ studentId }) => {
   const [students2, setStudents2] = useState([]);
   const [oldPassword, setOldPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
-  const [error, setError] = useState('');
+  const [message, setMessage] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const location = useLocation();
+  const { participantAddress } = location.state || {}; // Extract participantAddress
 
   // Fetch student data on component mount
   useEffect(() => {
@@ -22,42 +25,61 @@ const StudentProfileBody = ({ studentId }) => {
   }, [studentId]);
 
   // TODO function to change student's password. All the process is done, just need to complete this function and should work.
-  /*
+  
   // Handle form submission for password change
-  const handlePasswordChange = (e) => {
+  const handlePasswordChange = async (e) => {
     e.preventDefault();
 
-    if (oldPassword && newPassword) {
-      // Assuming there is an endpoint to update the password
-      fetch(`http://localhost:5000/api/students/${studentId}/change-password`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+    try {
+      const response = await fetch("http://localhost:4000/consult", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          oldPassword,
-          newPassword,
+          address: participantAddress,
+          user: studentId,
+          passwd: oldPassword,
+          type: 2 
         }),
-      })
-        .then((response) => response.json())
-        .then((data) => {
-          if (data.success) {
-            alert('Password changed successfully');
-            setOldPassword('');
-            setNewPassword('');
-          } else {
-            setError(data.message || 'Error changing password');
-          }
-        })
-        .catch((error) => {
-          console.error("Error changing password:", error);
-          setError('Error changing password');
-        });
-    } else {
-      setError('Please provide both old and new passwords');
+      });
+
+      const data = await response.json();
+      console.log(data);
+      if (data.success && data.result === true) {
+        const response = await fetch("http://localhost:4000/changeParticipant", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          address: participantAddress,
+          user: studentId,
+          passwd: newPassword
+        }),
+      });
+      const participantData = await response.json();
+    console.log(participantData);
+      const studentHash = participantData.hash;
+      if(studentHash !== "Error"){
+        const dbResponse = await fetch(`http://localhost:5000/api/students/${studentId}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+              hash: studentHash
+          }),
+      });
+
+      const dbData = await dbResponse.json();
+      console.log(dbData);
+      
+      
+      } else {
+        setMessage("Invalid credentials. Please try again.");
+      }
+}
+    } catch (error) {
+      console.error("Error making API request:", error);
+      setMessage("Server error. Please try again later.");
     }
   };
-  */
+  
 
   return (
     <div style={styles.container}>
@@ -67,7 +89,7 @@ const StudentProfileBody = ({ studentId }) => {
             <div style={styles.profilePicture}>🧑</div>
             <p style={styles.field}><strong>NAME:</strong> &nbsp; {students1.name}</p>
             <p style={styles.field}><strong>DOB:</strong> &nbsp; {students1.dob}</p>
-            <p style={styles.field}><strong>HASH (NAME + PASSWORD):</strong> &nbsp; {students1.hash}</p>
+            <p style={styles.field}><strong>HASH (ID + PASSWORD):</strong> &nbsp; {students1.hash}</p>
             <p style={styles.field}><strong>DEGREE:</strong> &nbsp; {students2.degreeid}</p>
           </div>
           <div style={styles.profileSection}>
