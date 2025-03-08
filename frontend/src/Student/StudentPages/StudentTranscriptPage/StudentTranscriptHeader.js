@@ -30,7 +30,7 @@ const StudentTranscriptHeader = () => {
     
               {/* Title */}
               <div style={titleStyle}>
-                <h1>Student Trasncript</h1>
+                <h1>Student Transcript</h1>
               </div>
     
               {/* Notifications Icon */}
