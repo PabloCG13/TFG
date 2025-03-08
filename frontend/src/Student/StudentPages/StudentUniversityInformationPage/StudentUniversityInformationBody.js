@@ -1,12 +1,13 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 
 const StudentUniversityInformationBody= ({studentId}) => {
-
+    const [degrees, setDegrees] = useState([]);
+    const [university, setUniversity] = useState([]);
     const location = useLocation();
     const { participantAddress } = location.state || {}; // Extract participantAddress
-
-  /* // Get the info about the degree in whcih the student studies
+    useEffect(() => {
+   // Get the info about the degree in whcih the student studies
     fetch(`http://localhost:5000/api/studies/${studentId}`)
     .then(response => {
             if (!response.ok) {
@@ -51,7 +52,9 @@ const StudentUniversityInformationBody= ({studentId}) => {
 
     //Create a table that first shows all the info of the univeristy name, id and location and then show all degrees 
     // associated to the university and the degreeCoordinator
-  */
+  
+    }, [studentId]);
+
   return (
     <div>
       <p> Student University Information</p>

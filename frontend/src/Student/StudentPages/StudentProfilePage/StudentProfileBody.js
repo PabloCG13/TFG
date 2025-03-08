@@ -90,6 +90,7 @@ const StudentProfileBody = ({ studentId }) => {
             <p style={styles.field}><strong>NAME:</strong> &nbsp; {students1.name}</p>
             <p style={styles.field}><strong>DOB:</strong> &nbsp; {students1.dob}</p>
             <p style={styles.field}><strong>HASH (ID + PASSWORD):</strong> &nbsp; {students1.hash}</p>
+            <p style={styles.field}><strong>UNIVERSITY:</strong> &nbsp; {students2.unicode}</p>
             <p style={styles.field}><strong>DEGREE:</strong> &nbsp; {students2.degreeid}</p>
           </div>
           <div style={styles.profileSection}>

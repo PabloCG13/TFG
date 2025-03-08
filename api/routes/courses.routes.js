@@ -10,7 +10,10 @@ module.exports = app => {
     router.get("/courses/", courses.findAll);
 
     // Get the courses that a teacher teaches
-    router.get("/courses/:teacherId",courses.findTeachersCourse);
+    router.get("/courses/teacher/:teacherId",courses.findTeachersCourse);
+
+      // Get the courses that a teacher teaches
+      router.get("/courses/university/:uniCode",courses.findUniversityCourses);
     
     // Get a certain course by its uniCode, degreeId and courseId
     router.get("/courses/:uniCode/:degreeId/:courseId", courses.findOne);

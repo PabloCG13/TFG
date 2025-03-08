@@ -27,7 +27,7 @@ const CourseTeacherHomeBody = ({teacherId}) => {
   useEffect(() => {
     if (!teacherId) return;
 
-    fetch(`http://localhost:5000/api/courses/${teacherId}`)
+    fetch(`http://localhost:5000/api/courses/teacher/${teacherId}`)
         .then(response => {
             if (!response.ok) {
                 throw new Error(`Failed to fetch courses. Status: ${response.status}`);
