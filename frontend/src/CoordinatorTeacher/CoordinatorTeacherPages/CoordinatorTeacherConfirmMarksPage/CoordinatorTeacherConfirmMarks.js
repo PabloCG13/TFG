@@ -8,7 +8,7 @@ const CoordinatorTeacherConfirmMarks = () => {
   const  {teacherId} = useParams();
   return (
     <div>
-      <CoordinatorTeacherConfirmMarksHeader />
+      <CoordinatorTeacherConfirmMarksHeader teacherId = {teacherId}/>
       <CoordinatorTeacherConfirmMarksBody teacherId={teacherId}/>
       <CoordinatorTeacherConfirmMarksFooter />
     </div>

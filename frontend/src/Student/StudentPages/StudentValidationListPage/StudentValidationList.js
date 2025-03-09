@@ -8,7 +8,7 @@ const StudentValidationList = () => {
   const  {studentId} = useParams();
   return (
     <div>
-      <StudentValidationListHeader />
+      <StudentValidationListHeader studentId={studentId}/>
       <StudentValidationListBody studentId={studentId}/>
       <StudentValidationListFooter />
     </div>

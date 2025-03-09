@@ -69,7 +69,6 @@ const CoordinatorTeacherHomeBody= ({teacherId}) => {
     }
   };
 
-
   return (
     <div style={containerStyle}>
       <div style={containerStyle}>
@@ -82,96 +81,82 @@ const CoordinatorTeacherHomeBody= ({teacherId}) => {
             <h2 style={profileTitle}>NAME = {teacher.name}</h2>
             <input type="password" placeholder="Old password" style={inputStyle} value={oldPasswd} onChange={(e) => setOldPasswd(e.target.value)}/>
             <input type="password" placeholder="New password" style={inputStyle} value={newPasswd} onChange={(e) => setNewPasswd(e.target.value)} />
-            <button onClick={changePasswordCall} style={buttonStyle}>Modify password</button > 
+            <button onClick={changePasswordCall} style={modifyPassword}>Modify password</button > 
           </div>
         </div>
       </div>
-      <Link
-        to={`/CoordinatorTeacher/CoordinatorTeacherPages/CoordinatorTeacherValidationListPage/CoordinatorTeacherValidationList/${teacherId}`}
-        state={{ participantAddress }}  // Pass participantAddress" // Route where it links to
-        style={validationListButtonStyle} 
-        onMouseOver={(e) => Object.assign(e.target.style, hoverStyle)} 
-        onMouseOut={(e) => Object.assign(e.target.style, validationListButtonStyle)} 
-      >
-      Validation List
-      </Link>
-      <Link 
-        to={`/CoordinatorTeacher/CoordinatorTeacherPages/CoordinatorTeacherConfirmValidationPage/CoordinatorTeacherConfirmValidation/${teacherId}`} // Route where it links to
-        state={{ participantAddress }}  // Pass participantAddress" // Route where it links to
-        style={confirmValidationsButtonStyle} 
-        onMouseOver={(e) => Object.assign(e.target.style, hoverStyle)}
-        onMouseOut={(e) => Object.assign(e.target.style, confirmValidationsButtonStyle)}
-      >
-      Confirm Validations
-      </Link>
-      <Link 
-        to={`/CoordinatorTeacher/CoordinatorTeacherPages/CoordinatorTeacherConfirmMarksPage/CoordinatorTeacherConfirmMarks/${teacherId}`} // Route where it links to
-        state={{ participantAddress }}  // Pass participantAddress" // Route where it links to
-        style={confirmMarksButtonStyle} 
-        onMouseOver={(e) => Object.assign(e.target.style, hoverStyle)}
-        onMouseOut={(e) => Object.assign(e.target.style, confirmMarksButtonStyle)}
-      >
-      Confirm Marks
-      </Link>
+      {/* Buttons Section */}
+      <div style={buttonsContainer}>
+        <Link
+          to={`/CoordinatorTeacher/CoordinatorTeacherPages/CoordinatorTeacherValidationListPage/CoordinatorTeacherValidationList/${teacherId}`}
+          state={{ participantAddress }}  // Pass participantAddress" // Route where it links to
+          style={buttonStyle} 
+          onMouseOver={(e) => Object.assign(e.target.style, hoverStyle)} 
+          onMouseOut={(e) => Object.assign(e.target.style, buttonStyle)} 
+        >
+        Validation List
+        </Link>
+        <Link 
+          to={`/CoordinatorTeacher/CoordinatorTeacherPages/CoordinatorTeacherConfirmValidationPage/CoordinatorTeacherConfirmValidation/${teacherId}`} // Route where it links to
+          state={{ participantAddress }}  // Pass participantAddress" // Route where it links to
+          style={buttonStyle} 
+          onMouseOver={(e) => Object.assign(e.target.style, hoverStyle)}
+          onMouseOut={(e) => Object.assign(e.target.style, buttonStyle)}
+        >
+        Confirm Validations
+        </Link>
+        <Link 
+          to={`/CoordinatorTeacher/CoordinatorTeacherPages/CoordinatorTeacherConfirmMarksPage/CoordinatorTeacherConfirmMarks/${teacherId}`} // Route where it links to
+          state={{ participantAddress }}  // Pass participantAddress" // Route where it links to
+          style={buttonStyle} 
+          onMouseOver={(e) => Object.assign(e.target.style, hoverStyle)}
+          onMouseOut={(e) => Object.assign(e.target.style, buttonStyle)}
+        >
+        Confirm Marks
+        </Link>
+      </div>
+      
     </div>
   );
 };
 
-
-
-
-
-
 // Styles
-
-/* Button Container */
 const containerStyle = {
   display: "flex",
+  height: "100vh",
+  backgroundColor: "#f4f4f4",
+};
+
+const buttonsContainer = {
+  flex: 1,
+  display: "flex",
+  flexDirection: "row",
   justifyContent: "center",
   alignItems: "center",
-  height: "100vh", // Full screen height
-  gap: "40px", // Space between buttons
-  flexWrap: "wrap", // Prevents overflow on small screens
+  gap: "20px",
 };
    
-/* Confirm Validations Button */
-const confirmValidationsButtonStyle = {
-  padding: "12px 24px",
-  fontSize: "30px",
+const buttonStyle = {
+  padding: "8px 16px",
+  fontSize: "40px",
   border: "none",
   backgroundColor: "#007bff",
   color: "white",
-  borderRadius: "8px",
+  borderRadius: "5px",
   cursor: "pointer",
-  transition: "background 0.3s ease, transform 0.2s ease",
-  textDecoration: "none"
+  textDecoration: "none",
+  textAlign: "center",
 };
 
-/* Validation List Button */
-const validationListButtonStyle = {
-  padding: "12px 24px",
-  fontSize: "30px",
-  border: "none",
-  backgroundColor: "#007bff",
+const modifyPassword = {
+  padding: "10px",
+  background: "#007bff",
   color: "white",
-  borderRadius: "8px",
-  cursor: "pointer",
-  transition: "background 0.3s ease, transform 0.2s ease",
-  textDecoration: "none"
-};
-
-/* Confirm Marks Button */
-const confirmMarksButtonStyle = {
-  padding: "12px 24px",
-  fontSize: "30px",
   border: "none",
-  backgroundColor: "#007bff",
-  color: "white",
-  borderRadius: "8px",
+  borderRadius: "5px",
   cursor: "pointer",
-  transition: "background 0.3s ease, transform 0.2s ease",
-  textDecoration: "none"
-};
+  marginTop: "10px",
+}
 
 const inputStyle = {
   width: "100%",
@@ -220,16 +205,7 @@ const profileTitle = {
   fontWeight: "bold",
   marginBottom: "20px",
 };
-  
-const buttonStyle = {
-  padding: "10px",
-  background: "#007bff",
-  color: "white",
-  border: "none",
-  borderRadius: "5px",
-  cursor: "pointer",
-  marginTop: "10px",
-};
+
 
 
 /* Hover */

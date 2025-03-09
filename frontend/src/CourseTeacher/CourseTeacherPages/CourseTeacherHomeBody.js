@@ -306,7 +306,12 @@ const handleConfirm = async () => {
                 <td>{student.studentid}</td>
                 <td>{student.degreeid}</td>
                 <td>{convertMark(student.mark)}</td>
-                <td>{student.provisional} HACER CHECKBOX AQUI</td>
+                <td>
+                  <span style={lockIconStyle}>
+                    {student.provisional === 0 ? "🔓" : "🔒"} 
+                  </span>
+                </td>
+
                 <td>
                   <button style={buttonStyle} onClick={() => openModal(student)}>
                   Modify
@@ -466,6 +471,18 @@ const confirmButtonStyle = {
   marginTop: "20px",
   cursor: "pointer",
   width: "100px",
+};
+
+const checkboxStyle = {
+  width: '20px',
+  height: '20px',
+  marginRight: '10px',
+};
+
+const lockIconStyle = {
+  width: '20px',
+  height: '20px',
+  verticalAlign: 'middle', // Para alinear el ícono con el checkbox
 };
 
 export default CourseTeacherHomeBody;

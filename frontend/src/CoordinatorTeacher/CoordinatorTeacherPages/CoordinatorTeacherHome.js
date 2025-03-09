@@ -8,9 +8,9 @@ const CoordinatorTeacherHome = () => {
   const  {teacherId} = useParams();
   return (
     <div>
-      <CoordinatorTeacherHomeHeader />
+      <CoordinatorTeacherHomeHeader teacherId = {teacherId}/>
       <CoordinatorTeacherHomeBody teacherId = {teacherId}/>
-      <CoordinatorTeacherHomeFooter />
+      <CoordinatorTeacherHomeFooter/>
     </div>
   );
 };

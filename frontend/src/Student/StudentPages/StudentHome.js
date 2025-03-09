@@ -9,7 +9,7 @@ const StudentHome = () => {
   const  {studentId} = useParams();
   return (
     <div>
-      <StudentHomeHeader />
+      <StudentHomeHeader studentId={studentId}/>
       <StudentHomeBody studentId={studentId} />
       <StudentHomeFooter />
     </div>

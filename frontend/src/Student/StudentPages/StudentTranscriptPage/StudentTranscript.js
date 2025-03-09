@@ -9,7 +9,7 @@ const StudentTranscript = () => {
   const  {studentId} = useParams();
   return (
     <div>
-      <StudentTranscriptHeader />
+      <StudentTranscriptHeader studentId={studentId}/>
       <StudentTranscriptBody studentId = {studentId}/>
       <StudentTranscriptFooter />
     </div>

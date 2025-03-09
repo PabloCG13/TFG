@@ -1,7 +1,8 @@
 import React from 'react';
 import perfil from '../../../Logo/perfil.png'; // Import the image from Logo folder
+import { Link } from 'react-router-dom'; // Import Link to redirect
 
-const CoordinatorTeacherConfirmValidationHeader = () => {
+const CoordinatorTeacherConfirmValidationHeader = ({teacherId}) => {
   return (
     <header style={headerStyle}>
       <div style={containerStyle}>
@@ -18,6 +19,15 @@ const CoordinatorTeacherConfirmValidationHeader = () => {
         <div style={titleStyle}>
           <h1>Confirm Validations</h1>
         </div>
+
+        <Link
+        to={`/CoordinatorTeacher/CoordinatorTeacherPages/CoordinatorTeacherHome/${teacherId}`} // Route where it links to
+        style={backButtonStyle} 
+        onMouseOver={(e) => Object.assign(e.target.style, hoverStyle)} 
+        onMouseOut={(e) => Object.assign(e.target.style, backButtonStyle)} 
+        >
+        Back
+        </Link>
       </div>
     </header>
   );
@@ -54,6 +64,24 @@ const imageStyle = {
 const titleStyle = {
   flex: 1, 
   textAlign: 'center', 
+};
+
+/* Back button styles */
+const backButtonStyle = {
+  textDecoration: 'none', /* Remove underline */
+  backgroundColor: '#ff4c4c', /* Red background */
+  color: 'white', /* White text */
+  padding: '10px 20px', /* Padding */
+  borderRadius: '5px', /* Rounded corners */
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  transition: 'background-color 0.3s', /* Smooth transition for hover effect */
+};
+
+/* Hover */
+const hoverStyle = {
+  backgroundColor: "#0056b3", // Changes the background color to a darker blue when the user hover 
 };
 
 export default CoordinatorTeacherConfirmValidationHeader;

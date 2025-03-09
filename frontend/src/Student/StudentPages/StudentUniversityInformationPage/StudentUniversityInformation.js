@@ -8,7 +8,7 @@ const StudentUniversityInformation = () => {
   const  {studentId} = useParams();
   return (
     <div>
-      <StudentUniversityInformationHeader />
+      <StudentUniversityInformationHeader studentId={studentId}/>
       <StudentUniversityInformationBody studentId={studentId}/>
       <StudentUniversityInformationFooter />
     </div>

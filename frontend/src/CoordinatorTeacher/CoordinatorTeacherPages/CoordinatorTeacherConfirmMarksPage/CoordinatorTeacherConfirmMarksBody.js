@@ -174,10 +174,90 @@ const handleConfirm = async () => {
   closeModal();
 };
 
+// TODO check it works properly. The part needed is not done yet
+const handleFinalConfirm = async () => {
+  // Actualizar la nota en el estado de students sin hacer un nuevo fetch
+  setStudents(prevStudents => prevStudents.map(student => {
+    if (student.studentid === selectedStudent.studentid) {
+      return { ...student, mark: selectedStudent.mark }; // Actualiza solo la nota del estudiante modificado
+    }
+    return student;
+  }));
+
+  try {
+    const dbResponse = await fetch(`http://localhost:5000/api/transcripts/${selectedStudent.unicode}/${selectedStudent.degreeid}/${selectedStudent.courseid}/${selectedStudent.studentid}/${selectedStudent.academicyear}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        provisional: 1, // Assuming provisional is still part of the request
+      }),
+    });
+
+    // Handle the response from the database 
+    if (dbResponse.ok) {
+      const responseJson = await dbResponse.json();
+      console.log('New mark updated response:', responseJson);
+    } else {
+      throw new Error('Failed to update mark');
+    }
+
+    const dbResponseAddress = await fetch(`http://localhost:5000/api/addresses/participant/${selectedStudent.studentid}`);
+    if (!dbResponseAddress.ok) {
+      throw new Error(`Failed to fetch student address. Status: ${dbResponseAddress.status}`);
+    }
+
+    const dbData = await dbResponseAddress.json();
+    console.log("Student address:", dbData);
+
+    const dbResponseTranscript = await fetch(`http://localhost:5000/api/transcripts/${selectedStudent.studentid}`);
+    if (!dbResponseTranscript.ok) {
+      throw new Error(`Failed to fetch transcript. Status: ${dbResponseTranscript.status}`);
+    }
+
+    const transcriptHash = await dbResponseTranscript.json();
+    console.log("Got this transcript: ", transcriptHash);
+
+    // Step 2: Modify transcript on the blockchain
+    const transcriptResponse = await fetch("http://localhost:4000/modifyTranscript", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        file: transcriptHash,
+        addressStudent: dbData.addressid,
+        address: participantAddress,
+        type: 1,
+      }),
+    });
+
+    if (!transcriptResponse.ok) {
+      throw new Error(`Failed to modify transcript. Status: ${transcriptResponse.status}`);
+    }
+
+    const transcriptData = await transcriptResponse.json();
+    const transcriptHashModified = transcriptData.hash;
+    console.log("Transcript modified successfully:", transcriptHashModified);
+
+    const updateResponse = await fetch(`http://localhost:5000/api/students/${selectedStudent.studentid}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ transcriptHash: transcriptHashModified }),
+    });
+
+    if (!updateResponse.ok) {
+      throw new Error(`Failed to update student ${selectedStudent.studentid}. Status: ${updateResponse.status}`);
+    }
+
+    const updateData = await updateResponse.json();
+    console.log(`Student ${selectedStudent.studentid} updated successfully with transcriptHash:`, updateData);
+
+  } catch (error) {
+    console.error("Error:", error);
+    setMessage("There was an error updating the grade.");
+  }
+};
+
   // Function to change the password
   const changePasswordCall = async () => {
-
-
     try {
       const response = await fetch("http://localhost:4000/consult", {
         method: "POST",
@@ -299,7 +379,6 @@ const handleConfirm = async () => {
               <th>Degree</th>
               <th>Grade</th>
               <th>Provisional</th>
-              <th>Action</th>
             </tr>
           </thead>
           <tbody>
@@ -308,12 +387,21 @@ const handleConfirm = async () => {
                 <td>{student.studentid}</td>
                 <td>{student.degreeid}</td>
                 <td>{convertMark(student.mark)}</td>
-                <td>{student.provisional} HACER CHECKBOX AQUI</td>
+                <td>
+                  <span style={lockIconStyle}>
+                    {student.provisional === 0 ? "🔓" : "🔒"} 
+                  </span>
+                </td>
                 <td>
                   <button style={buttonStyle} onClick={() => openModal(student)}>
                   Modify
                   </button>
                 </td>
+                <td>
+                  {/*TODO fix so it works*/}
+                  <button style={buttonStyle} onClick={handleFinalConfirm}>
+                  Confirm
+                  </button></td>
               </tr>
             ))}
           </tbody>
@@ -468,6 +556,12 @@ const confirmButtonStyle = {
   marginTop: "20px",
   cursor: "pointer",
   width: "100px",
+};
+
+const lockIconStyle = {
+  width: '20px',
+  height: '20px',
+  verticalAlign: 'middle', // Para alinear el ícono con el checkbox
 };
 
 export default CoordinatorTeacherConfirmMarksBody;

@@ -8,7 +8,7 @@ const StudentProfile = () => {
   const  {studentId} = useParams();
   return (
     <div>
-      <StudentProfileHeader />
+      <StudentProfileHeader studentId={studentId}/>
       <StudentProfileBody studentId={studentId}/>
       <StudentProfileFooter />
     </div>

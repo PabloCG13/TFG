@@ -60,7 +60,7 @@ const CourseTeacherLogin = () => {
 
   return (
     <div style={loginPageStyle}>
-      <h2>Course Teacher Log In</h2>
+      <h2>Coordinator Teacher Log In</h2>
 
       {message && <p style={errorStyle}>{message}</p>} {/* Show error message */}
 
