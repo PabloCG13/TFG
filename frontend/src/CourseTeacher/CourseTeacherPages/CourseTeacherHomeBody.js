@@ -86,81 +86,93 @@ const CourseTeacherHomeBody = ({teacherId}) => {
     setSelectedStudent({ ...selectedStudent, mark: event.target.value });
     //setStudents({...selectedStudent, mark: event.target.value });
   };
-
-  // Function to confirm the new grade
-  const handleConfirm = async () => {
   
+  // TODO check if the api call fails if the frontend grade changes
+  // Function to confirm the new grade
+const handleConfirm = async () => {
+  // Actualizar la nota en el estado de students sin hacer un nuevo fetch
+  setStudents(prevStudents => prevStudents.map(student => {
+    if (student.studentid === selectedStudent.studentid) {
+      return { ...student, mark: selectedStudent.mark }; // Actualiza solo la nota del estudiante modificado
+    }
+    return student;
+  }));
+
+  try {
     const dbResponse = await fetch(`http://localhost:5000/api/transcripts/${selectedStudent.unicode}/${selectedStudent.degreeid}/${selectedStudent.courseid}/${selectedStudent.studentid}/${selectedStudent.academicyear}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          provisional: 1, // Assuming provisional is still part of the request
-          mark: selectedStudent.mark,
-        }),
-      });
-    // Handle the response from the database (optional)
-      if (dbResponse.ok) {
-        const responseJson = await dbResponse.json();
-        console.log('New mark updated response:', responseJson);
-      } else {
-        throw new Error('Failed to update mark');
-      }
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        provisional: 1, // Assuming provisional is still part of the request
+        mark: selectedStudent.mark,
+      }),
+    });
+
+    // Handle the response from the database 
+    if (dbResponse.ok) {
+      const responseJson = await dbResponse.json();
+      console.log('New mark updated response:', responseJson);
+    } else {
+      throw new Error('Failed to update mark');
+    }
 
     const dbResponseAddress = await fetch(`http://localhost:5000/api/addresses/participant/${selectedStudent.studentid}`);
-  
-      if (!dbResponseAddress.ok) {
-          throw new Error(`Failed to fetch student address. Status: ${dbResponseAddress.status}`);
-      }
-  
-      const dbData = await dbResponseAddress.json();
-      console.log("Student address:", dbData);
-      
-      const dbResponseTranscript = await fetch(`http://localhost:5000/api/transcripts/${selectedStudent.studentid}`);
+    if (!dbResponseAddress.ok) {
+      throw new Error(`Failed to fetch student address. Status: ${dbResponseAddress.status}`);
+    }
 
-      if (!dbResponseTranscript.ok) {
-        throw new Error(`Failed to fetch transcript. Status: ${dbResponseTranscript.status}`);
-      }
+    const dbData = await dbResponseAddress.json();
+    console.log("Student address:", dbData);
 
-      const transcriptHash = await dbResponseTranscript.json();
-      console.log("Got this transcript: ", transcriptHash);
-      
-      
-       // Step 2: Modify transcript on the blockchain
-      const transcriptResponse = await fetch("http://localhost:4000/modifyTranscript", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-              file: transcriptHash,
-              addressStudent: dbData.addressid,
-              address: participantAddress,
-              type: 1,
-          }),
-      });
-  
-      if (!transcriptResponse.ok) {
-          throw new Error(`Failed to modify transcript. Status: ${transcriptResponse.status}`);
-      }
-  
-      const transcriptData = await transcriptResponse.json();
-      const transcriptHashModified = transcriptData.hash;
-      console.log("Transcript modified successfully:", transcriptHashModified);
-      
-       const updateResponse = await fetch(`http://localhost:5000/api/students/${selectedStudent.studentid}`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ transcriptHash: transcriptHashModified }),
-      });
-  
-      if (!updateResponse.ok) {
-          throw new Error(`Failed to update student ${selectedStudent.studentid}. Status: ${updateResponse.status}`);
-      }
-  
-      const updateData = await updateResponse.json();
-      console.log(`Student ${selectedStudent.studentid} updated successfully with transcriptHash:`, updateData);
- 
-      
-    closeModal();
-  };
+    const dbResponseTranscript = await fetch(`http://localhost:5000/api/transcripts/${selectedStudent.studentid}`);
+    if (!dbResponseTranscript.ok) {
+      throw new Error(`Failed to fetch transcript. Status: ${dbResponseTranscript.status}`);
+    }
+
+    const transcriptHash = await dbResponseTranscript.json();
+    console.log("Got this transcript: ", transcriptHash);
+
+    // Step 2: Modify transcript on the blockchain
+    const transcriptResponse = await fetch("http://localhost:4000/modifyTranscript", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        file: transcriptHash,
+        addressStudent: dbData.addressid,
+        address: participantAddress,
+        type: 1,
+      }),
+    });
+
+    if (!transcriptResponse.ok) {
+      throw new Error(`Failed to modify transcript. Status: ${transcriptResponse.status}`);
+    }
+
+    const transcriptData = await transcriptResponse.json();
+    const transcriptHashModified = transcriptData.hash;
+    console.log("Transcript modified successfully:", transcriptHashModified);
+
+    const updateResponse = await fetch(`http://localhost:5000/api/students/${selectedStudent.studentid}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ transcriptHash: transcriptHashModified }),
+    });
+
+    if (!updateResponse.ok) {
+      throw new Error(`Failed to update student ${selectedStudent.studentid}. Status: ${updateResponse.status}`);
+    }
+
+    const updateData = await updateResponse.json();
+    console.log(`Student ${selectedStudent.studentid} updated successfully with transcriptHash:`, updateData);
+
+  } catch (error) {
+    console.error("Error:", error);
+    setMessage("There was an error updating the grade.");
+  }
+
+  closeModal();
+};
+
 
   // Function to change the password
   const changePasswordCall = async () => {
@@ -216,23 +228,28 @@ const CourseTeacherHomeBody = ({teacherId}) => {
     }
   };
 
-
-  // Function to convert grades between "Letter" and "Numeric"
   const convertMark = (mark) => {
-    const markMapping = {
-      A: 90,
-      B: 80,
-      C: 70,
-      D: 60,
-      F: 50,
-    };
-
     if (viewMode === "Numeric") {
-      return markMapping[mark] !== undefined ? markMapping[mark] : mark;
+      // Si estamos en modo numérico, convertimos la letra a un rango numérico.
+      if (mark === "A") return "90-100";
+      if (mark === "B") return "80-89";
+      if (mark === "C") return "70-79";
+      if (mark === "D") return "60-69";
+      if (mark === "E") return "50-59";
+      if (mark === "F") return "0-49";
+      return mark;  // En caso de que ya sea un número, lo retornamos tal cual
     } else {
-      return Object.keys(markMapping).find((key) => markMapping[key] === parseInt(mark)) || mark;
+      // Si estamos en modo letra, convertimos el número en una letra correspondiente.
+      const numericMark = parseInt(mark, 10);
+  
+      if (numericMark >= 90) return "A";
+      if (numericMark >= 80) return "B";
+      if (numericMark >= 70) return "C";
+      if (numericMark >= 60) return "D";
+      if (numericMark >= 50) return "E";
+      if (numericMark < 50) return "F";  // Cualquier número menor a 50 se considera F
     }
-  };
+  }
 
   return (
     <div style={containerStyle}>

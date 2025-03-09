@@ -91,13 +91,13 @@ function App() {
 
 
         {/* Coordinator Teacher Validation List Page route */}
-        <Route path="/CoordinatorTeacher/CoordinatorTeacherPages/CoordinatorTeacherValidationListPage/CoordinatorTeacherValidationList" element={<CoordinatorTeacherValidationList />} />
+        <Route path="/CoordinatorTeacher/CoordinatorTeacherPages/CoordinatorTeacherValidationListPage/CoordinatorTeacherValidationList/:teacherId" element={<CoordinatorTeacherValidationList />} />
 
         {/* Coordinator Teacher Confirm Validations Page route */}
-        <Route path="/CoordinatorTeacher/CoordinatorTeacherPages/CoordinatorTeacherConfirmValidationPage/CoordinatorTeacherConfirmValidation" element={<CoordinatorTeacherConfirmValidation />} />
+        <Route path="/CoordinatorTeacher/CoordinatorTeacherPages/CoordinatorTeacherConfirmValidationPage/CoordinatorTeacherConfirmValidation/:teacherId" element={<CoordinatorTeacherConfirmValidation />} />
 
         {/* Coordinator Teacher Confirm Marks Page route */}
-        <Route path="/CoordinatorTeacher/CoordinatorTeacherPages/CoordinatorTeacherConfirmMarksPage/CoordinatorTeacherConfirmMarks" element={<CoordinatorTeacherConfirmMarks />} />
+        <Route path="/CoordinatorTeacher/CoordinatorTeacherPages/CoordinatorTeacherConfirmMarksPage/CoordinatorTeacherConfirmMarks/:teacherId" element={<CoordinatorTeacherConfirmMarks />} />
 
         
         {/* University Home Page route */}

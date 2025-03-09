@@ -71,8 +71,6 @@ const CoordinatorTeacherHomeBody= ({teacherId}) => {
 
 
   return (
-    
-
     <div style={containerStyle}>
       <div style={containerStyle}>
         {/* Sidebar */}
@@ -89,7 +87,8 @@ const CoordinatorTeacherHomeBody= ({teacherId}) => {
         </div>
       </div>
       <Link
-        to="/CoordinatorTeacher/CoordinatorTeacherPages/CoordinatorTeacherValidationListPage/CoordinatorTeacherValidationList" // Route where it links to
+        to={`/CoordinatorTeacher/CoordinatorTeacherPages/CoordinatorTeacherValidationListPage/CoordinatorTeacherValidationList/${teacherId}`}
+        state={{ participantAddress }}  // Pass participantAddress" // Route where it links to
         style={validationListButtonStyle} 
         onMouseOver={(e) => Object.assign(e.target.style, hoverStyle)} 
         onMouseOut={(e) => Object.assign(e.target.style, validationListButtonStyle)} 
@@ -97,7 +96,8 @@ const CoordinatorTeacherHomeBody= ({teacherId}) => {
       Validation List
       </Link>
       <Link 
-        to="/CoordinatorTeacher/CoordinatorTeacherPages/CoordinatorTeacherConfirmValidationPage/CoordinatorTeacherConfirmValidation" // Route where it links to
+        to={`/CoordinatorTeacher/CoordinatorTeacherPages/CoordinatorTeacherConfirmValidationPage/CoordinatorTeacherConfirmValidation/${teacherId}`} // Route where it links to
+        state={{ participantAddress }}  // Pass participantAddress" // Route where it links to
         style={confirmValidationsButtonStyle} 
         onMouseOver={(e) => Object.assign(e.target.style, hoverStyle)}
         onMouseOut={(e) => Object.assign(e.target.style, confirmValidationsButtonStyle)}
@@ -105,7 +105,8 @@ const CoordinatorTeacherHomeBody= ({teacherId}) => {
       Confirm Validations
       </Link>
       <Link 
-        to="/CoordinatorTeacher/CoordinatorTeacherPages/CoordinatorTeacherConfirmMarksPage/CoordinatorTeacherConfirmMarks" // Route where it links to
+        to={`/CoordinatorTeacher/CoordinatorTeacherPages/CoordinatorTeacherConfirmMarksPage/CoordinatorTeacherConfirmMarks/${teacherId}`} // Route where it links to
+        state={{ participantAddress }}  // Pass participantAddress" // Route where it links to
         style={confirmMarksButtonStyle} 
         onMouseOver={(e) => Object.assign(e.target.style, hoverStyle)}
         onMouseOut={(e) => Object.assign(e.target.style, confirmMarksButtonStyle)}
