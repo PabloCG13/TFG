@@ -199,12 +199,13 @@ contract tfg {
     }
     function consultParticipant(
         string memory user,
-        string memory passwd
+        string memory passwd,
+        uint role
     ) public view participantExists(msg.sender) returns (bool) {
         bytes32 generatedHash = sha256(abi.encodePacked(user, passwd));
         string memory storedHash = bytes32ToString(generatedHash);
 
-        return compareStrings(storedHash, personToHash[msg.sender].hash);
+        return compareStrings(storedHash, personToHash[msg.sender].hash) && role == personToHash[msg.sender].role;
     }
 
     function consultUniversity(

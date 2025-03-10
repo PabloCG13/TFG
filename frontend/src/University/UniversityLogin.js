@@ -34,7 +34,7 @@ const UniversityLogin = () => {
       const response = await fetch("http://localhost:4000/consult", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ address: universityAddress, user: user, passwd: passwd, type: 1 }),
+        body: JSON.stringify({ address: universityAddress, user: user, passwd: passwd, role: 4, type: 1 }),
       });
 
       const data = await response.json();

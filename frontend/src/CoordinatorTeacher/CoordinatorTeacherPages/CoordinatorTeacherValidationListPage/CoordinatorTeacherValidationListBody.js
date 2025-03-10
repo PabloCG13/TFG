@@ -1,24 +1,82 @@
 import React, { useState, useEffect } from "react";
 import { useLocation } from 'react-router-dom';
 
-const CoordinatorTeacherValidationListBody= ({teacherId}) => {
+const CoordinatorTeacherValidationListBody = ({ teacherId }) => {
   const [teacher, setTeacher] = useState([]);
   const [oldPasswd, setOldPasswd] = useState('');
   const [newPasswd, setNewPasswd] = useState('');
-  const location =  useLocation();
-  const { participantAddress } = location.state || {}; // Extract data
-  const [message, setMessage] = useState(''); 
+  const [message, setMessage] = useState('');
+  const location = useLocation();
+  const { participantAddress } = location.state || {}; 
 
+  // Validation states
+  const [validations, setValidations] = useState([]);
+  const [filteredValidations, setFilteredValidations] = useState([]);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [validityPeriod, setValidityPeriod] = useState('');
+  const [universityName, setUniversityName] = useState('');
+  const [showFilters, setShowFilters] = useState(false);
+  const [uniqueUnicodes, setUniqueUnicodes] = useState([]);
+  const [universities, setUniversities] = useState({});
+
+  // Fetch teacher info
   useEffect(() => {
     if (!teacherId) return;
-
-    //Call to get the teacher data for the profile:
     fetch(`http://localhost:5000/api/teachers/${teacherId}`)
-    .then((response) => response.json())
-    .then((data) => setTeacher(data))
-    .catch((error) => console.error("Error fetching teacher info:", error));
-      
+      .then(response => response.json())
+      .then(data => setTeacher(data))
+      .catch(error => console.error("Error fetching teacher info:", error));
   }, [teacherId]);
+
+  // Fetch all validations
+  useEffect(() => {
+    fetch(`http://localhost:5000/api/validations`)
+      .then(response => {
+        if (!response.ok) {
+          throw new Error(`Failed to fetch validations. Status: ${response.status}`);
+        }
+        return response.json();
+      })
+      .then(data => {
+        setValidations(data);
+        setFilteredValidations(data);
+        const uniqueUnicodesSet = new Set(data.map(v => v.unicodedst));
+        setUniqueUnicodes([...uniqueUnicodesSet]);
+      })
+      .catch(error => console.error("Error fetching validations:", error));
+  }, []);
+
+  // Fetch university details for each unique university code
+  useEffect(() => {
+    uniqueUnicodes.forEach(unicodedst => {
+      fetch(`http://localhost:5000/api/universities/${unicodedst}`)
+        .then(response => response.json())
+        .then(uniData => {
+          setUniversities(prev => ({ ...prev, [unicodedst]: uniData }));
+        })
+        .catch(error => console.error("Error fetching university:", error));
+    });
+  }, [uniqueUnicodes]);
+
+  // Filter validations
+  useEffect(() => {
+    let results = validations;
+    if (searchTerm) {
+      results = results.filter(valid =>
+        valid.courseidsrc.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+    if (validityPeriod) {
+      results = results.filter(valid => parseInt(valid.period) >= parseInt(validityPeriod));
+    }
+    if (universityName) {
+      results = results.filter(valid => {
+        const university = universities[valid.unicodedst];
+        return university && university.name.toLowerCase().includes(universityName.toLowerCase());
+      });
+    }
+    setFilteredValidations(results);
+  }, [searchTerm, validityPeriod, universityName, validations, universities]);
 
   // Function to change the password
   const changePasswordCall = async () => {
@@ -30,42 +88,38 @@ const CoordinatorTeacherValidationListBody= ({teacherId}) => {
           address: participantAddress,
           user: teacherId,
           passwd: oldPasswd,
+          role: 3,
           type: 2 
         }),
-    });
+      });
 
       const data = await response.json();
-      console.log(data);
       if (data.success && data.result === true) {
         const response = await fetch("http://localhost:4000/changeParticipant", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          address: participantAddress,
-          user: teacherId,
-          passwd: newPasswd
-        }),
-      });
-      const participantData = await response.json();
-    console.log(participantData);
-      const teacherHash = participantData.hash;
-      if(teacherHash !== "Error"){
-        const dbResponse = await fetch(`http://localhost:5000/api/teachers/${teacherId}`, {
-          method: "PUT",
+          method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-              hash: teacherHash
+            address: participantAddress,
+            user: teacherId,
+            passwd: newPasswd
           }),
-      });
+        });
+        const participantData = await response.json();
+        const teacherHash = participantData.hash;
 
-      const dbData = await dbResponse.json();
-      console.log(dbData);
-      
-      
-      } else {
-        setMessage("Invalid credentials. Please try again.");
+        if (teacherHash !== "Error") {
+          const dbResponse = await fetch(`http://localhost:5000/api/teachers/${teacherId}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ hash: teacherHash }),
+          });
+
+          const dbData = await dbResponse.json();
+          console.log(dbData);
+        } else {
+          setMessage("Invalid credentials. Please try again.");
+        }
       }
-}
     } catch (error) {
       console.error("Error making API request:", error);
       setMessage("Server error. Please try again later.");
@@ -74,7 +128,7 @@ const CoordinatorTeacherValidationListBody= ({teacherId}) => {
 
   return (
     <div style={containerStyle}>
-      {/* Sidebar */}
+      {/* Sidebar with teacher profile */}
       <div style={sidebarStyle}>
         <div style={profileContainer}>
           <div style={profileImage}></div>
@@ -86,11 +140,98 @@ const CoordinatorTeacherValidationListBody= ({teacherId}) => {
           <button onClick={changePasswordCall} style={buttonStyle}>Modify password</button > 
         </div>
       </div>
+
+      {/* Table with validations */}
+      <div style={mainContentStyle}>
+        <div style={tableContainer}>
+          <h2 style={tableTitle}>Validations</h2>
+          <div style={filterContainer}>
+            <input type="text" placeholder="Search by Course ID" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
+            <button onClick={() => setShowFilters(!showFilters)}>Search Options</button>
+          </div>
+          {showFilters && (
+            <div style={filterContainer}>
+              <input type="number" placeholder="Validity Period (Year)" value={validityPeriod} onChange={(e) => setValidityPeriod(e.target.value)} />
+              <select value={universityName} onChange={(e) => setUniversityName(e.target.value)}>
+                <option value="">Select University</option>
+                {Object.values(universities).map(university => (
+                  <option key={university.unicode} value={university.name}>
+                    {university.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+          <table style={tableStyle}>
+            <thead>
+              <tr>
+                <th style={thStyle}>Origin Course</th>
+                <th style={thStyle}>Destination Course</th>
+                <th style={thStyle}>Validity Period</th>
+                <th style={thStyle}>University Name</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredValidations.map(valid => (
+                <tr key={valid.unicodedst}>
+                  <td style={tdStyle}>{valid.unicodesrc}, {valid.degreeidsrc}, {valid.courseidsrc}</td>
+                  <td style={tdStyle}>{valid.unicodedst}, {valid.degreeiddst}, {valid.courseiddst}</td>
+                  <td style={tdStyle}>{valid.period}</td>
+                  <td style={tdStyle}>{universities[valid.unicodedst]?.name || "Loading..."}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
   );
 };
 
+
 // Styles
+const mainContentStyle = {
+  flex: 1,
+  marginLeft: '20px',
+};
+
+const tableContainer = {
+  background: '#fff',
+  padding: '20px',
+  boxShadow: '0px 0px 10px rgba(0, 0, 0, 0.1)',
+};
+
+const tableTitle = {
+  fontSize: '18px',
+  fontWeight: 'bold',
+  marginBottom: '10px',
+};
+
+const tableStyle = {
+  width: '100%',
+  borderCollapse: 'collapse',
+  textAlign: 'center',
+};
+
+const thStyle = {
+  padding: '10px',
+  backgroundColor: '#f4f4f4',
+  fontWeight: 'bold',
+  borderBottom: '2px solid #ccc',
+};
+
+const tdStyle = {
+  padding: '10px',
+  borderBottom: '1px solid #eee',
+  textAlign: 'center',
+};
+
+const filterContainer = {
+  display: 'flex',
+  gap: '10px',
+  marginBottom: '10px',
+};
+
 const containerStyle = {
   display: "flex",
   height: "100vh",

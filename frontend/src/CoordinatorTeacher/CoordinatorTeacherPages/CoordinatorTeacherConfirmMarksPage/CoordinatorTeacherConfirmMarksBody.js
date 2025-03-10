@@ -266,6 +266,7 @@ const handleFinalConfirm = async () => {
           address: participantAddress,
           user: teacherId,
           passwd: oldPasswd,
+          role: 3,
           type: 2 
         }),
       });

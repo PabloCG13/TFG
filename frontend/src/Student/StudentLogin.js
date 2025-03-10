@@ -38,6 +38,7 @@ const StudentLogin = () => {
           address: participantAddress, 
           user: studentId, 
           passwd: password, 
+          role: 1,
           type: 2 // Set to 2 for student
         }),
       });

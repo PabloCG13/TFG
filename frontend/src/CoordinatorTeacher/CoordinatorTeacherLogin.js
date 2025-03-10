@@ -37,6 +37,7 @@ const CourseTeacherLogin = () => {
           address: participantAddress,
           user: teacherId,
           passwd: password,
+          role: 3,
           type: 2 
         }),
       });

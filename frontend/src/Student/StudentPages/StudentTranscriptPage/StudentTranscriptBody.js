@@ -8,6 +8,24 @@ const StudentTranscriptBody= ({studentId}) => {
   const { participantAddress } = location.state || {}; // Extract participantAddress
   
   useEffect(() => {
+    const currentTimestamp = new Date().toISOString();
+
+    // Make the PUT request to update lastAccess
+    fetch(`http://localhost:5000/api/students/${studentId}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ lastAccess: currentTimestamp }),
+    })
+    .then(response => {
+      if (!response.ok) {
+        throw new Error(`Failed to update lastAccess. Status: ${response.status}`);
+      }
+      return response.json();
+     })
+     .then(data => console.log("Successfully updated lastAccess:", data))
+     .catch(error => console.error("Error updating lastAccess:", error));
+   
+
     //Call to get all the courses in which the student is enrolled
     fetch(`http://localhost:5000/api/transcripts/${studentId}`)
       .then((response) => response.json())

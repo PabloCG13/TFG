@@ -186,6 +186,7 @@ const handleConfirm = async () => {
           address: participantAddress,
           user: teacherId,
           passwd: oldPasswd,
+          role: 2,
           type: 2 
         }),
       });

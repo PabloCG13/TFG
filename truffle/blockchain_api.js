@@ -16,7 +16,7 @@ const { Web3 } = require("web3");
 
 // Set up Web3 connection
 const web3 = new Web3("http://ganache:8545"); // Change if necessary
-const contractAddress = "0x254dffcd3277C0b1660F6d42EFbB754edaBAbC2B";
+const contractAddress = "0x5b1869D9A4C187F2EAa108f3062412ecf0526b24";
 const contract = new web3.eth.Contract(contractJson.abi, contractAddress);
 
 const app = express();
@@ -48,7 +48,7 @@ app.post("/addUniversity", async (req, res) => {
 app.post("/addParticipant", async (req, res) => {
     try {
         const { address, uni, user, passwd, role } = req.body;
-
+        
         if (!address || !uni || !user || !passwd || role === undefined || role === null) {
             return res.status(400).json({ error: "Missing required fields" });
         }
@@ -89,13 +89,13 @@ app.post("/changeParticipant", async (req, res) => {
 
 app.post("/consult", async (req, res) => {
     try {
-        const { address, user, passwd, type } = req.body;
+        const { address, user, passwd, role, type } = req.body;
 
-        if(!address || !user || !passwd || !type) {
+        if(!address || !user || !passwd || !role ||!type) {
             return res.status(400).json({ error: "Missing required fields" });
         }
 
-        const result = await consult(address, user, passwd, type);
+        const result = await consult(address, user, passwd, role, type);
 
         if (result === "Error" || result === null) {
             return res.status(500).json({ error: "Failed to consult" });
