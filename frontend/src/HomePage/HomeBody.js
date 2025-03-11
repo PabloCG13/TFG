@@ -18,7 +18,7 @@ const HomeBody= () => {
         onMouseOver={(e) => Object.assign(e.target.style, hoverStyle)}
         onMouseOut={(e) => Object.assign(e.target.style, courseTeacherButtonStyle)}
       >
-      Course Teacher
+      Course Coordinator
       </Link>
       <Link 
       to="/CoordinatorTeacher/CoordinatorTeacherLogin" // Route where it links to
@@ -26,7 +26,7 @@ const HomeBody= () => {
         onMouseOver={(e) => Object.assign(e.target.style, hoverStyle)}
         onMouseOut={(e) => Object.assign(e.target.style, courseCoordinatorButtonStyle)}
       >
-      Course Coordinator
+      Degree Coordinator
       </Link>
       <Link 
       to="/University/UniversityLogin" // Route where it links to

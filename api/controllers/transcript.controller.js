@@ -3,12 +3,12 @@ const db = require("../config/db.js"); // Import pg-promise instance
 // Create transcript
 exports.create = async (req, res) => {
     try {
-        const { uniCode, degreeId, courseId, studentId, academicYear, provisional, mark, lastAccess, teacherId } = req.body;
+        const { uniCode, degreeId, courseId, studentId, academicYear, provisional, erasmus, mark, lastAccess, teacherId } = req.body;
         const query = `
-            INSERT INTO transcript (uniCode, degreeId, courseId, studentId, academicYear, provisional, mark, lastAccess, teacherId)
-            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *;
+            INSERT INTO transcript (uniCode, degreeId, courseId, studentId, academicYear, provisional, erasmus, mark, lastAccess, teacherId)
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING *;
         `;
-        const transcript = await db.one(query, [uniCode, degreeId, courseId, studentId, academicYear, provisional, mark, lastAccess, teacherId]);
+        const transcript = await db.one(query, [uniCode, degreeId, courseId, studentId, academicYear, provisional, erasmus, mark, lastAccess, teacherId]);
         res.status(201).json(transcript);
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -55,6 +55,31 @@ exports.findStudentsInCourse = async (req,res) => {
 	}
 }
 
+
+
+
+exports.findErasmusStudents = async (req,res) => {
+	try{
+    	const { uniCode, degreeId } = req.params;
+    	const transcripts = await db.any(`
+            SELECT t.*
+            FROM transcript t
+            JOIN studies s ON t.studentId = s.studentId
+            WHERE s.degreeId = $2 AND s.uniCode = $1  
+            AND t.degreeId <> s.degreeId  
+            AND t.uniCode <> s.uniCode  
+            AND t.erasmus = 1;
+        `, [uniCode, degreeId]);
+    	
+    	if (transcripts.length === 0) {
+        	return res.status(404).json({ message: "No erasmus students at the moment" });
+    	}
+
+    	res.status(200).json(transcripts);
+	} catch (err) {
+    	res.status(500).json({ message: err.message || "Some error occurred" });
+	}
+}
 
 // Get one transcript by code
 exports.findOne = async (req, res) => {

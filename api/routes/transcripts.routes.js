@@ -9,6 +9,8 @@ module.exports = app => {
 
     router.get("/transcripts/:studentId", transcripts.findStudent);
 
+    router.get("/transcripts/erasmus/:uniCode/:degreeId", transcripts.findErasmusStudents);
+
     router.get("/transcripts/students-in-course/:uniCode/:degreeId/:courseId",transcripts.findStudentsInCourse);
   
     router.get("/transcripts/:uniCode/:degreeId/:courseId/:studentId/:academicYear", transcripts.findOne);

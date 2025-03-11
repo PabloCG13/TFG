@@ -28,7 +28,7 @@ const CoordinatorTeacherConfirmMarksBody = ({teacherId}) => {
   useEffect(() => {
     if (!teacherId) return;
 
-    fetch(`http://localhost:5000/api/courses/teacher/${teacherId}`)
+    fetch(`http://localhost:5000/api/degrees/${teacherId}`)
         .then(response => {
             if (!response.ok) {
                 throw new Error(`Failed to fetch courses. Status: ${response.status}`);
@@ -36,18 +36,17 @@ const CoordinatorTeacherConfirmMarksBody = ({teacherId}) => {
             return response.json();
         })
         .then(data => {
-            // Extract ONLY the 'courseid' field
-            const courseId = data.courseid;  // Assuming the API always returns a single object
+            
             const degreeId = data.degreeid;
             const uniCode = data.unicode;
-            if (!courseId) {
-                throw new Error("courseid is missing in API response");
+            if (!degreeId) {
+                throw new Error("degreeid is missing in API response");
             }
 
-            console.log("Extracted course ID:", courseId);
+            console.log("Extracted degree ID:", degreeId);
 
             // Now fetch students for this courseId
-            return fetch(`http://localhost:5000/api/transcripts/students-in-course/${uniCode}/${degreeId}/${courseId}`);
+            return fetch(`http://localhost:5000/api/transcripts/erasmus/${uniCode}/${degreeId}`);
         })
         .then(response => {
             if (!response.ok) {

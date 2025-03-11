@@ -45,7 +45,9 @@ const StudentTranscriptBody= ({studentId}) => {
               <th>Degree ID</th>
               <th>Course ID</th>
               <th>Mark</th>
+              <th>Provisional</th>
               <th>Academic Year</th>
+              <th>Erasmus</th>
             </tr>
           </thead>
           <tbody>
@@ -54,7 +56,13 @@ const StudentTranscriptBody= ({studentId}) => {
                 <td>{course.degreeid}</td>
                 <td>{course.courseid}</td>
                 <td>{course.mark}</td>
+                <td>
+                  <span style={lockIconStyle}>
+                    {course.provisional === 0 ? "🔓" : "🔒"} 
+                  </span>
+                </td>
                 <td>{course.academicyear}</td>
+                <td>{course.erasmus}</td>
               </tr>
             ))}
           </tbody>
@@ -93,6 +101,12 @@ const tableStyle = {
   width: "100%",
   borderCollapse: "collapse",
   textAlign: "center",
+};
+
+const lockIconStyle = {
+  width: '20px',
+  height: '20px',
+  verticalAlign: 'middle', // Para alinear el ícono con el checkbox
 };
 
 

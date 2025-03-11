@@ -317,6 +317,7 @@ const UniversityHomeBody = ({ uniCode }) => {
           courseId: courseId,
           studentId: studentId, // You can include the student ID here if needed in the request body
           academicYear: year,
+          erasmus: 0,
           provisional: 0, // Assuming provisional is still part of the request
           teacherId: teacherId,
         }),

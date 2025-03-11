@@ -38,9 +38,9 @@ const CoordinatorTeacherValidationListBody = ({ teacherId }) => {
   // Fetch all validations
   useEffect(() => {
     console.log("UniCode",degrees.unicode);
-    console.log("DegreeId", degrees.degreeId);
+    console.log("DegreeId", degrees.degreeid);
     const uniCode = degrees.unicode;
-    const degreeId = degrees.degreeId;
+    const degreeId = degrees.degreeid;
     fetch(`http://localhost:5000/api/validations/${uniCode}/${degreeId}`)
       .then(response => {
         if (!response.ok) {

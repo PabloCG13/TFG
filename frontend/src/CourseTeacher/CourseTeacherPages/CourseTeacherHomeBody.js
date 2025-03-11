@@ -97,13 +97,13 @@ const handleConfirm = async () => {
     }
     return student;
   }));
-
+  const prov = selectedStudent.erasmus == 0 ? 1 : 0;
   try {
     const dbResponse = await fetch(`http://localhost:5000/api/transcripts/${selectedStudent.unicode}/${selectedStudent.degreeid}/${selectedStudent.courseid}/${selectedStudent.studentid}/${selectedStudent.academicyear}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        provisional: 1, // Assuming provisional is still part of the request
+        provisional: prov, // Assuming provisional is still part of the request
         mark: selectedStudent.mark,
       }),
     });
