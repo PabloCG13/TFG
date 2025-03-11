@@ -1,112 +1,113 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 
-const StudentUniversityInformationBody= ({studentId}) => {
-    const [degrees, setDegrees] = useState([]);
+const StudentUniversityInformationBody = ({ studentId }) => {
     const [universities, setUniversities] = useState([]);
+    const [degreesByUniversity, setDegreesByUniversity] = useState({});
+    const [degreeDetailsByUniversity, setDegreeDetailsByUniversity] = useState({});
     const location = useLocation();
-    const { participantAddress } = location.state || {}; // Extract participantAddress
-   // Get the info about the degree in whcih the student studies
-useEffect(() => {
-    if (!studentId) return;
 
-    // Fetch all universities where the student is studying
-    fetch(`http://localhost:5000/api/studies/${studentId}`)
-      .then(response => {
-        if (!response.ok) {
-          throw new Error(`Failed to fetch courses. Status: ${response.status}`);
-        }
-        return response.json();
-      })
-      .then(universitiesData => {
-        if (!Array.isArray(universitiesData) || universitiesData.length === 0) {
-          throw new Error("No universities found for this student.");
-        }
+    useEffect(() => {
+        if (!studentId) return;
 
-        setUniversities(universitiesData); // Store universities
-	console.log(universitiesData);
-        // Fetch details and degrees for each university
-        return Promise.all(
-          universitiesData.map(async (uni) => {
-            const uniResponse = await fetch(`http://localhost:5000/api/universities/${uni.unicode}`);
-            if (!uniResponse.ok) throw new Error(`Failed to fetch university ${uni.unicode}`);
-            const uniData = await uniResponse.json();
-		
-            const degreesResponse = await fetch(`http://localhost:5000/api/universities/${uni.unicode}/degrees`);
-            if (!degreesResponse.ok) throw new Error(`Failed to fetch degrees for ${uni.unicode}`);
-            const degreesData = await degreesResponse.json();
+        fetch(`http://localhost:5000/api/studies/${studentId}`)
+            .then(response => {
+                if (!response.ok) throw new Error(`Failed to fetch studies. Status: ${response.status}`);
+                return response.json();
+            })
+            .then(studiesData => {
+                if (!Array.isArray(studiesData) || studiesData.length === 0) {
+                    throw new Error("No universities found for this student.");
+                }
+		console.log("Studies data: ", studiesData);
+                // Organize degrees by university
+                const universityDegreeMap = {};
+                studiesData.forEach(({ unicode, degreeid }) => {
+                    if (!universityDegreeMap[unicode]) universityDegreeMap[unicode] = [];
+                    universityDegreeMap[unicode].push(degreeid);
+                });
 
-            return { uni: uniData, degrees : degreesData };
-          })
-        );
-      })
-      .then(results => {
-        setUniversities(results.map(r => r.uni)); // Store universities
-        setDegrees(prevDegrees => {
-        
-        const updatedDegrees = { ...prevDegrees };
-        results.forEach(({ uni, degrees }) => {
-          updatedDegrees[uni.uniCode] = degrees; // Store degrees per university
-        });
-	console.log(updatedDegrees);
-	console.log("degregeee",degrees);
-        return updatedDegrees;
-      });
-      })
-      .catch(error => console.error("Error:", error));
-  }, [studentId]);
+                setDegreesByUniversity(universityDegreeMap);
 
-return (
-    <div>
-      <h2>Student's Universities and Degrees</h2>
-      {universities.map((uni) => (
-        <div key={uni.uniCode} style={{ marginBottom: "20px", border: "1px solid black", padding: "10px" }}>
-          <h3>{uni.name}</h3>
-          <p><strong>ID:</strong> {uni.unicode}</p>
-          <p><strong>Location:</strong> {uni.location}</p>
+                // Fetch universities
+                return Promise.all(Object.keys(universityDegreeMap).map(async (uniCode) => {
+                    const uniResponse = await fetch(`http://localhost:5000/api/universities/${uniCode}`);
+                    if (!uniResponse.ok) throw new Error(`Failed to fetch university ${uniCode}`);
+                    
+		console.log("Uni Response: ", uniResponse);
+                    return uniResponse.json();
+                }));
+            })
+            .then(universitiesData => {
+                setUniversities(universitiesData);
+            })
+            .catch(error => console.error("Error:", error));
+    }, [studentId]);
 
-          <h4>Degrees</h4>
-          <ul>
-            {degrees[uni.uniCode]?.map(degree => (
-              <li key={degree.degreeId}>{degree.name} - Coordinator: {degree.teacherid}</li>
-            )) || <p>No degrees found.</p>}
-          </ul>
+    // Fetch degrees and teacher names once universities and degrees are known
+    useEffect(() => {
+        if (Object.keys(degreesByUniversity).length === 0) return;
+
+        const fetchDegrees = async () => {
+            const degreeDetailsMap = {};
+
+            for (const [uniCode, degreeIds] of Object.entries(degreesByUniversity)) {
+                degreeDetailsMap[uniCode] = [];
+
+                for (const degreeId of degreeIds) {
+                    try {
+                        // Fetch degree details using uniCode + degreeId
+                        const degreeResponse = await fetch(`http://localhost:5000/api/degrees/${uniCode}/${degreeId}`);
+                        if (!degreeResponse.ok) throw new Error(`Failed to fetch degree ${degreeId} at ${uniCode}`);
+                        const degreeData = await degreeResponse.json();
+			
+			console.log("Degree data: ", degreeData);
+                        // Fetch teacher details
+                        const teacherResponse = await fetch(`http://localhost:5000/api/teachers/${degreeData.teacherid}`);
+                        if (!teacherResponse.ok) throw new Error(`Failed to fetch teacher ${degreeData.teacherid}`);
+                        const teacherData = await teacherResponse.json();
+			
+			console.log("Teacher data: ", teacherData);
+                        // Store degree with teacher name
+                        degreeDetailsMap[uniCode].push({
+                            degreeId: degreeId,
+                            name: degreeData.name,
+                            teacherName: teacherData.name
+                        });
+                    } catch (error) {
+                        console.error("Error fetching degree/teacher:", error);
+                    }
+                }
+            }
+
+		console.log("Degree details map: ", degreeDetailsMap);
+            setDegreeDetailsByUniversity(degreeDetailsMap);
+        };
+
+        fetchDegrees();
+    }, [degreesByUniversity]); // Only run when degree list is first set
+
+    return (
+        <div>
+            <h2>Student's Universities and Degrees</h2>
+            {universities.map((uni) => (
+                <div key={uni.unicode} style={{ marginBottom: "20px", border: "1px solid black", padding: "10px" }}>
+                    <h3>{uni.name}</h3>
+                    <p><strong>ID:</strong> {uni.unicode}</p>
+                    <p><strong>Location:</strong> {uni.location}</p>
+
+                    <h4>Degrees</h4>
+                    <ul>
+                        {degreeDetailsByUniversity[uni.unicode]?.map(degree => (
+                            <li key={degree.degreeid}>
+                                {degree.name} - Coordinator: {degree.teacherName}
+                            </li>
+                        )) || <p>No degrees found.</p>}
+                    </ul>
+                </div>
+            ))}
         </div>
-      ))}
-    </div>
-  );
+    );
 };
-
-
-// Styles
-const containerStyle = {
-  display: "flex",
-  height: "100vh",
-  backgroundColor: "#f4f4f4",
-};
-
-const mainContentStyle = {
-  flex: 1,
-  marginLeft: "20px",
-};
-
-const tableContainer = {
-  background: "#fff",
-  padding: "20px",
-  boxShadow: "0px 0px 10px rgba(0, 0, 0, 0.1)",
-};
-
-const tableTitle = {
-  fontSize: "18px",
-  fontWeight: "bold",
-  marginBottom: "10px",
-};
-
-const tableStyle = {
-  width: "100%",
-  borderCollapse: "collapse",
-  textAlign: "center",
-};
-
 
 export default StudentUniversityInformationBody;
