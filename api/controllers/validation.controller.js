@@ -25,6 +25,27 @@ exports.findAll = async (req, res) => {
     }
 };
 
+// Get all validations that belong to a certain university and degree
+exports.findAllValidationsForDegreeinUni = async (req, res) => {
+    try {
+        const { uniCode, degreeId } = req.params;
+        const validations = await db.any(`
+        SELECT * FROM validation 
+        WHERE (uniCodeSrc = $1 AND degreeIdSrc = $2)
+               OR
+              (uniCodeDst = $1 AND degreeIdDst = $2);`
+        , [uniCode, degreeId]);
+
+        if (!validations) {
+            return res.status(404).json({ message: "Validation not found" });
+        }
+
+        res.status(200).json(validations);
+    } catch (err) {
+        res.status(500).json({ message: err.message || "Some error occurred" });
+    }
+};
+
 // Get one validation by code
 exports.findOne = async (req, res) => {
     try {

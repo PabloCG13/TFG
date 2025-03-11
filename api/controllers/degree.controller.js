@@ -25,6 +25,22 @@ exports.findAll = async (req, res) => {
     }
 };
 
+// Get one the degree and uni for a teacher
+exports.findUniAndDegree = async (req, res) => {
+    try {
+        const { teacherId } = req.params;
+        const degree = await db.oneOrNone("SELECT * FROM degree WHERE teacherId = $1", [teacherId]);
+
+        if (!degree) {
+            return res.status(404).json({ message: "Degree not found" });
+        }
+
+        res.status(200).json(degree);
+    } catch (err) {
+        res.status(500).json({ message: err.message || "Some error occurred" });
+    }
+};
+
 // Get one degree by code
 exports.findOne = async (req, res) => {
     try {

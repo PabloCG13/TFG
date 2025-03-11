@@ -6,6 +6,8 @@ module.exports = app => {
     router.post("/validations/", validations.create);
   
     router.get("/validations/", validations.findAll);
+
+    router.get("/validations/:uniCode/:degreeId", validations.findAllValidationsForDegreeinUni);
   
     router.get("/validations/:uniCodeSrc/:degreeIdSrc/:courseIdSrc/:uniCodeDst/:degreeIdDst/:courseIdDst", validations.findOne);
   

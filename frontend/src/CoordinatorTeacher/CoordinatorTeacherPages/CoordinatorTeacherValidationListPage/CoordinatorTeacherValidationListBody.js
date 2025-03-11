@@ -18,6 +18,7 @@ const CoordinatorTeacherValidationListBody = ({ teacherId }) => {
   const [showFilters, setShowFilters] = useState(false);
   const [uniqueUnicodes, setUniqueUnicodes] = useState([]);
   const [universities, setUniversities] = useState({});
+  const [degrees, setDegrees] = useState("");
 
   // Fetch teacher info
   useEffect(() => {
@@ -26,11 +27,21 @@ const CoordinatorTeacherValidationListBody = ({ teacherId }) => {
       .then(response => response.json())
       .then(data => setTeacher(data))
       .catch(error => console.error("Error fetching teacher info:", error));
+    fetch(`http://localhost:5000/api/degrees/${teacherId}`)
+      .then(response => response.json())
+      .then(data => {
+        console.log("Data:", data);
+        setDegrees(data);})
+      .catch(error => console.error("Error fetching degree info:", error));
   }, [teacherId]);
 
   // Fetch all validations
   useEffect(() => {
-    fetch(`http://localhost:5000/api/validations`)
+    console.log("UniCode",degrees.unicode);
+    console.log("DegreeId", degrees.degreeId);
+    const uniCode = degrees.unicode;
+    const degreeId = degrees.degreeId;
+    fetch(`http://localhost:5000/api/validations/${uniCode}/${degreeId}`)
       .then(response => {
         if (!response.ok) {
           throw new Error(`Failed to fetch validations. Status: ${response.status}`);
@@ -44,7 +55,7 @@ const CoordinatorTeacherValidationListBody = ({ teacherId }) => {
         setUniqueUnicodes([...uniqueUnicodesSet]);
       })
       .catch(error => console.error("Error fetching validations:", error));
-  }, []);
+  }, [degrees]);
 
   // Fetch university details for each unique university code
   useEffect(() => {
