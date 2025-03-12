@@ -110,17 +110,20 @@ app.post("/consult", async (req, res) => {
 app.post("/askForTranscript", async (req, res) => {
     try {
         const { file, addressStudent } = req.body;
+        console.log("Address:", addressStudent)
 
         if(!file || !addressStudent ) {
             return res.status(400).json({ error: "Missing required fields" });
         }
 
-        const result = await askForTranscript(addressStudent);
+        const result = await askForTranscript(file, addressStudent);
 
         if (result === "Error" || result === null) {
             return res.status(500).json({ error: "Failed to ask" });
         }
-        res.status(200).json({ success: true, result });
+        console.log("El result es:", result);
+
+        res.status(200).json({ success: true, result: result.result, hash: result.storedHash });
     } catch (error) {
         res.status(500).json({ success: false, error: error.message });
     }

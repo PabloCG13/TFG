@@ -37,22 +37,24 @@ const StudentTranscriptBody= ({studentId}) => {
   const handleTranscript = async () =>{
     console.log("He pulsado el boton");
     try{
+      console.log("El transcript es ", studentCourse);
       const response = await fetch("http://localhost:4000/askForTranscript", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ 
-          address: participantAddress, 
+          addressStudent: participantAddress, 
           file: studentCourse
         }),
       });
   
       const data = await response.json();
-  
+      console.log("askForTranscript:",data);
       if (data.success && data.result === true) {
-        console.log(response);
+        console.log("hash",data.hash);
         // Show on the
         setMessage("Hash:", data.hash);
       } else {
+        console.log("hash",data.hash);
         setMessage("Not the correct transcript. Please try again.");
       }
     } catch (error) {

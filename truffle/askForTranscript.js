@@ -42,9 +42,8 @@ async function askForTranscript(file, addressStudent) {
         const hash = await generateSHA256HashMessage(jsonData);
         console.log("Transcript HASH:", hash);
 
-        const result = await contract.methods.isTranscriptHashEqual(hash).send({
-        from: studentAddress,
-        gas: 6721975
+        const result = await contract.methods.isTranscriptHashEqual(hash).call({
+        from: studentAddress
         });
 
         console.log("Result:", result);
