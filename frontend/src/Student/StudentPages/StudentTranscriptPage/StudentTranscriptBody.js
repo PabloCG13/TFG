@@ -4,6 +4,7 @@ import { useLocation } from 'react-router-dom';
 const StudentTranscriptBody= ({studentId}) => {
   
   const [studentCourse, setStudentCourses] = useState([]);
+  const [message, setMessage] = useState(null); // State for error messages
   const location = useLocation();
   const { participantAddress } = location.state || {}; // Extract participantAddress
   
@@ -32,6 +33,34 @@ const StudentTranscriptBody= ({studentId}) => {
       .then((data) => setStudentCourses(data))
       .catch((error) => console.error("Error fetching student's courses:", error));
   }, [studentId]);
+
+  const handleTranscript = async () =>{
+    console.log("He pulsado el boton");
+    try{
+      const response = await fetch("http://localhost:4000/askForTranscript", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ 
+          address: participantAddress, 
+          file: studentCourse
+        }),
+      });
+  
+      const data = await response.json();
+  
+      if (data.success && data.result === true) {
+        console.log(response);
+        // Show on the
+        setMessage("Hash:", data.hash);
+      } else {
+        setMessage("Not the correct transcript. Please try again.");
+      }
+    } catch (error) {
+      console.error("Error making API request:", error);
+      setMessage("Server error. Please try again later.");
+    }
+  };
+
 
   return (
     <div style={containerStyle}>
@@ -67,6 +96,11 @@ const StudentTranscriptBody= ({studentId}) => {
             ))}
           </tbody>
         </table>
+        </div>
+        <div style={buttonContainerStyle}>
+          <button style={buttonStyle} onClick={()=> handleTranscript()}>
+            Print Transcript
+          </button>
         </div>
       </div>
     </div>
@@ -107,6 +141,29 @@ const lockIconStyle = {
   width: '20px',
   height: '20px',
   verticalAlign: 'middle', // Para alinear el ícono con el checkbox
+};
+
+/* Button Container */
+const buttonContainerStyle = {
+  display: "flex",
+  justifyContent: "center",
+  alignItems: "center",
+  height: "100vh", // Full screen height
+  gap: "40px", // Space between buttons
+    lexWrap: "wrap", // Prevents overflow on small screens
+};
+   
+/* Transcript Button */
+const buttonStyle = {
+  padding: "12px 24px",
+  fontSize: "30px",
+  border: "none",
+  backgroundColor: "#007bff",
+  color: "white", 
+  borderRadius: "8px",
+  cursor: "pointer",
+  transition: "background 0.3s ease, transform 0.2s ease",
+  textDecoration: "none"
 };
 
 

@@ -266,6 +266,10 @@ contract tfg {
         return studentToRecord[participant].hash;
     }
 
+    function isTranscriptHashEqual(string memory newHash) public view participantIsStudent(msg.sender) returns(bool){
+        return compareStrings(newHash, studentToRecord[msg.sender].hash);
+    }
+
     function removeParticipant(
         address participant
     ) public onlyOwner participantExists(participant) {

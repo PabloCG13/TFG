@@ -65,6 +65,7 @@ CREATE TABLE IF NOT EXISTS validation (
     courseIdDst VARCHAR(30) NOT NULL,
     token VARCHAR(64) NOT NULL,
     period VARCHAR(30) NOT NULL,
+    provisional INTEGER NOT NULL,
     PRIMARY KEY (uniCodeSrc, degreeIdSrc, courseIdSrc, uniCodeDst, degreeIdDst, courseIdDst),
     FOREIGN KEY (uniCodeSrc, degreeIdSrc, courseIdSrc) REFERENCES course (uniCode, degreeId, courseId) ON DELETE CASCADE,
     FOREIGN KEY (uniCodeDst, degreeIdDst, courseIdDst) REFERENCES course (uniCode, degreeId, courseId) ON DELETE CASCADE

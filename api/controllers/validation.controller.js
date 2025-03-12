@@ -3,12 +3,12 @@ const db = require("../config/db.js"); // Import pg-promise instance
 // Create validation
 exports.create = async (req, res) => {
     try {
-        const { uniCodeSrc, degreeIdSrc, courseIdSrc, uniCodeDst, degreeIdDst, courseIdDst, token, period } = req.body;
+        const { uniCodeSrc, degreeIdSrc, courseIdSrc, uniCodeDst, degreeIdDst, courseIdDst, token, period, provisional } = req.body;
         const query = `
-            INSERT INTO validation (uniCodeSrc, degreeIdSrc, courseIdSrc, uniCodeDst, degreeIdDst, courseIdDst, token, period)
-            VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *;
+            INSERT INTO validation (uniCodeSrc, degreeIdSrc, courseIdSrc, uniCodeDst, degreeIdDst, courseIdDst, token, period, provisional)
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *;
         `;
-        const validation = await db.one(query, [uniCodeSrc, degreeIdSrc, courseIdSrc, uniCodeDst, degreeIdDst, courseIdDst, token, period]);
+        const validation = await db.one(query, [uniCodeSrc, degreeIdSrc, courseIdSrc, uniCodeDst, degreeIdDst, courseIdDst, token, period, provisional]);
         res.status(201).json(validation);
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -34,6 +34,29 @@ exports.findAllValidationsForDegreeinUni = async (req, res) => {
         WHERE (uniCodeSrc = $1 AND degreeIdSrc = $2)
                OR
               (uniCodeDst = $1 AND degreeIdDst = $2);`
+        , [uniCode, degreeId]);
+
+        if (!validations) {
+            return res.status(404).json({ message: "Validation not found" });
+        }
+
+        res.status(200).json(validations);
+    } catch (err) {
+        res.status(500).json({ message: err.message || "Some error occurred" });
+    }
+};
+
+
+// Get all validations that belong to a certain university and degree that have not been approved
+exports.findAllProvisionalValidationsForDegreeinUni = async (req, res) => {
+    try {
+        const { uniCode, degreeId } = req.params;
+        const validations = await db.any(`
+        SELECT * FROM validation 
+        WHERE (uniCodeSrc = $1 AND degreeIdSrc = $2 AND provisional = 1)
+               ;`
+          //OR
+          //(uniCodeDst = $1 AND degreeIdDst = $2 AND provisional = 1)     
         , [uniCode, degreeId]);
 
         if (!validations) {

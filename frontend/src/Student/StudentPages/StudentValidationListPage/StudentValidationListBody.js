@@ -77,6 +77,12 @@ const StudentValidationListBody = ({ studentId }) => {
     setFilteredValidations(results);
   }, [searchTerm, validityPeriod, universityName, validations, universities]);
 
+  const handleValidation = async () =>{
+    console.log("He pulsado el boton");
+    
+
+  };
+
   return (
     <div style={containerStyle}>
       <div style={mainContentStyle}>
@@ -116,6 +122,7 @@ const StudentValidationListBody = ({ studentId }) => {
                 <th style={thStyle}>Destination Course</th>
                 <th style={thStyle}>Validity Period</th>
                 <th style={thStyle}>University Name</th>
+                <th style={thStyle}>Provisional</th>
               </tr>
             </thead>
             <tbody>
@@ -131,10 +138,20 @@ const StudentValidationListBody = ({ studentId }) => {
                       <div>Loading...</div>
                     )}
                   </td>
+                  <td>
+                  <span style={lockIconStyle}>
+                    {validatid.provisional === 0 ? "🔓" : "🔒"} 
+                  </span>
+                  </td>
                 </tr>
               ))}
             </tbody>
           </table>
+        </div>
+        <div style={buttonContainerStyle}>
+          <button style={buttonStyle} onClick={()=> handleValidation()}>
+            Ask for Validation
+          </button>
         </div>
       </div>
     </div>
@@ -187,6 +204,35 @@ const filterContainer = {
   display: 'flex',
   gap: '10px',
   marginBottom: '10px',
+};
+
+/* Button Container */
+const buttonContainerStyle = {
+  display: "flex",
+  justifyContent: "center",
+  alignItems: "center",
+  height: "100vh", // Full screen height
+  gap: "40px", // Space between buttons
+    lexWrap: "wrap", // Prevents overflow on small screens
+};
+   
+/* Button */
+const buttonStyle = {
+  padding: "12px 24px",
+  fontSize: "30px",
+  border: "none",
+  backgroundColor: "#007bff",
+  color: "white", 
+  borderRadius: "8px",
+  cursor: "pointer",
+  transition: "background 0.3s ease, transform 0.2s ease",
+  textDecoration: "none"
+};
+
+const lockIconStyle = {
+  width: '20px',
+  height: '20px',
+  verticalAlign: 'middle', // Para alinear el ícono con el checkbox
 };
 
 export default StudentValidationListBody;

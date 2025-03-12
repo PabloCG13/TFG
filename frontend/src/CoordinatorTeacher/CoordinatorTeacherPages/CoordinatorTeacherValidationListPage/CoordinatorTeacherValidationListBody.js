@@ -180,6 +180,7 @@ const CoordinatorTeacherValidationListBody = ({ teacherId }) => {
                 <th style={thStyle}>Destination Course</th>
                 <th style={thStyle}>Validity Period</th>
                 <th style={thStyle}>University Name</th>
+                <th style={thStyle}>Provisional</th>
               </tr>
             </thead>
             <tbody>
@@ -189,6 +190,11 @@ const CoordinatorTeacherValidationListBody = ({ teacherId }) => {
                   <td style={tdStyle}>{valid.unicodedst}, {valid.degreeiddst}, {valid.courseiddst}</td>
                   <td style={tdStyle}>{valid.period}</td>
                   <td style={tdStyle}>{universities[valid.unicodedst]?.name || "Loading..."}</td>
+                  <td>
+                  <span style={lockIconStyle}>
+                    {valid.provisional === 0 ? "🔓" : "🔒"} 
+                  </span>
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -298,6 +304,12 @@ const buttonStyle = {
   borderRadius: "5px",
   cursor: "pointer",
   marginTop: "10px",
+};
+
+const lockIconStyle = {
+  width: '20px',
+  height: '20px',
+  verticalAlign: 'middle', // Para alinear el ícono con el checkbox
 };
 
 
