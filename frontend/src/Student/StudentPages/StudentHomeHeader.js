@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import perfil from '../../Logo/perfil.png'; // Import the image from Logo folder
+import { Link } from 'react-router-dom'; // Import Link to redirect
 
 const StudentHomeHeader = () => {
   // State to control modal visibility
@@ -32,6 +33,15 @@ const StudentHomeHeader = () => {
           <div style={titleStyle}>
             <h1>Student Home Page</h1>
           </div>
+
+          <Link
+            to={`/`} // Route where it links to
+            style={backButtonStyle} 
+            onMouseOver={(e) => Object.assign(e.target.style, hoverStyle)} 
+            onMouseOut={(e) => Object.assign(e.target.style, backButtonStyle)} 
+            >
+            Log Out
+            </Link>
 
           {/* Notifications Icon */}
           <div style={notificationStyle} className="notifications">
@@ -105,6 +115,19 @@ const starButtonStyle = {
   cursor: 'pointer',
 };
 
+/* Back button styles */
+const backButtonStyle = {
+  textDecoration: 'none', /* Remove underline */
+  backgroundColor: '#ff4c4c', /* Red background */
+  color: 'white', /* White text */
+  padding: '10px 20px', /* Padding */
+  borderRadius: '5px', /* Rounded corners */
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  transition: 'background-color 0.3s', /* Smooth transition for hover effect */
+};
+
 // Modal Styles
 const modalOverlayStyle = {
   position: 'fixed',
@@ -134,6 +157,11 @@ const closeButtonStyle = {
   padding: '10px',
   marginTop: '20px',
   cursor: 'pointer',
+};
+
+/* Hover */
+const hoverStyle = {
+  backgroundColor: "#0056b3", // Changes the background color to a darker blue when the user hover 
 };
 
 export default StudentHomeHeader;
