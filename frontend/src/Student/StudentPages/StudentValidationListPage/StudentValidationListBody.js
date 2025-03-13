@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
+import { Link } from 'react-router-dom'; // Import Link to redirect
 
 const StudentValidationListBody = ({ studentId }) => {
   const [validations, setValidations] = useState([]);
@@ -79,8 +80,6 @@ const StudentValidationListBody = ({ studentId }) => {
 
   const handleValidation = async () =>{
     console.log("He pulsado el boton");
-    
-
   };
 
   return (
@@ -147,14 +146,20 @@ const StudentValidationListBody = ({ studentId }) => {
               ))}
             </tbody>
           </table>
-        </div>
-        <div style={buttonContainerStyle}>
-          <button style={buttonStyle} onClick={()=> handleValidation()}>
-            Ask for Validation
-          </button>
+    
+          </div>
+          {/*onClick={()=> handleValidation() */}              
+          <Link 
+          to={`/Student/StudentPages/StudentValidationListPage/StudentValidationListAskForValidationPage/StudentValidationListAskForValidation/${studentId}`}
+          state={{ participantAddress }}  // Pass participantAddress
+          style={validationListButtonStyle}
+          onMouseOver={(e) => Object.assign(e.target.style, hoverStyle)}
+          onMouseOut={(e) => Object.assign(e.target.style, validationListButtonStyle)}
+        >
+          Ask for Validation
+        </Link>
         </div>
       </div>
-    </div>
   );
 };
 
@@ -205,19 +210,9 @@ const filterContainer = {
   gap: '10px',
   marginBottom: '10px',
 };
-
-/* Button Container */
-const buttonContainerStyle = {
-  display: "flex",
-  justifyContent: "center",
-  alignItems: "center",
-  height: "100vh", // Full screen height
-  gap: "40px", // Space between buttons
-    lexWrap: "wrap", // Prevents overflow on small screens
-};
    
-/* Button */
-const buttonStyle = {
+/* Validation List Button */
+const validationListButtonStyle = {
   padding: "12px 24px",
   fontSize: "30px",
   border: "none",
@@ -227,12 +222,18 @@ const buttonStyle = {
   cursor: "pointer",
   transition: "background 0.3s ease, transform 0.2s ease",
   textDecoration: "none"
+
 };
 
 const lockIconStyle = {
   width: '20px',
   height: '20px',
   verticalAlign: 'middle', // Para alinear el ícono con el checkbox
+};
+
+/* Hover */
+const hoverStyle = {
+  backgroundColor: "#0056b3", // Changes the background color to a darker blue when the user hover 
 };
 
 export default StudentValidationListBody;

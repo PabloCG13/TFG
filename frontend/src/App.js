@@ -20,6 +20,8 @@ import StudentValidationList from "./Student/StudentPages/StudentValidationListP
 import StudentUniversityInformation from "./Student/StudentPages/StudentUniversityInformationPage/StudentUniversityInformation"; // Import Student University Information Page
 import StudentProfile from "./Student/StudentPages/StudentProfilePage/StudentProfile"; // Import Student Profile Page
 
+import StudentAskForValidation from "./Student/StudentPages/StudentValidationListPage/StudentValidationListAskForValidationPage/StudentValidationListAskForValidation"; // Import Student Profile Page
+
 import CourseTeacherHome from "./CourseTeacher/CourseTeacherPages/CourseTeacherHome"; // Import Course Teacher Home Page
 
 import CoordinatorTeacherHome from "./CoordinatorTeacher/CoordinatorTeacherPages/CoordinatorTeacherHome"; // Import Coordinator Teacher Home Page
@@ -80,6 +82,10 @@ function App() {
 
         {/* Student Profile route */}
         <Route path="/Student/StudentPages/StudentProfilePage/StudentProfile/:studentId" element={<StudentProfile />} />
+
+
+        {/* Student Ask For Validation Page route */}
+        <Route path="/Student/StudentPages/StudentValidationListPage/StudentValidationListAskForValidationPage/StudentValidationListAskForValidation/:studentId" element={< StudentAskForValidation/>} />
 
 
         {/* Course Teacher Home Page route */}
