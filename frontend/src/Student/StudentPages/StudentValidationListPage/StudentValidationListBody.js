@@ -122,6 +122,11 @@ const StudentValidationListBody = ({ studentId }) => {
                 <th style={thStyle}>Validity Period</th>
                 <th style={thStyle}>University Name</th>
                 <th style={thStyle}>Provisional</th>
+                {/* TODO: Add a button that only appears if it is provisional 
+                and origin course unicode and degreeId is the same */}
+
+                {/*add a filter to only show those destination unis that have button
+                */}
               </tr>
             </thead>
             <tbody>

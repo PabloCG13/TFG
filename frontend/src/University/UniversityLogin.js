@@ -15,10 +15,7 @@ const UniversityLogin = () => {
 
     try {
       
-    const dbResponse = await fetch(`http://localhost:5000/api/addresses/participant/${user}`, {
-      method: "GET",
-      headers: { "Content-Type": "application/json" },
-    });
+    const dbResponse = await fetch(`http://localhost:5000/api/addresses/participant/${user}`);
 
     const dbData = await dbResponse.json();
 

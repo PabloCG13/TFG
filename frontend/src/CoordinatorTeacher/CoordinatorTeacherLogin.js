@@ -14,10 +14,7 @@ const CourseTeacherLogin = () => {
     e.preventDefault();
 
     try {
-      const dbResponse = await fetch(`http://localhost:5000/api/addresses/participant/${teacherId}`, {
-        method: "GET",
-        headers: { "Content-Type": "application/json" },
-      });
+      const dbResponse = await fetch(`http://localhost:5000/api/addresses/participant/${teacherId}`);
   
       const dbData = await dbResponse.json();
   

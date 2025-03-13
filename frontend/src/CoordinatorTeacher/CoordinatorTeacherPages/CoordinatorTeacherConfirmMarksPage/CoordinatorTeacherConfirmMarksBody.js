@@ -377,6 +377,7 @@ const handleFinalConfirm = async () => {
             <tr>
               <th>ID</th>
               <th>Degree</th>
+              <th>Course</th>
               <th>Grade</th>
               <th>Provisional</th>
             </tr>
@@ -386,6 +387,7 @@ const handleFinalConfirm = async () => {
               <tr key={index}>
                 <td>{student.studentid}</td>
                 <td>{student.degreeid}</td>
+                <td>{student.courseid}</td>
                 <td>{convertMark(student.mark)}</td>
                 <td>
                   <span style={lockIconStyle}>

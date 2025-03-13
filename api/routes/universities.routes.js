@@ -4,7 +4,9 @@ module.exports = app => {
     var router = require("express").Router();
   
     router.post("/universities/", universities.create);
-  
+
+    router.post("/universities/exclude", universities.findUniversitiesExcluding);
+
     router.get("/universities/", universities.findAll);
   
     router.get("/universities/:uniCode", universities.findOne);

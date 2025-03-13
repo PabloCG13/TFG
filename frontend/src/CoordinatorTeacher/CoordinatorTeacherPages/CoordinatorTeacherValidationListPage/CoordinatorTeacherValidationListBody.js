@@ -179,7 +179,7 @@ const CoordinatorTeacherValidationListBody = ({ teacherId }) => {
                 <th style={thStyle}>Origin Course</th>
                 <th style={thStyle}>Destination Course</th>
                 <th style={thStyle}>Validity Period</th>
-                <th style={thStyle}>University Name</th>
+                <th style={thStyle}>Destination University Name</th>
                 <th style={thStyle}>Provisional</th>
               </tr>
             </thead>

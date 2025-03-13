@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import perfil from '../../../Logo/perfil.png'; // Import the image from Logo folder
 import { Link } from 'react-router-dom'; // Import Link to redirect
 
+
 const StudentTranscriptHeader = ({studentId}) => {
       // State to control modal visibility
       const [isModalOpen, setIsModalOpen] = useState(false);

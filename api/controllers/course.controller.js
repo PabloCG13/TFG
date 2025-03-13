@@ -74,6 +74,36 @@ exports.findOne = async (req, res) => {
     }
 };
 
+// Get remaining courses in the degree the student is enrolled in
+exports.findRemainingCoursesForStudent = async (req, res) => {
+    try {
+        const { uniCode, degreeId, studentId } = req.params;
+        const course = await db.any(`
+        WITH student_transcripts AS (
+            SELECT uniCode, degreeId, courseId
+            FROM transcript
+            WHERE studentId = $3
+        )
+        SELECT *
+        FROM course
+        WHERE uniCode = $1 
+        AND degreeId = $2
+        AND (uniCode, degreeId, courseId) NOT IN (
+            SELECT uniCode, degreeId, courseId FROM student_transcripts
+        );
+        
+        `, [uniCode, degreeId, studentId]);
+
+        if (!course) {
+            return res.status(404).json({ message: "Course not found" });
+        }
+
+        res.status(200).json(course);
+    } catch (err) {
+        res.status(500).json({ message: err.message || "Some error occurred" });
+    }
+};
+
 // Update a course by the code in the request
 exports.update = async (req, res) => {
     try {

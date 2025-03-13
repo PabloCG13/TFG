@@ -58,6 +58,29 @@ exports.getStudents = async (req, res) => {
     }
 };
 
+exports.findUniversitiesExcluding = async (req, res) => {
+    try {
+        // Extract the list of uniCodes to exclude from request body
+        const { uniCodes } = req.body;
+
+        if (!uniCodes || !Array.isArray(uniCodes) || uniCodes.length === 0) {
+            return res.status(400).json({ message: "Invalid or empty uniCode array" });
+        }
+
+        // Query to fetch universities excluding the provided uniCodes
+        const universities = await db.any(`
+            SELECT * FROM university 
+            WHERE uniCode NOT IN ($1:csv);
+        `, [uniCodes]);
+
+
+        res.status(200).json(universities);
+    } catch (err) {
+        res.status(500).json({ message: err.message || "Some error occurred" });
+    }
+};
+
+
 // Get all teachers teaching at a given university
 exports.getTeachers = async (req, res) => {
     try {

@@ -29,13 +29,23 @@ const StudentTranscriptBody= ({studentId}) => {
 
     //Call to get all the courses in which the student is enrolled
     fetch(`http://localhost:5000/api/transcripts/${studentId}`)
-      .then((response) => response.json())
-      .then((data) => setStudentCourses(data))
+      .then((response) =>{
+        if (!response.ok) {
+          throw new Error(`Failed to fetch validations. Status: ${response.status}`);
+        }
+        return response.json();
+      })
+      .then((data) =>{ 
+        if (!data.length) {
+          throw new Error("No validations found.");
+        }
+        setStudentCourses(data);
+      })
       .catch((error) => console.error("Error fetching student's courses:", error));
   }, [studentId]);
 
   const handleTranscript = async () =>{
-    console.log("He pulsado el boton");
+    console.log("He pulsado el boton con address", participantAddress);
     try{
       console.log("El transcript es ", studentCourse);
       const response = await fetch("http://localhost:4000/askForTranscript", {
