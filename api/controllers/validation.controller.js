@@ -53,7 +53,7 @@ exports.findAllProvisionalValidationsForDegreeinUni = async (req, res) => {
         const { uniCode, degreeId } = req.params;
         const validations = await db.any(`
         SELECT * FROM validation 
-        WHERE (uniCodeSrc = $1 AND degreeIdSrc = $2 AND provisional = 1)
+        WHERE (uniCodeSrc = $1 AND degreeIdSrc = $2 AND provisional = 0)
                ;`
           //OR
           //(uniCodeDst = $1 AND degreeIdDst = $2 AND provisional = 1)     
