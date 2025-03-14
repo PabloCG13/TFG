@@ -1,8 +1,12 @@
 import React from 'react';
 import perfil from '../../../Logo/perfil.png'; // Import the image from Logo folder
 import { Link } from 'react-router-dom'; // Import Link to redirect
+import { useLocation } from 'react-router-dom';
 
 const CoordinatorTeacherValidationListHeader = ({teacherId}) => {
+    const location = useLocation();
+    const { participantAddress } = location.state || {}; // Extract participantAddress
+
   return (
     <header style={headerStyle}>
       <div style={containerStyle}>
@@ -22,6 +26,7 @@ const CoordinatorTeacherValidationListHeader = ({teacherId}) => {
 
         <Link
         to={`/CoordinatorTeacher/CoordinatorTeacherPages/CoordinatorTeacherHome/${teacherId}`} // Route where it links to
+        state={{ participantAddress }}  // Pass participantAddress
         style={backButtonStyle} 
         onMouseOver={(e) => Object.assign(e.target.style, hoverStyle)} 
         onMouseOut={(e) => Object.assign(e.target.style, backButtonStyle)} 

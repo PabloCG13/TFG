@@ -1,8 +1,13 @@
 import React, { useState } from 'react';
 import perfil from '../../../../Logo/perfil.png'; // Import the image from Logo folder
 import { Link } from 'react-router-dom'; // Import Link to redirect
+import { useLocation } from 'react-router-dom';
 
 const StudentValidationListAskForValidationHeader = ({studentId}) => {
+  const location = useLocation();
+  const { participantAddress } = location.state || {}; // Extract participantAddress
+ 
+ 
   // State to control modal visibility
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -36,6 +41,7 @@ const StudentValidationListAskForValidationHeader = ({studentId}) => {
 
           <Link
           to={`/Student/StudentPages/StudentValidationListPage/StudentValidationList/${studentId}`} // Route where it links to
+          state={{ participantAddress }}  // Pass participantAddress
           style={backButtonStyle} 
           onMouseOver={(e) => Object.assign(e.target.style, hoverStyle)} 
           onMouseOut={(e) => Object.assign(e.target.style, backButtonStyle)} 

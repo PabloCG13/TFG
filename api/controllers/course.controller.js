@@ -79,10 +79,27 @@ exports.findRemainingCoursesForStudent = async (req, res) => {
     try {
         const { uniCode, degreeId, studentId } = req.params;
         const course = await db.any(`
-        WITH student_transcripts AS (
+        WITH 
+        student_transcripts AS (
+            -- Get all courses the student has taken in the same degree
             SELECT uniCode, degreeId, courseId
             FROM transcript
             WHERE studentId = $3
+        ),
+        external_transcripts AS (
+            -- Get all transcripts for the student but in different universities/degrees
+            SELECT uniCode, degreeId, courseId
+            FROM transcript
+            WHERE studentId = $3
+            AND (uniCode, degreeId) NOT IN (SELECT uniCode, degreeId FROM student_transcripts)
+        ),
+        validated_courses AS (
+            -- Find all courses validated based on previous external transcripts
+            SELECT v.uniCodeSrc AS uniCode, v.degreeIdSrc AS degreeId, v.courseIdSrc AS courseId
+            FROM validation v
+            JOIN external_transcripts et ON v.uniCodeDst = et.uniCode 
+                                          AND v.degreeIdDst = et.degreeId 
+                                          AND v.courseIdDst = et.courseId
         )
         SELECT *
         FROM course
@@ -90,8 +107,10 @@ exports.findRemainingCoursesForStudent = async (req, res) => {
         AND degreeId = $2
         AND (uniCode, degreeId, courseId) NOT IN (
             SELECT uniCode, degreeId, courseId FROM student_transcripts
+        )
+        AND (uniCode, degreeId, courseId) NOT IN (
+            SELECT uniCode, degreeId, courseId FROM validated_courses
         );
-        
         `, [uniCode, degreeId, studentId]);
 
         if (!course) {
