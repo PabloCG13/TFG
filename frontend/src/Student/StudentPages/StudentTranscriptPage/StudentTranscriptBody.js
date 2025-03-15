@@ -7,6 +7,9 @@ const StudentTranscriptBody= ({studentId}) => {
   const [message, setMessage] = useState(null); // State for error messages
   const location = useLocation();
   const { participantAddress } = location.state || {}; // Extract participantAddress
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalMessage, setModalMessage] = useState("");
   
   useEffect(() => {
     //Call to get all the courses in which the student is enrolled
@@ -44,15 +47,17 @@ const StudentTranscriptBody= ({studentId}) => {
       if (data.success && data.result === true) {
         console.log("hash",data.hash);
         // Show on the
-        setMessage("Hash:", data.hash);
+        setModalMessage("Hash of the transcript:", data.hash);
       } else {
         console.log("hash",data.hash);
-        setMessage("Not the correct transcript. Please try again.");
+        setModalMessage("Not the correct transcript. Please try again.");
       }
     } catch (error) {
       console.error("Error making API request:", error);
-      setMessage("Server error. Please try again later.");
+      setModalMessage("Server error. Please try again later.");
     }
+
+    setIsModalOpen(true);
   };
 
 
@@ -97,6 +102,16 @@ const StudentTranscriptBody= ({studentId}) => {
           </button>
         </div>
       </div>
+      {/* Modal Popup */}
+      {isModalOpen && (
+        <div style={modalOverlayStyle} onClick={() => setIsModalOpen(false)}>
+          <div style={modalStyle} onClick={(e) => e.stopPropagation()}>
+            <h2>Transcript Verification</h2>
+            <p>{modalMessage}</p>
+            <button style={closeButtonStyle} onClick={() => setIsModalOpen(false)}>Close</button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
@@ -158,6 +173,37 @@ const buttonStyle = {
   cursor: "pointer",
   transition: "background 0.3s ease, transform 0.2s ease",
   textDecoration: "none"
+};
+
+const modalOverlayStyle = {
+  position: "fixed",
+  top: 0,
+  left: 0,
+  width: "100%",
+  height: "100%",
+  backgroundColor: "rgba(0, 0, 0, 0.5)",
+  display: "flex",
+  justifyContent: "center",
+  alignItems: "center",
+  zIndex: 1000,
+};
+
+const modalStyle = {
+  backgroundColor: "white",
+  padding: "20px",
+  borderRadius: "8px",
+  textAlign: "center",
+  width: "400px",
+};
+
+const closeButtonStyle = {
+  backgroundColor: "#28a745",
+  color: "white",
+  border: "none",
+  padding: "10px",
+  marginTop: "20px",
+  cursor: "pointer",
+  width: "100px",
 };
 
 

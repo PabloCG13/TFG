@@ -78,7 +78,7 @@ const StudentValidationListBody = ({ studentId }) => {
     setFilteredValidations(results);
   }, [searchTerm, validityPeriod, universityName, validations, universities]);
 
-  const handleValidation = async () =>{
+  const handlePetition = async () =>{
     console.log("He pulsado el boton");
   };
 
@@ -147,6 +147,11 @@ const StudentValidationListBody = ({ studentId }) => {
                     {validatid.provisional === 0 ? "🔓" : "🔒"} 
                   </span>
                   </td>
+                  <td>
+                  <button style={buttonStyle} onClick={() => handlePetition(validatid)}>
+                  Choose
+                  </button>
+                </td>
                 </tr>
               ))}
             </tbody>
@@ -228,6 +233,19 @@ const validationListButtonStyle = {
   transition: "background 0.3s ease, transform 0.2s ease",
   textDecoration: "none"
 
+};
+
+/* Transcript Button */
+const buttonStyle = {
+  padding: "12px 24px",
+  fontSize: "30px",
+  border: "none",
+  backgroundColor: "#007bff",
+  color: "white", 
+  borderRadius: "8px",
+  cursor: "pointer",
+  transition: "background 0.3s ease, transform 0.2s ease",
+  textDecoration: "none"
 };
 
 const lockIconStyle = {
