@@ -87,34 +87,15 @@ const CoordinatorTeacherConfirmMarksBody = ({teacherId}) => {
     //setStudents({...selectedStudent, mark: event.target.value });
   };
 
+
   // TODO check if the api call fails if the frontend grade changes
   // Function to confirm the new grade
 const handleConfirm = async () => {
   // Actualizar la nota en el estado de students sin hacer un nuevo fetch
-  setStudents(prevStudents => prevStudents.map(student => {
-    if (student.studentid === selectedStudent.studentid) {
-      return { ...student, mark: selectedStudent.mark }; // Actualiza solo la nota del estudiante modificado
-    }
-    return student;
-  }));
-
+  
   try {
-    const dbResponse = await fetch(`http://localhost:5000/api/transcripts/${selectedStudent.unicode}/${selectedStudent.degreeid}/${selectedStudent.courseid}/${selectedStudent.studentid}/${selectedStudent.academicyear}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        provisional: 1, // Assuming provisional is still part of the request
-        mark: selectedStudent.mark,
-      }),
-    });
+    const prov = selectedStudent.erasmus === 0 ? 1 : 0;
 
-    // Handle the response from the database 
-    if (dbResponse.ok) {
-      const responseJson = await dbResponse.json();
-      console.log('New mark updated response:', responseJson);
-    } else {
-      throw new Error('Failed to update mark');
-    }
 
     const dbResponseAddress = await fetch(`http://localhost:5000/api/addresses/participant/${selectedStudent.studentid}`);
     if (!dbResponseAddress.ok) {
@@ -129,15 +110,38 @@ const handleConfirm = async () => {
       throw new Error(`Failed to fetch transcript. Status: ${dbResponseTranscript.status}`);
     }
 
-    const transcriptHash = await dbResponseTranscript.json();
-    console.log("Got this transcript: ", transcriptHash);
+    let transcriptHash = await dbResponseTranscript.json();
+    console.log("Got this transcript before modification:", transcriptHash);
+
+
+    // Find the specific entry that matches selectedStudent
+    let updatedTranscript = transcriptHash.map(entry => {
+        if (
+            entry.unicode === selectedStudent.unicode &&
+            entry.degreeid === selectedStudent.degreeid &&
+            entry.courseid === selectedStudent.courseid &&
+            entry.studentid === selectedStudent.studentid &&
+            entry.academicyear === selectedStudent.academicyear
+        ) {
+            return {
+                ...entry,
+                provisional: prov,  // Update provisional field
+                mark: selectedStudent.mark  // Update mark field
+            };
+        }
+        return entry;
+    });
+
+
+    console.log("Updated transcript:", updatedTranscript);
+
 
     // Step 2: Modify transcript on the blockchain
     const transcriptResponse = await fetch("http://localhost:4000/modifyTranscript", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        file: transcriptHash,
+        file: updatedTranscript,
         addressStudent: dbData.addressid,
         address: participantAddress,
         type: 1,
@@ -152,6 +156,24 @@ const handleConfirm = async () => {
     const transcriptHashModified = transcriptData.hash;
     console.log("Transcript modified successfully:", transcriptHashModified);
 
+    
+    const dbResponse = await fetch(`http://localhost:5000/api/transcripts/${selectedStudent.unicode}/${selectedStudent.degreeid}/${selectedStudent.courseid}/${selectedStudent.studentid}/${selectedStudent.academicyear}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        provisional: prov, // Assuming provisional is still part of the request
+        mark: selectedStudent.mark,
+      }),
+    });
+
+    // Handle the response from the database 
+    if (dbResponse.ok) {
+      const responseJson = await dbResponse.json();
+      console.log('New mark updated response:', responseJson);
+    } else {
+      throw new Error('Failed to update mark');
+    }
+
     const updateResponse = await fetch(`http://localhost:5000/api/students/${selectedStudent.studentid}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
@@ -164,7 +186,13 @@ const handleConfirm = async () => {
 
     const updateData = await updateResponse.json();
     console.log(`Student ${selectedStudent.studentid} updated successfully with transcriptHash:`, updateData);
-
+   
+    setStudents(prevStudents => prevStudents.map(student => {
+      if (student.studentid === selectedStudent.studentid) {
+        return { ...student, mark: selectedStudent.mark, provisional: prov }; // Actualiza solo la nota del estudiante modificado
+      }
+      return student;
+    }));
   } catch (error) {
     console.error("Error:", error);
     setMessage("There was an error updating the grade.");
@@ -394,7 +422,9 @@ const handleFinalConfirm = async () => {
                     {student.provisional === 0 ? "🔓" : "🔒"} 
                   </span>
                 </td>
-                <td>
+                {student.mark !== null && (
+                  <>
+                  <td>
                   <button style={buttonStyle} onClick={() => openModal(student)}>
                   Modify
                   </button>
@@ -404,6 +434,9 @@ const handleFinalConfirm = async () => {
                   <button style={buttonStyle} onClick={handleFinalConfirm}>
                   Confirm
                   </button></td>
+                  </>
+                )}
+                
               </tr>
             ))}
           </tbody>

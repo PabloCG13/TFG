@@ -1,8 +1,46 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import perfil from '../../Logo/perfil.png'; // Import the image from Logo folder
 import { Link } from 'react-router-dom'; // Import Link to redirect
 
-const CourseTeacherHomeHeader = () => {
+const CourseTeacherHomeHeader = ({teacherId}) => {
+const [validations, setValidations] = useState([]);
+
+  useEffect(() => {
+    if (!teacherId) return;
+
+    fetch(`http://localhost:5000/api/courses/teacher/${teacherId}`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`Failed to fetch courses. Status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            // Extract ONLY the 'courseid' field
+            const courseId = data.courseid;  // Assuming the API always returns a single object
+            const degreeId = data.degreeid;
+            const uniCode = data.unicode;
+            if (!courseId) {
+                throw new Error("courseid is missing in API response");
+            }
+
+            console.log("Extracted course ID:", courseId);
+
+            // Now fetch students for this courseId
+            return fetch(`http://localhost:5000/api/validations/request/${uniCode}/${degreeId}/${courseId}`);
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`Failed to fetch students. Status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then((validData) => setValidations(validData))
+        .catch(error => console.error("Error:", error));
+      
+}, [teacherId]);
+  	
+
   // State to control modal visibility
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -14,6 +52,26 @@ const CourseTeacherHomeHeader = () => {
   // Function to close modal
   const closeModal = () => {
     setIsModalOpen(false);
+  };
+
+  const handleBackCourse = () =>{
+    const currentTimestamp = new Date().toISOString();
+    console.log("Timestamp:", currentTimestamp);
+    console.log("teacherId", teacherId);
+    // Make the PUT request to update lastAccess
+    fetch(`http://localhost:5000/api/teachers/${teacherId}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ lastAccess: currentTimestamp }),
+    })
+    .then(response => {
+      if (!response.ok) {
+        throw new Error(`Failed to update lastAccess. Status: ${response.status}`);
+      }
+      return response.json();
+     })
+     .then(data => console.log("Successfully updated lastAccess:", data))
+     .catch(error => console.error("Error updating lastAccess:", error));
   };
 
   return (
@@ -37,6 +95,13 @@ const CourseTeacherHomeHeader = () => {
           <Link
             to={`/`} // Route where it links to
             style={backButtonStyle} 
+            onClick={(e) => {
+              e.preventDefault(); // Prevent immediate navigation
+              handleBackCourse(); // Call the function
+              setTimeout(() => {
+                window.location.href = "/"; // Navigate after updating lastAccess
+              }, 500); // Delay navigation slightly to ensure update
+            }}
             onMouseOver={(e) => Object.assign(e.target.style, hoverStyle)} 
             onMouseOut={(e) => Object.assign(e.target.style, backButtonStyle)} 
             >

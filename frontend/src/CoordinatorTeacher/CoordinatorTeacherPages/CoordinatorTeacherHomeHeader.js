@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import perfil from '../../Logo/perfil.png'; // Import the image from Logo folder
 import { Link } from 'react-router-dom'; // Import Link to redirect
 
-const CoordinatorTeacherHomeHeader = () => {
+const CoordinatorTeacherHomeHeader = ({teacherId}) => {
   // State to control modal visibility
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -14,6 +14,25 @@ const CoordinatorTeacherHomeHeader = () => {
   // Function to close modal
   const closeModal = () => {
     setIsModalOpen(false);
+  };
+
+  const handleBackCourse = () =>{
+    const currentTimestamp = new Date().toISOString();
+
+    // Make the PUT request to update lastAccess
+    fetch(`http://localhost:5000/api/teachers/${teacherId}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ lastAccess: currentTimestamp }),
+    })
+    .then(response => {
+      if (!response.ok) {
+        throw new Error(`Failed to update lastAccess. Status: ${response.status}`);
+      }
+      return response.json();
+     })
+     .then(data => console.log("Successfully updated lastAccess:", data))
+     .catch(error => console.error("Error updating lastAccess:", error));
   };
 
   return (
@@ -37,6 +56,13 @@ const CoordinatorTeacherHomeHeader = () => {
           <Link
             to={`/`} // Route where it links to
             style={backButtonStyle} 
+            onClick={(e) => {
+              e.preventDefault(); // Prevent immediate navigation
+              handleBackCourse(); // Call the function
+              setTimeout(() => {
+                window.location.href = "/"; // Navigate after updating lastAccess
+              }, 500); // Delay navigation slightly to ensure update
+            }}
             onMouseOver={(e) => Object.assign(e.target.style, hoverStyle)} 
             onMouseOut={(e) => Object.assign(e.target.style, backButtonStyle)} 
             >

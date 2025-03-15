@@ -11,6 +11,8 @@ module.exports = app => {
   
     router.get("/validations/provisional/:uniCode/:degreeId", validations.findAllProvisionalValidationsForDegreeinUni);
 
+    router.get("/validations/provisional/requests/:uniCode/:degreeId/:courseId", validations.findPendingRequestsForCourse);
+
     router.get("/validations/:uniCodeSrc/:degreeIdSrc/:courseIdSrc/:uniCodeDst/:degreeIdDst/:courseIdDst", validations.findOne);
   
     router.put("/validations/:uniCodeSrc/:degreeIdSrc/:courseIdSrc/:uniCodeDst/:degreeIdDst/:courseIdDst", validations.update);

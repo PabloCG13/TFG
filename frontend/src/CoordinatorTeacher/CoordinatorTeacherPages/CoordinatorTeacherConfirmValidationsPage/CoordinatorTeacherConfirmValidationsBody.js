@@ -1,13 +1,15 @@
 import React, { useState, useEffect } from "react";
 import { useLocation } from 'react-router-dom';
 
-const CoordinatorTeacherConfirmValidationBody= ({teacherId}) => {
+
+const CoordinatorTeacherConfirmValidationBody = ({ teacherId }) => {
   const [teacher, setTeacher] = useState([]);
   const [oldPasswd, setOldPasswd] = useState('');
   const [newPasswd, setNewPasswd] = useState('');
   const [message, setMessage] = useState('');
   const location = useLocation();
-  const { participantAddress } = location.state || {}; 
+  const { participantAddress } = location.state || {};
+
 
   // Validation states
   const [validations, setValidations] = useState([]);
@@ -20,6 +22,14 @@ const CoordinatorTeacherConfirmValidationBody= ({teacherId}) => {
   const [universities, setUniversities] = useState({});
   const [degrees, setDegrees] = useState("");
   const [selectedValidation, setSelectedValidation] = useState(null);
+  const [refreshKey, setRefreshKey] = useState(0);
+
+
+  // Modal states
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedMonth, setSelectedMonth] = useState("");
+  const [selectedYear, setSelectedYear] = useState("");
+
 
   // Fetch teacher info
   useEffect(() => {
@@ -30,25 +40,17 @@ const CoordinatorTeacherConfirmValidationBody= ({teacherId}) => {
       .catch(error => console.error("Error fetching teacher info:", error));
     fetch(`http://localhost:5000/api/degrees/${teacherId}`)
       .then(response => response.json())
-      .then(data => {
-        console.log("Data:", data);
-        setDegrees(data);})
+      .then(data => setDegrees(data))
       .catch(error => console.error("Error fetching degree info:", error));
-  }, [teacherId]);
+  }, [teacherId, refreshKey]);
+
 
   // Fetch all validations
   useEffect(() => {
-    console.log("UniCode",degrees.unicode);
-    console.log("DegreeId", degrees.degreeid);
     const uniCode = degrees.unicode;
     const degreeId = degrees.degreeid;
     fetch(`http://localhost:5000/api/validations/provisional/${uniCode}/${degreeId}`)
-      .then(response => {
-        if (!response.ok) {
-          throw new Error(`Failed to fetch validations. Status: ${response.status}`);
-        }
-        return response.json();
-      })
+      .then(response => response.json())
       .then(data => {
         setValidations(data);
         setFilteredValidations(data);
@@ -58,7 +60,8 @@ const CoordinatorTeacherConfirmValidationBody= ({teacherId}) => {
       .catch(error => console.error("Error fetching validations:", error));
   }, [degrees]);
 
-  // Fetch university details for each unique university code
+
+  // Fetch university details
   useEffect(() => {
     uniqueUnicodes.forEach(unicodedst => {
       fetch(`http://localhost:5000/api/universities/${unicodedst}`)
@@ -70,27 +73,20 @@ const CoordinatorTeacherConfirmValidationBody= ({teacherId}) => {
     });
   }, [uniqueUnicodes]);
 
-  // Filter validations
-  useEffect(() => {
-    let results = validations;
-    if (searchTerm) {
-      results = results.filter(valid =>
-        valid.courseidsrc.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-    }
-    if (validityPeriod) {
-      results = results.filter(valid => parseInt(valid.period) >= parseInt(validityPeriod));
-    }
-    if (universityName) {
-      results = results.filter(valid => {
-        const university = universities[valid.unicodedst];
-        return university && university.name.toLowerCase().includes(universityName.toLowerCase());
-      });
-    }
-    setFilteredValidations(results);
-  }, [searchTerm, validityPeriod, universityName, validations, universities]);
 
-  // Function to change the password
+  // Open modal to set Month and Year before confirming validation
+  const openModal = (valid) => {
+    setSelectedValidation(valid);
+    setSelectedMonth("");
+    setSelectedYear("");
+    setIsModalOpen(true);
+  };
+
+
+  // Close modal
+  const closeModal = () => {
+    setIsModalOpen(false);
+  };
   const changePasswordCall = async () => {
     try {
       const response = await fetch("http://localhost:4000/consult", {
@@ -101,10 +97,11 @@ const CoordinatorTeacherConfirmValidationBody= ({teacherId}) => {
           user: teacherId,
           passwd: oldPasswd,
           role: 3,
-          type: 2 
+          type: 2
         }),
       });
-
+ 
+ 
       const data = await response.json();
       if (data.success && data.result === true) {
         const response = await fetch("http://localhost:4000/changeParticipant", {
@@ -118,14 +115,16 @@ const CoordinatorTeacherConfirmValidationBody= ({teacherId}) => {
         });
         const participantData = await response.json();
         const teacherHash = participantData.hash;
-
+ 
+ 
         if (teacherHash !== "Error") {
           const dbResponse = await fetch(`http://localhost:5000/api/teachers/${teacherId}`, {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ hash: teacherHash }),
           });
-
+ 
+ 
           const dbData = await dbResponse.json();
           console.log(dbData);
         } else {
@@ -137,15 +136,18 @@ const CoordinatorTeacherConfirmValidationBody= ({teacherId}) => {
       setMessage("Server error. Please try again later.");
     }
   };
-  
-  const handleConfirmValidation = (data) =>{
+
+
+  const handleAskCourseTeacher = (data) =>{
+    setSelectedValidation(data);
+    console.log("Selected validation", data);
     setSelectedValidation(data);
     console.log("Selected validation", data);
      // Make the PUT request to update lastAccess
      fetch(`http://localhost:5000/api/validations/${data.unicodesrc}/${data.degreeidsrc}/${data.courseidsrc}/${data.unicodedst}/${data.degreeiddst}/${data.courseiddst}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ provisional: 1 }),
+      body: JSON.stringify({ provisional: 2 }),
     })
     .then(response => {
       if (!response.ok) {
@@ -153,17 +155,60 @@ const CoordinatorTeacherConfirmValidationBody= ({teacherId}) => {
       }
       return response.json();
      })
-     .then(data => console.log("Successfully updated provisional:", data))
-     .catch(error => console.error("Error updating provisional:", error));
-  //Call to the blockcahin to addValidation 
-
+     .then(data => {
+      setRefreshKey(prev => prev +1);
+      console.log("Successfully updated provisional:", data);
+    })
+     .catch(error => console.error("Error updating provisional:", error));   
+   
   };
+ 
 
-  const handleAskCourseTeacher = (data) =>{
-    setSelectedValidation(data);
-    console.log("Selected validation", data);
-        
-    
+  // Function to confirm validation after selecting month and year
+  const handleConfirmValidation = async () => {
+    if (!selectedMonth || !selectedYear) {
+      alert("Please select a month and year before confirming.");
+      return;
+    }
+
+
+    const data = selectedValidation;
+
+
+    // Make the PUT request to update validation
+    fetch(`http://localhost:5000/api/validations/${data.unicodesrc}/${data.degreeidsrc}/${data.courseidsrc}/${data.unicodedst}/${data.degreeiddst}/${data.courseiddst}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ provisional: 1 }),
+    })
+    .then(response => response.json())
+    .then(data => {
+      setRefreshKey(prev => prev + 1);
+      console.log("Successfully updated provisional:", data);
+      closeModal();
+    })
+    .catch(error => console.error("Error updating provisional:", error));
+
+
+    // Blockchain call (Example)
+    const courseSrc = `${data.unicodesrc}, ${data.degreeidsrc}, ${data.courseidsrc}`;
+    const courseDst = `${data.unicodedst}, ${data.degreeiddst}, ${data.courseiddst}`;
+
+
+    // await fetch("http://localhost:4000/addValidation", {
+    //   method: "POST",
+    //   headers: { "Content-Type": "application/json" },
+    //   body: JSON.stringify({
+    //     address: participantAddress,
+    //     srcCour: courseSrc,
+    //     dstCour: courseDst,
+    //     _month: selectedMonth,
+    //     _year: selectedYear
+    //   }),
+    // });
+
+
+    console.log(`Confirmed validation for Month: ${selectedMonth}, Year: ${selectedYear}`);
   };
 
 
@@ -178,31 +223,19 @@ const CoordinatorTeacherConfirmValidationBody= ({teacherId}) => {
           <h2 style={profileTitle}>NAME = {teacher.name}</h2>
           <input type="password" placeholder="Old password" style={inputStyle} value={oldPasswd} onChange={(e) => setOldPasswd(e.target.value)}/>
           <input type="password" placeholder="New password" style={inputStyle} value={newPasswd} onChange={(e) => setNewPasswd(e.target.value)} />
-          <button onClick={changePasswordCall} style={buttonStyle}>Modify password</button > 
+          <button onClick={changePasswordCall} style={buttonStyle}>Modify password</button >
         </div>
       </div>
+
+
+
 
       {/* Table with validations */}
       <div style={mainContentStyle}>
         <div style={tableContainer}>
           <h2 style={tableTitle}>Validations</h2>
-          <div style={filterContainer}>
-            <input type="text" placeholder="Search by Course ID" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
-            <button onClick={() => setShowFilters(!showFilters)}>Search Options</button>
-          </div>
-          {showFilters && (
-            <div style={filterContainer}>
-              <input type="number" placeholder="Validity Period (Year)" value={validityPeriod} onChange={(e) => setValidityPeriod(e.target.value)} />
-              <select value={universityName} onChange={(e) => setUniversityName(e.target.value)}>
-                <option value="">Select University</option>
-                {Object.values(universities).map(university => (
-                  <option key={university.unicode} value={university.name}>
-                    {university.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-          )}
+
+
           <table style={tableStyle}>
             <thead>
               <tr>
@@ -210,7 +243,7 @@ const CoordinatorTeacherConfirmValidationBody= ({teacherId}) => {
                 <th style={thStyle}>Destination Course</th>
                 <th style={thStyle}>Validity Period</th>
                 <th style={thStyle}>Destination University Name</th>
-               
+                <th style={thStyle}>Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -221,24 +254,49 @@ const CoordinatorTeacherConfirmValidationBody= ({teacherId}) => {
                   <td style={tdStyle}>{valid.period}</td>
                   <td style={tdStyle}>{universities[valid.unicodedst]?.name || "Loading..."}</td>
                   <td>
-                  <button style={buttonStyle} onClick={() => handleConfirmValidation(valid)}>
-                  Confirm
-                  </button>
-                </td>
-                <td>
-                  <button style={buttonStyle} onClick={() => handleAskCourseTeacher(valid)}>
-                  Ask Course Teacher
-                  </button>
-                </td>
+                    {valid.provisional === 2 ? (
+                      <span style={{ color: "orange", fontWeight: "bold" }}>Pending Confirmation</span>
+                    ) : (
+                      <>
+                        <td>
+                        <button style={buttonStyle} onClick={() => openModal(valid)}>
+                          Confirm
+                        </button>
+                        </td>
+                        <td>
+                          <button style={buttonStyle} onClick={() => handleAskCourseTeacher(valid)}>
+                          Ask Course Teacher
+                          </button>
+                        </td>
+
+                      </>
+                    )}
+                  </td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
       </div>
+
+
+      {/* Modal for selecting Month and Year */}
+      {isModalOpen && (
+        <div style={modalOverlayStyle} onClick={closeModal}>
+          <div style={modalStyle} onClick={(e) => e.stopPropagation()}>
+            <h2>Select Month and Year</h2>
+            <label>Month:</label>
+            <input type="number" min="1" max="12" value={selectedMonth} onChange={(e) => setSelectedMonth(e.target.value)} />
+            <label>Year:</label>
+            <input type="number" min="2000" max="2100" value={selectedYear} onChange={(e) => setSelectedYear(e.target.value)} />
+            <button style={buttonStyle} onClick={handleConfirmValidation}>Confirm</button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
+
 
 
 // Styles
@@ -341,11 +399,25 @@ const buttonStyle = {
   marginTop: "10px",
 };
 
-const lockIconStyle = {
-  width: '20px',
-  height: '20px',
-  verticalAlign: 'middle', // Para alinear el ícono con el checkbox
+const modalOverlayStyle = {
+  position: "fixed",
+  top: 0,
+  left: 0,
+  width: "100%",
+  height: "100%",
+  backgroundColor: "rgba(0, 0, 0, 0.5)",
+  display: "flex",
+  justifyContent: "center",
+  alignItems: "center",
+  zIndex: 1000,
 };
 
+const modalStyle = {
+  backgroundColor: "white",
+  padding: "20px",
+  borderRadius: "8px",
+  textAlign: "center",
+  width: "400px",
+};
 
 export default CoordinatorTeacherConfirmValidationBody;

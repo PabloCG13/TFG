@@ -33,7 +33,7 @@ const StudentHomeHeader = ({studentId}) => {
      })
      .then(data => console.log("Successfully updated lastAccess:", data))
      .catch(error => console.error("Error updating lastAccess:", error));
-    };
+  };
 
   return (
     <div>
