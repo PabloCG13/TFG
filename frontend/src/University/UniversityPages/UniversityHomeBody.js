@@ -156,7 +156,7 @@ const UniversityHomeBody = ({ uniCode }) => {
         console.error(`Student with ID ${user} already exists!`);
         setMessage(`Student with ID ${user} already exists.`);
         return false;
-      } else if (studentExistsResponse.status !== 400) {
+      } else if (studentExistsResponse.status !== 404) {
         // If the API returns an unexpected error other than 400, log the issue and stop
         console.error(`Unexpected error when checking student: ${studentExistsResponse.status}`);
         return false;
@@ -238,7 +238,7 @@ const UniversityHomeBody = ({ uniCode }) => {
         console.error(`Teacher with ID ${user} already exists!`);
         setMessage(`Teacher with ID ${user} already exists.`);
         return false;
-      } else if (teacherExistsResponse.status !== 400) {
+      } else if (teacherExistsResponse.status !== 404) {
         // If the API returns an unexpected error other than 400, log the issue and stop
         console.error(`Unexpected error when checking teacher: ${teacherExistsResponse.status}`);
         return false;

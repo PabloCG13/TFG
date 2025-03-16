@@ -108,7 +108,7 @@ exports.getDegrees = async (req, res) => {
     try {
         const { uniCode } = req.params;
         const degrees = await db.any(`
-            SELECT d.degreeId, d.name, d.teacherId
+            SELECT d.unicode, d.degreeId, d.name, d.teacherId
             FROM degree d
             WHERE d.uniCode = $1;
         `, [uniCode]);

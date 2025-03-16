@@ -8,7 +8,9 @@ const StudentValidationListAskForValidationBody = ({ studentId }) => {
   const [courses, setCourses] = useState({});
   const [selectedCourse, setSelectedCourse] = useState(null);
   const [selectedUniversity, setSelectedUniversity] = useState(null);
+  const [selectedDegree, setSelectedDegree] = useState(null);
   const [degreesInUni, setDegreesInUni] = useState([]);
+  const [coursesInDegree, setCoursesInDegree] = useState([]);
   const location = useLocation();
   const { participantAddress } = location.state || {}; // Extract participantAddress
 
@@ -68,14 +70,31 @@ const StudentValidationListAskForValidationBody = ({ studentId }) => {
   // Handle university row selection
   const handleUniversityClick = (uni) => {
     setSelectedUniversity(uni);
+    setSelectedDegree(null);
+    setCoursesInDegree([]);
 
 
     fetch(`http://localhost:5000/api/universities/${uni.unicode}/degrees`)
       .then((response) => response.json())
       .then((data) => {
+        console.log("Degree:", data);
         setDegreesInUni(data);
       })
       .catch((error) => console.error(`Error fetching degrees for ${uni.unicode}`, error));
+  };
+
+
+  // Handle degree selection
+  const handleDegreeClick = (degree) => {
+    setSelectedDegree(degree);
+    console.log("Degree:",degree);
+
+    fetch(`http://localhost:5000/api/courses/degree/${degree.unicode}/${degree.degreeid}`)
+      .then((response) => response.json())
+      .then((data) => {
+        setCoursesInDegree(data);
+      })
+      .catch((error) => console.error(`Error fetching courses for ${degree.unicode}, ${degree.degreeid}`, error));
   };
 
 
@@ -89,6 +108,15 @@ const StudentValidationListAskForValidationBody = ({ studentId }) => {
   const handleBackUniversity = () => {
     setSelectedUniversity(null);
     setDegreesInUni([]);
+    setSelectedDegree(null);
+    setCoursesInDegree([]);
+  };
+
+
+  // Handle back button for degree details
+  const handleBackDegree = () => {
+    setSelectedDegree(null);
+    setCoursesInDegree([]);
   };
 
 
@@ -156,27 +184,59 @@ const StudentValidationListAskForValidationBody = ({ studentId }) => {
         <h2 style={titleStyle}>University List</h2>
 
 
-        {/* University Degrees (if selected) */}
-        {selectedUniversity && (
+        {/* Degree List (if a university is selected) */}
+        {selectedUniversity && !selectedDegree && (
           <div style={detailsContainerStyle}>
             <h3>Degrees Offered at {selectedUniversity.name}</h3>
             <table border="1">
               <thead>
                 <tr>
+                  
                   <th>Degree ID</th>
                   <th>Degree Name</th>
+                  <th>Degree Coordinator</th>
                 </tr>
               </thead>
               <tbody>
                 {degreesInUni.map((degree) => (
-                  <tr key={degree.degreeid}>
-                    <td>{degree.degreeid}</td>
+                  <tr key={degree.degreeid} onClick={() => handleDegreeClick(degree)}>
+                    <td>{degree.unicode},{degree.degreeid}</td>
                     <td>{degree.name}</td>
+                    <td>{degree.teacherid}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
             <button style={backButtonStyle} onClick={handleBackUniversity}>Back</button>
+          </div>
+        )}
+
+
+        {/* Courses in Selected Degree */}
+        {selectedDegree && (
+          <div style={detailsContainerStyle}>
+            <h3>Courses in {selectedDegree.name}</h3>
+            <table border="1">
+              <thead>
+                <tr>
+                  <th>Course ID</th>
+                  <th>Course Name</th>
+                  <th>Credits</th>
+                  <th>Period</th>
+                </tr>
+              </thead>
+              <tbody>
+                {coursesInDegree.map((course) => (
+                  <tr key={course.courseid}>
+                    <td>{course.courseid}</td>
+                    <td>{course.name}</td>
+                    <th>{course.credits}</th>
+                    <th>{course.period}</th>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            <button style={backButtonStyle} onClick={handleBackDegree}>Back</button>
           </div>
         )}
 
@@ -187,17 +247,15 @@ const StudentValidationListAskForValidationBody = ({ studentId }) => {
             <tr>
               <th>University Code</th>
               <th>Name</th>
+              <th>University Location</th>
             </tr>
           </thead>
           <tbody>
             {excludedUniversities.map((uni) => (
-              <tr
-                key={uni.unicode}
-                onClick={() => handleUniversityClick(uni)}
-                style={selectedUniversity && selectedUniversity.unicode === uni.unicode ? highlightedRowStyle : {}}
-              >
+              <tr key={uni.unicode} onClick={() => handleUniversityClick(uni)} style={highlightedRowStyle}>
                 <td>{uni.unicode}</td>
                 <td>{uni.name}</td>
+                <td>{uni.location}</td>
               </tr>
             ))}
           </tbody>
@@ -208,7 +266,7 @@ const StudentValidationListAskForValidationBody = ({ studentId }) => {
 };
 
 
-// 🎨 Styles
+// Styles
 const containerStyle = {
   display: 'flex',
   height: '100vh',

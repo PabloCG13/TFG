@@ -42,11 +42,26 @@ exports.findTeachersCourse = async (req, res) => {
 };
 
 
-// Get one course by teacherId
+// Get one course by unicode
 exports.findUniversityCourses = async (req, res) => {
     try {
         const { uniCode } = req.params;
-        const course = await db.oneOrNone("SELECT * FROM course WHERE uniCode = $1", [uniCode]);
+        const course = await db.any("SELECT * FROM course WHERE uniCode = $1", [uniCode]);
+
+        if (!course) {
+            return res.status(404).json({ message: "Course not found" });
+        }
+
+        res.status(200).json(course);
+    } catch (err) {
+        res.status(500).json({ message: err.message || "Some error occurred" });
+    }
+};
+
+exports.findDegreeCourses = async (req, res) => {
+    try {
+        const { uniCode, degreeId } = req.params;
+        const course = await db.any("SELECT * FROM course WHERE uniCode = $1 AND degreeId = $2", [uniCode, degreeId]);
 
         if (!course) {
             return res.status(404).json({ message: "Course not found" });

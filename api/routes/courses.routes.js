@@ -12,8 +12,11 @@ module.exports = app => {
     // Get the courses that a teacher teaches
     router.get("/courses/teacher/:teacherId",courses.findTeachersCourse);
 
-    // Get the courses that a teacher teaches
+    // Get the courses that a university offers
     router.get("/courses/university/:uniCode",courses.findUniversityCourses);
+
+    //Get the course of a degree
+    router.get("/courses/degree/:uniCode/:degreeId",courses.findDegreeCourses);
 
     router.get("/courses/remaining/:uniCode/:degreeId/:studentId", courses.findRemainingCoursesForStudent);
     
