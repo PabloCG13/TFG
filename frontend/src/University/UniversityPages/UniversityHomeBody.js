@@ -52,6 +52,359 @@ const UniversityHomeBody = ({ uniCode }) => {
       .catch((error) => console.error("Error fetching degrees:", error));  
   }, [uniCode]);
 
+  let body;
+  let user;
+  let password;
+  let role;
+  let namedb;
+  let newItem;
+
+  const handleAddParticipantToBlockchain = async () => {
+    try {  
+      const addressResponse = await fetch(`http://localhost:5000/api/addresses/any-participant/null-participant`); 
+        
+      const addressData = await addressResponse.json();
+      console.log("Addressdata: ", addressData);
+      if (!addressResponse.ok || !addressData.addressid) {
+        setMessage("Failed to retrieve a free blockchain address.");
+        console.error("Address fetch error:", addressData);
+        return [null,null];
+      }
+      
+      const participantAddress = addressData.addressid; // Retrieved from API
+      console.log("Retrieved participant Address:", participantAddress);
+      
+
+      const response = await fetch("http://localhost:4000/addParticipant", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          address: participantAddress,
+          uni: universityAddress,
+          user: user,
+          passwd: password,
+          role: role
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.success && data.hash !== "Error") {
+        setMessage(`User added successfully to the Blockchain! Hash: ${data.hash}`);
+        console.log("User added successfully. Hash:", data.hash);
+        return [participantAddress, data.hash];
+      }else {
+        if (data.hash === "Error") {
+          setMessage(`Failed to add user: ${data.hash}`);
+          console.error("Failed to add user:", data.hash);
+        } else {
+          setMessage(`Failed to add user: ${data.error}`);
+          console.error("Failed to add user:", data.error);
+        }
+        return [null, null];
+      } 
+    } catch (error) {
+      setMessage("API request failed.");
+      console.error("Error:", error);
+      return [null, null];
+    }
+
+  }
+
+  const updateAddressesTable = async (participantAddress) => {
+    try {
+      console.log("User:", user);
+      console.log("address:", participantAddress);
+      const updateResponse = await fetch(`http://localhost:5000/api/addresses/${participantAddress}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ participantId: user, addressId: participantAddress }),  // Pass the user as body
+      });
+
+      if (updateResponse.ok) {
+        console.log(`Address ${participantAddress} successfully updated with user: ${user}`);
+      } else {
+        console.error(`Failed to update address: ${participantAddress}`);
+      }
+    } catch (error) {
+      console.error("Failed to update address in the DB:", error);
+    }
+  }
+
+  const addStudent = async (student) => {
+    if (!student.studentid || !student.degreeid || !student.name || !student.surname|| !student.dni || !student.dob || student.password !== student.confirmPassword) {
+      alert("Please enter a valid ID and make sure passwords match");
+      return false;
+    }
+
+    user = student.studentid;
+    password = student.password;
+    role = 1;
+    namedb = `${student.name}, ${student.surname}`;
+
+    body = JSON.stringify({ studentId: user, name: namedb, dob:student.dob, dni:student.dni });
+    
+
+    
+    try{
+      // Check if the teacher already exists
+      const studentExistsResponse = await fetch(`http://localhost:5000/api/students/${user}`);
+  
+  
+      if (studentExistsResponse.ok) {
+        // If the API returns a 200 response, the teacher **already exists**, return error
+        console.error(`Student with ID ${user} already exists!`);
+        setMessage(`Student with ID ${user} already exists.`);
+        return false;
+      } else if (studentExistsResponse.status !== 400) {
+        // If the API returns an unexpected error other than 400, log the issue and stop
+        console.error(`Unexpected error when checking student: ${studentExistsResponse.status}`);
+        return false;
+      }
+  
+  
+      // If the response status is 400, the teacher **does NOT exist**, continue with the process
+      console.log("Student ID is available, proceeding with creation...");
+
+      const [participantAddress, hashP] = await handleAddParticipantToBlockchain();
+      if(!participantAddress || ! hashP)
+        return false;
+      //Add a first transcript with the data of the student to be consistent
+      const transcriptResponse = await fetch("http://localhost:4000/modifyTranscript", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+            file: JSON.parse(body),  // File data from the original request
+            addressStudent: participantAddress,
+            address: universityAddress,
+            type: 2
+          }),
+      });
+
+      const transcriptData = await transcriptResponse.json();
+      const transcriptHash = transcriptData.hash;
+
+      if (transcriptResponse.ok) {//Register into the students and studies tables
+        console.log("Transcript modified successfully:", transcriptHash);
+        const dbResponseTranscript = await fetch(`http://localhost:5000/api/students`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ ...JSON.parse(body), hash: hashP, transcriptHash: transcriptHash}), // Añadir hash al body
+        });
+        newItem = await dbResponseTranscript.json();   
+
+        const dbResponseStudies = await fetch(`http://localhost:5000/api/studies`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ studentId: newStudent.studentid, uniCode: uniCode, degreeId: newStudent.degreeid}), // Añadir hash al body
+        }); 
+        const test = await dbResponseStudies.json(); 
+        console.log(test);
+        await updateAddressesTable(participantAddress);
+        return true;
+      } else {
+          console.error("Failed to modify transcript:", transcriptData.error);
+          return false;
+      }
+    } catch (error) {
+      setMessage("API request failed.");
+      console.error("Error:", error);
+      return false;
+    }
+  
+  }
+
+
+  const addTeacher = async (teacher) => {
+    if (!teacher.teacherid || !teacher.name || !teacher.surname || teacher.password !== teacher.confirmPassword || !teacher.role) {
+      alert("Please enter a valid ID, make sure passwords match, and select a role");
+      return false;
+    }
+  
+    user = teacher.teacherid;
+    console.log("Teacher id:", user);
+    password = teacher.password;
+    role = teacher.role === "Degree Coordinator" ? 3 : 2; // Determine role based on selection
+    namedb = `${teacher.name} ${teacher.surname}`;
+    body = JSON.stringify({ teacherId: user, name: namedb });
+  
+    try {
+      // Check if the teacher already exists
+      const teacherExistsResponse = await fetch(`http://localhost:5000/api/teachers/${user}`);
+  
+  
+      if (teacherExistsResponse.ok) {
+        // If the API returns a 200 response, the teacher **already exists**, return error
+        console.error(`Teacher with ID ${user} already exists!`);
+        setMessage(`Teacher with ID ${user} already exists.`);
+        return false;
+      } else if (teacherExistsResponse.status !== 400) {
+        // If the API returns an unexpected error other than 400, log the issue and stop
+        console.error(`Unexpected error when checking teacher: ${teacherExistsResponse.status}`);
+        return false;
+      }
+  
+  
+      // If the response status is 400, the teacher **does NOT exist**, continue with the process
+      console.log("Teacher ID is available, proceeding with creation...");
+  
+  
+      const [participantAddress, hashP] = await handleAddParticipantToBlockchain();
+      if (!participantAddress || !hashP) return false;
+  
+  
+      // Add the teacher to the database
+      const dbResponse = await fetch(`http://localhost:5000/api/teachers`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...JSON.parse(body), hash: hashP }),
+      });
+  
+  
+      if (!dbResponse.ok) {
+        console.error(`Failed to add teacher to DB. Status: ${dbResponse.status}`);
+        return false;
+      }
+  
+  
+      await updateAddressesTable(participantAddress);
+      newItem = await dbResponse.json();
+      
+      return true;
+    } catch (error) {
+      console.error("Error in addTeacher:", error);
+      return false;
+    }
+  };  
+
+  const addDegree = async (degree) => {
+      if (!degree.teacherid || !degree.name || !degree.degreeid) {
+        alert("Please enter a valid ID, degree coordinator and name");
+        return false;
+      }
+      
+      const dbResponse = await fetch("http://localhost:5000/api/degrees", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+            uniCode: uniCode, 
+            degreeId: degree.degreeid, 
+            name: degree.name,
+            teacherId: degree.teacherid
+        }),
+    });
+
+    const dbData = await dbResponse.json();
+    console.log(dbData);
+    if (dbResponse.ok) {
+        setMessage(`Degree registered successfully! ID: ${dbData.degreeid}`);
+        console.log("Stored Degree:", dbData);
+        return true;
+    } else {
+        setMessage(`Failed to create a new entry in the Database error`);
+        console.error("Database error:", dbData.error);
+        return false;
+    }
+      
+  }
+
+  const addCourse = async (course) => {
+    if (!course.teacherid || !course.name || !course.degreeid || !course.content || !course.credits || !course.period) {
+      alert("Please enter a valid ID, degree coordinator and name");
+      return false;
+    }
+    
+    const dbResponse = await fetch("http://localhost:5000/api/courses", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+          uniCode: uniCode, 
+          degreeId: course.degreeid, 
+          courseId: course.courseid,
+          name: course.name,
+          content: course.content,
+          credits: course.credits,
+          period: course.period,
+          teacherId: course.teacherid
+      }),
+    });
+
+    const dbData = await dbResponse.json();
+    console.log(dbData);
+    if (dbResponse.ok) {
+      setMessage(`Course registered successfully! ID: ${dbData.degreeid}`);
+      console.log("Stored Course:", dbData);
+      return true;
+    } else {
+      setMessage(`Failed to create a new entry in the Database error`);
+      console.error("Database error:", dbData.error);
+      return false;
+    }
+  }
+
+  const updateState = (type) => {
+    switch (type) {
+      case "students":
+        setStudents([...students, newItem]);
+        setShowStudentForm(false);
+        setNewStudent({ studentid: "", name:"", surname:"", dni:"", dob:"", password: "", confirmPassword: "" });
+        break;
+      case "teachers":
+        setTeachers([...teachers, newItem]);
+        setShowTeacherForm(false);
+        setNewTeacher({ teacherid: "", name:"", surname:"", role: "", password: "", confirmPassword: ""});
+        break;
+      case "courses":
+        setCourses([...courses, newCourse]);
+        setShowCourseForm(false);
+        setNewCourse({ degreeid:"", courseid:"", name:"", content:"", credits:"", period:"", teacherid:""});
+        break;
+      case "degrees":
+        setDegrees([...degrees, newDegree]);
+        setShowDegreeForm(false);
+        setNewDegree({ degreeid:"", name:"", teacherid:""});
+        break; 
+      default:
+        console.warn(`No state update handler for type: ${type}`);
+    }
+  }
+
+  const handleAddEntry = async (type) => {
+    let success;
+    if (type === "students") {
+      const student = newStudent;
+      success = await addStudent(student);
+    } 
+    else if (type === "teachers") {
+      const teacher = newTeacher;
+      success = await addTeacher(teacher);
+    } 
+    else if(type === "degrees"){//TODO: da un error al añadir un degree
+      const degree = newDegree;
+      success = await addDegree(degree);
+    }else if(type==="courses"){
+      const course = newCourse;
+      success = await addCourse(course);
+    }
+    else {
+      if (!newEntry) return;
+    }
+    /*--------------------------------------------------------------------------- */
+    
+    // Update state after successful addition to the DB
+    if(success){
+      updateState(type);
+    
+      setNewEntry(""); // Reset input in all cases
+    }else{
+      console.error("Failed to add entry:", type);
+      setMessage(`Failed to add ${type}. Please try again`);
+    }
+    
+  };
+
+
+  /*
   const handleAddEntry = async (type) => {
     let body;
     let user;
@@ -152,7 +505,7 @@ const UniversityHomeBody = ({ uniCode }) => {
     else {
       if (!newEntry) return;
     }
-    
+
     if(type === "students" || type === "teachers")
     try {
       // Add to the Blockchain first
@@ -201,32 +554,32 @@ const UniversityHomeBody = ({ uniCode }) => {
                 addressStudent: participantAddress,
                 address: universityAddress,
                 type: 2
-            }),
-        });
-
-        const transcriptData = await transcriptResponse.json();
-        const transcriptHash = transcriptData.hash;
-
-        if (transcriptResponse.ok) {
-          console.log("Transcript modified successfully:", transcriptHash);
-          const dbResponseTranscript = await fetch(`http://localhost:5000/api/${type}`, {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ ...JSON.parse(body), hash: data.hash, transcriptHash: transcriptHash}), // Añadir hash al body
+              }),
           });
-          newItem = await dbResponseTranscript.json();   
 
-          const dbResponseStudies = await fetch(`http://localhost:5000/api/studies`, {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ studentId: newStudent.studentid, uniCode: uniCode, degreeId: newStudent.degreeid}), // Añadir hash al body
-          }); 
-          const test = await dbResponseStudies.json(); 
-          console.log(test);
+          const transcriptData = await transcriptResponse.json();
+          const transcriptHash = transcriptData.hash;
 
-        } else {
-            console.error("Failed to modify transcript:", transcriptData.error);
-        }
+          if (transcriptResponse.ok) {
+            console.log("Transcript modified successfully:", transcriptHash);
+            const dbResponseTranscript = await fetch(`http://localhost:5000/api/${type}`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ ...JSON.parse(body), hash: data.hash, transcriptHash: transcriptHash}), // Añadir hash al body
+            });
+            newItem = await dbResponseTranscript.json();   
+
+            const dbResponseStudies = await fetch(`http://localhost:5000/api/studies`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ studentId: newStudent.studentid, uniCode: uniCode, degreeId: newStudent.degreeid}), // Añadir hash al body
+            }); 
+            const test = await dbResponseStudies.json(); 
+            console.log(test);
+
+          } else {
+              console.error("Failed to modify transcript:", transcriptData.error);
+          }
         } else{
           const dbResponse = await fetch(`http://localhost:5000/api/${type}`, {
             method: "POST",
@@ -298,6 +651,7 @@ const UniversityHomeBody = ({ uniCode }) => {
     
     setNewEntry(""); // Reset input in all cases
   };
+  */
 
   const handleStudentToCourse = async ({ degreeId, courseId, studentId, year, teacherId }) => {
 
@@ -558,7 +912,7 @@ const UniversityHomeBody = ({ uniCode }) => {
               <h2>Add Student</h2>
               <input type="text" placeholder="ID" value={newStudent.studentid} onChange={(e) => setNewStudent({ ...newStudent, studentid: e.target.value })} />
               {/* Dropdown for role selection */}
-              <select value={newStudent.degreeid} onChange={(e) => setNewStudent({ ...newStudent, degreeid: e.target.value })} style={inputStyle}>
+              <select key={newStudent.degreeid} value={newStudent.degreeid} onChange={(e) => setNewStudent({ ...newStudent, degreeid: e.target.value })} style={inputStyle}>
               <option value="" disabled>Select Degree</option>
               {degrees.map((degree) => (
               <option key={degree.degreeid} value={degree.degreeid}>{degree.name}</option>
