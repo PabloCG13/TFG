@@ -32,6 +32,7 @@ require("./routes/validations.routes")(app);
 require("./routes/transcripts.routes")(app);
 require("./routes/studies.routes")(app);
 require("./routes/addresses.routes")(app);
+require("./routes/validates.routes")(app);
 
 // set port, listen for requests
 const PORT = 5000;

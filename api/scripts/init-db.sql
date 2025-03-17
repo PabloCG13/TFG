@@ -71,6 +71,9 @@ CREATE TABLE IF NOT EXISTS validation (
     FOREIGN KEY (uniCodeDst, degreeIdDst, courseIdDst) REFERENCES course (uniCode, degreeId, courseId) ON DELETE CASCADE
 );
 
+
+
+
 -- Create transcript table
 CREATE TABLE IF NOT EXISTS transcript (
     uniCode VARCHAR(4) NOT NULL,
@@ -102,6 +105,20 @@ CREATE TABLE IF NOT EXISTS studies (
 CREATE TABLE IF NOT EXISTS address (
     addressId VARCHAR(42) PRIMARY KEY,
     participantId VARCHAR(4)
+);
+
+-- Create validates table
+CREATE TABLE IF NOT EXISTS validates (
+    uniCodeSrc VARCHAR(4) NOT NULL,
+    degreeIdSrc VARCHAR(30) NOT NULL,
+    courseIdSrc VARCHAR(30) NOT NULL,
+    uniCodeDst VARCHAR(4) NOT NULL,
+    degreeIdDst VARCHAR(30) NOT NULL,
+    courseIdDst VARCHAR(30) NOT NULL,
+    studentId VARCHAR(30) NOT NULL,
+    PRIMARY KEY (uniCodeSrc, degreeIdSrc, courseIdSrc, uniCodeDst, degreeIdDst, courseIdDst, studentId),
+    FOREIGN KEY (uniCodeSrc, degreeIdSrc, courseIdSrc, uniCodeDst, degreeIdDst, courseIdDst) REFERENCES validation (uniCodeSrc, degreeIdSrc, courseIdSrc, uniCodeDst, degreeIdDst, courseIdDst) ON DELETE CASCADE,
+    FOREIGN KEY (studentId) REFERENCES student (studentId) ON DELETE CASCADE
 );
 
 

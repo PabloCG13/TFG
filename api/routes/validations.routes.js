@@ -9,9 +9,11 @@ module.exports = app => {
 
     router.get("/validations/:uniCode/:degreeId", validations.findAllValidationsForDegreeinUni);
   
-    router.get("/validations/provisional/:uniCode/:degreeId", validations.findAllProvisionalValidationsForDegreeinUni);
+    router.get("/validations/provisionals/:uniCode/:degreeId", validations.findAllProvisionalValidationsForDegreeinUni);
 
     router.get("/validations/provisional/requests/:uniCode/:degreeId/:courseId", validations.findPendingRequestsForCourse);
+
+    router.get("/validations/provisional/answers/:uniCode/:degreeId", validations.findPendingAnswersForDegreeinUni);
 
     router.get("/validations/:uniCodeSrc/:degreeIdSrc/:courseIdSrc/:uniCodeDst/:degreeIdDst/:courseIdDst", validations.findOne);
   

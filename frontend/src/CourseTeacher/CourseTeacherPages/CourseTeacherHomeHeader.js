@@ -2,89 +2,151 @@ import React, { useState, useEffect } from 'react';
 import perfil from '../../Logo/perfil.png'; // Import the image from Logo folder
 import { Link } from 'react-router-dom'; // Import Link to redirect
 
-const CourseTeacherHomeHeader = ({teacherId}) => {
-const [validations, setValidations] = useState([]);
+
+const CourseTeacherHomeHeader = ({ teacherId }) => {
+  const [validations, setValidations] = useState([]);
+  const [selectedValidation, setSelectedValidation] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [srcCourse, setSrcCourse] = useState("");
+  const [dstCourse, setDstCourse] = useState("");
+
+  useEffect(()=>{
+    fetch(`http://localhost:5000/api/courses/teacher/${teacherId}`)
+    .then((response) => response.json())
+    .then((data) => setSrcCourse(data))
+    .catch((error) => console.error("Error fetching course info:", error));
+  }, [teacherId])
+
+  const fetchValidations = () => {
+    fetch(`http://localhost:5000/api/courses/teacher/${teacherId}`)
+      .then(response => {
+        if (!response.ok) {
+          throw new Error(`Failed to fetch courses. Status: ${response.status}`);
+        }
+        return response.json();
+      })
+      .then(data => {
+        if (!data.courseid) {
+          throw new Error("courseid is missing in API response");
+        }
+
+
+        console.log("Extracted course ID:", data.courseid);
+        return fetch(`http://localhost:5000/api/validations/provisional/requests/${data.unicode}/${data.degreeid}/${data.courseid}`);
+      })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error(`Failed to fetch students. Status: ${response.status}`);
+        }
+        return response.json();
+      })
+      .then(validData => {
+        setValidations(validData);
+        console.log("Updated validations:", validData);
+      })
+      .catch(error => console.error("Error:", error));
+  };
 
   useEffect(() => {
     if (!teacherId) return;
 
-    fetch(`http://localhost:5000/api/courses/teacher/${teacherId}`)
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`Failed to fetch courses. Status: ${response.status}`);
-            }
-            return response.json();
-        })
-        .then(data => {
-            // Extract ONLY the 'courseid' field
-            const courseId = data.courseid;  // Assuming the API always returns a single object
-            const degreeId = data.degreeid;
-            const uniCode = data.unicode;
-            if (!courseId) {
-                throw new Error("courseid is missing in API response");
-            }
+    // Initial fetch
+    fetchValidations();
 
-            console.log("Extracted course ID:", courseId);
 
-            // Now fetch students for this courseId
-            return fetch(`http://localhost:5000/api/validations/request/${uniCode}/${degreeId}/${courseId}`);
-        })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`Failed to fetch students. Status: ${response.status}`);
-            }
-            return response.json();
-        })
-        .then((validData) => setValidations(validData))
-        .catch(error => console.error("Error:", error));
-      
-}, [teacherId]);
-  	
+    // Fetch every 30 seconds
+    const interval = setInterval(fetchValidations, 30000);
 
-  // State to control modal visibility
-  const [isModalOpen, setIsModalOpen] = useState(false);
+
+    // Cleanup function
+    return () => clearInterval(interval);
+  }, [teacherId]);
+
 
   // Function to open modal
   const openModal = () => {
     setIsModalOpen(true);
   };
 
+
   // Function to close modal
   const closeModal = () => {
     setIsModalOpen(false);
+    setSelectedValidation(null); // Reset selected validation when closing modal
   };
 
-  const handleBackCourse = () =>{
+
+  const handleBackCourse = () => {
     const currentTimestamp = new Date().toISOString();
     console.log("Timestamp:", currentTimestamp);
     console.log("teacherId", teacherId);
-    // Make the PUT request to update lastAccess
+
+
     fetch(`http://localhost:5000/api/teachers/${teacherId}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ lastAccess: currentTimestamp }),
     })
-    .then(response => {
-      if (!response.ok) {
-        throw new Error(`Failed to update lastAccess. Status: ${response.status}`);
-      }
-      return response.json();
-     })
-     .then(data => console.log("Successfully updated lastAccess:", data))
-     .catch(error => console.error("Error updating lastAccess:", error));
+      .then(response => {
+        if (!response.ok) {
+          throw new Error(`Failed to update lastAccess. Status: ${response.status}`);
+        }
+        return response.json();
+      })
+      .then(data => console.log("Successfully updated lastAccess:", data))
+      .catch(error => console.error("Error updating lastAccess:", error));
+  };
+  const handleDstCourse = (validation) => {
+    setSelectedValidation(validation);
+    const uniCode = validation.unicodedst;
+    const degreeId = validation.degreeiddst;
+    const courseId = validation.courseiddst;
+
+    console.log("Uni:", uniCode, "degreeID:", degreeId, "courseId", courseId);
+
+    fetch(`http://localhost:5000/api//courses/${uniCode}/${degreeId}/${courseId}`)
+      .then(response => {
+        if (!response.ok) {
+          throw new Error(`Failed to update lastAccess. Status: ${response.status}`);
+        }
+        return response.json();
+      })
+      .then(data => {
+        console.log("Successfully reetrieved info from Dst Course:", data);
+        setDstCourse(data);
+      })
+      .catch(error => console.error("Error accessing dstCourse:", error));
+  };
+
+  const handlePetition = (answer, valid) =>{
+    console.log("Validation:", valid);
+    fetch(`http://localhost:5000/api/validations/${valid.unicodesrc}/${valid.degreeidsrc}/${valid.courseidsrc}/${valid.unicodedst}/${valid.degreeiddst}/${valid.courseiddst}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ provisional: answer }),
+    })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error(`Failed to update provisional. Status: ${response.status}`);
+        }
+        return response.json();
+      })
+      .then(data => {
+        console.log("Successfully updated provisional:", data);
+        fetchValidations();
+      })
+      .catch(error => console.error("Error updating provisional:", error));
+      closeModal();
+      
   };
 
   return (
-    <div>
+    <div> 
       <header style={headerStyle}>
         <div style={containerStyle}>
           {/* Profile logo */}
           <a href="/" style={buttonStyle}>
-            <img
-              src={perfil}
-              alt="Perfil"
-              style={imageStyle}
-            />
+            <img src={perfil} alt="Perfil" style={imageStyle} />
           </a>
 
           {/* Title */}
@@ -93,29 +155,32 @@ const [validations, setValidations] = useState([]);
           </div>
 
           <Link
-            to={`/`} // Route where it links to
+            to={`/`} 
             style={backButtonStyle} 
             onClick={(e) => {
-              e.preventDefault(); // Prevent immediate navigation
-              handleBackCourse(); // Call the function
+              e.preventDefault();
+              handleBackCourse();
               setTimeout(() => {
-                window.location.href = "/"; // Navigate after updating lastAccess
-              }, 500); // Delay navigation slightly to ensure update
+                window.location.href = "/";
+              }, 500);
             }}
             onMouseOver={(e) => Object.assign(e.target.style, hoverStyle)} 
             onMouseOut={(e) => Object.assign(e.target.style, backButtonStyle)} 
-            >
+          >
             Log Out
-            </Link>
+          </Link>
 
-          {/* Notifications Icon */}
+          {/* Notifications Icon with Validation Counter */}
           <div style={notificationStyle} className="notifications">
             <button 
               style={starButtonStyle} 
               aria-label="Notifications"
-              onClick={openModal} // Open modal on click.
+              onClick={openModal}
             >
-            <span className="star">★</span>
+              <span className="star">★</span>
+              {validations.length > 0 && (
+                <span style={notificationBadgeStyle}>{validations.length}</span>
+              )}
             </button>
           </div>
         </div>
@@ -126,14 +191,109 @@ const [validations, setValidations] = useState([]);
         <div style={modalOverlayStyle} onClick={closeModal}>
           <div style={modalStyle} onClick={(e) => e.stopPropagation()}>
             <h2>Notifications</h2>
-            <p>Here is where notifications go...</p>
+            {validations.length > 0 ? (
+              <ul>
+                {validations.map((validation, index) => (
+                  <li key={index}>
+                     There is a new validation request for the course **{validation.courseidsrc}**  
+                    <button 
+                      style={viewDetailsButtonStyle} 
+                      onClick={() => handleDstCourse(validation)}
+                    >
+                      View More
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p>No new notifications</p>
+            )}
             <button onClick={closeModal} style={closeButtonStyle}>Close</button>
+          </div>
+        </div>
+      )}
+
+      {/* Validation Details Modal */}
+      {selectedValidation && (
+        <div style={modalOverlayStyle} onClick={() => setSelectedValidation(null)}>
+          <div style={modalStyle} onClick={(e) => e.stopPropagation()}>
+            <h2>Validation Details</h2>
+            <div style={tableContainerStyle}>
+              <div style={tableStyle}>
+                <h3>My Course</h3>
+                <table>
+                  <thead>
+                    <tr>
+                      <th>University</th>
+                      <th>Degree</th>
+                      <th>Course ID</th>
+                      <th>Period</th>
+                      <th>Credits</th>
+                      {/*<th>Content</th>*/}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>{srcCourse.unicode}</td>
+                      <td>{srcCourse.degreeid}</td>
+                      <td>{srcCourse.courseid}</td>
+                      <td>{srcCourse.period}</td>
+                      <td>{srcCourse.credits}</td>
+                      {/*<td>{srcCourse.content}</td>*/}
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+
+              <div style={tableStyle}>
+                <h3>Destination Course</h3>
+                <table>
+                  <thead>
+                    <tr>
+                      <th>University</th>
+                      <th>Degree</th>
+                      <th>Course ID</th>
+                      <th>Period</th>
+                      <th>Credits</th>
+                      {/*<th>Content</th>*/}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>{dstCourse.unicode}</td>
+                      <td>{dstCourse.degreeid}</td>
+                      <td>{dstCourse.courseid}</td>
+                      <td>{dstCourse.period}</td>
+                      <td>{dstCourse.credits}</td>
+                     {/*} <td>{dstCourse.content}</td>*/}
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+
+            <div style={buttonContainerStyle}>
+              <button onClick={() => handlePetition(3, selectedValidation)} style={acceptButtonStyle}>
+                Accept
+              </button>
+              <button onClick={() => handlePetition(4, selectedValidation)} style={rejectButtonStyle}>
+                Reject
+              </button>
+            </div>
+
+
+            <button onClick={() => setSelectedValidation(null)} style={closeButtonStyle}>
+              Close
+            </button>
           </div>
         </div>
       )}
     </div>
   );
 };
+
 
 // Styles
 const headerStyle = {
@@ -155,6 +315,16 @@ const buttonStyle = {
   textDecoration: 'none',
 };
 
+const viewDetailsButtonStyle = {
+  marginLeft: '10px',
+  padding: '5px 10px',
+  fontSize: '12px',
+  backgroundColor: '#28a745',
+  color: 'white',
+  border: 'none',
+  cursor: 'pointer',
+};
+
 const imageStyle = {
   width: '80px',
   height: '80px',
@@ -166,6 +336,7 @@ const titleStyle = {
 };
 
 const notificationStyle = {
+  position: 'relative',
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
@@ -178,22 +349,36 @@ const starButtonStyle = {
   color: 'white',
   fontSize: '30px',
   cursor: 'pointer',
+  position: 'relative',
 };
 
-/* Back button styles */
+const notificationBadgeStyle = {
+  position: 'absolute',
+  top: '-5px',
+  right: '-5px',
+  background: 'red',
+  color: 'white',
+  borderRadius: '50%',
+  width: '18px',
+  height: '18px',
+  fontSize: '12px',
+  textAlign: 'center',
+  fontWeight: 'bold',
+  lineHeight: '18px',
+};
+
 const backButtonStyle = {
-  textDecoration: 'none', /* Remove underline */
-  backgroundColor: '#ff4c4c', /* Red background */
-  color: 'white', /* White text */
-  padding: '10px 20px', /* Padding */
-  borderRadius: '5px', /* Rounded corners */
+  textDecoration: 'none',
+  backgroundColor: '#ff4c4c',
+  color: 'white',
+  padding: '10px 20px',
+  borderRadius: '5px',
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
-  transition: 'background-color 0.3s', /* Smooth transition for hover effect */
+  transition: 'background-color 0.3s',
 };
 
-// Modal Styles
 const modalOverlayStyle = {
   position: 'fixed',
   top: 0,
@@ -204,7 +389,7 @@ const modalOverlayStyle = {
   display: 'flex',
   justifyContent: 'center',
   alignItems: 'center',
-  zIndex: 1000, // Ensures that modal is above other elements.
+  zIndex: 1000,
 };
 
 const modalStyle = {
@@ -212,7 +397,10 @@ const modalStyle = {
   padding: '20px',
   borderRadius: '8px',
   textAlign: 'center',
-  width: '600px', // Adjust modal style
+  width: '80%',
+  maxWidth: '700px',
+  maxHeight: '90vh',
+  overflowY: 'auto',
 };
 
 const closeButtonStyle = {
@@ -224,9 +412,47 @@ const closeButtonStyle = {
   cursor: 'pointer',
 };
 
-/* Hover */
 const hoverStyle = {
-  backgroundColor: "#0056b3", // Changes the background color to a darker blue when the user hover 
+  backgroundColor: "#0056b3",
+};
+
+const tableContainerStyle = {
+  display: 'flex',
+  flexWrap: 'wrap',
+  justifyContent: 'space-around',
+  marginBottom: '20px',
+  widht: '100%',
+  gap: '20px',
+};
+
+const tableStyle = {
+  border: '1px solid #ddd',
+  padding: '8px',
+  flex: '1',
+  minWidth: '280px',
+  maxWidth: '45%',
+};
+
+const buttonContainerStyle = {
+  display: 'flex',
+  justifyContent: 'center',
+  gap: '20px',
+};
+
+const acceptButtonStyle = {
+  backgroundColor: 'green',
+  color: 'white',
+  padding: '10px 20px',
+  border: 'none',
+  cursor: 'pointer',
+};
+
+const rejectButtonStyle = {
+  backgroundColor: 'red',
+  color: 'white',
+  padding: '10px 20px',
+  border: 'none',
+  cursor: 'pointer',
 };
 
 export default CourseTeacherHomeHeader;

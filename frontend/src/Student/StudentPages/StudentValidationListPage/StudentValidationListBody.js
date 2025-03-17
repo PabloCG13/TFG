@@ -78,8 +78,26 @@ const StudentValidationListBody = ({ studentId }) => {
     setFilteredValidations(results);
   }, [searchTerm, validityPeriod, universityName, validations, universities]);
 
-  const handlePetition = async () =>{
+  const handlePetition = async (validatid) =>{
     console.log("He pulsado el boton");
+    console.log("Validation selected:",validatid);
+
+    const dbResponse = await fetch(`http://localhost:5000/api/validates/${studentId}`);
+
+    if (!dbResponse.ok) throw new Error(`Failed to fetch studies. Status: ${dbResponse.status}`);
+    console.log("response: ",dbResponse);
+
+    const dbResponseValidates = await fetch(`http://localhost:5000/api/validates`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ...JSON.parse(validatid), studentId: studentId}), // Añadir hash al body
+    });
+
+    if (!dbResponseValidates.ok) {
+      console.error(`Failed to add validate entry to DB. Status: ${dbResponseValidates.status}`);
+      return false;
+    }
+
   };
 
   return (

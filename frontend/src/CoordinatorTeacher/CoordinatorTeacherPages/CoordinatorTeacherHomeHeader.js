@@ -1,10 +1,58 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import perfil from '../../Logo/perfil.png'; // Import the image from Logo folder
 import { Link } from 'react-router-dom'; // Import Link to redirect
 
 const CoordinatorTeacherHomeHeader = ({teacherId}) => {
   // State to control modal visibility
+  const [validations, setValidations] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+  useEffect(() => {
+    if (!teacherId) return;
+
+
+    const fetchValidations = () => {
+      fetch(`http://localhost:5000/api/degrees/${teacherId}`)
+        .then(response => {
+          if (!response.ok) {
+            throw new Error(`Failed to fetch degree. Status: ${response.status}`);
+          }
+          return response.json();
+        })
+        .then(data => {
+          if (!data.degreeid) {
+            throw new Error("degreeid is missing in API response");
+          }
+
+          console.log("Extracted degree ID:", data.degreeid);
+          return fetch(`http://localhost:5000/api/validations/provisional/answers/${data.unicode}/${data.degreeid}`);
+        })
+        .then(response => {
+          if (!response.ok) {
+            throw new Error(`Failed to fetch students. Status: ${response.status}`);
+          }
+          return response.json();
+        })
+        .then(validData => {
+          setValidations(validData);
+          console.log("Updated validations:", validData);
+        })
+        .catch(error => console.error("Error:", error));
+    };
+
+
+    // Initial fetch
+    fetchValidations();
+
+
+    // Fetch every 30 seconds
+    const interval = setInterval(fetchValidations, 30000);
+
+
+    // Cleanup function
+    return () => clearInterval(interval);
+  }, [teacherId]);
+
 
   // Function to open modal
   const openModal = () => {
@@ -69,14 +117,17 @@ const CoordinatorTeacherHomeHeader = ({teacherId}) => {
             Log Out
             </Link>
 
-          {/* Notifications Icon */}
+          {/* Notifications Icon with Validation Counter */}
           <div style={notificationStyle} className="notifications">
             <button 
               style={starButtonStyle} 
               aria-label="Notifications"
-              onClick={openModal} // Open modal on click.
+              onClick={openModal}
             >
-            <span className="star">★</span>
+              <span className="star">★</span>
+              {validations.length > 0 && (
+                <span style={notificationBadgeStyle}>{validations.length}</span>
+              )}
             </button>
           </div>
         </div>
@@ -87,7 +138,23 @@ const CoordinatorTeacherHomeHeader = ({teacherId}) => {
         <div style={modalOverlayStyle} onClick={closeModal}>
           <div style={modalStyle} onClick={(e) => e.stopPropagation()}>
             <h2>Notifications</h2>
-            <p>Here is where notifications go...</p>
+            {validations.length > 0 ? (
+              <ul>
+                {validations.map((validation, index) => (
+                  <li key={index}>
+                     There is an answer for the validation request for the course **{validation.courseidsrc}**  
+                    <button 
+                      style={viewDetailsButtonStyle} 
+                      /*onClick={() => handleDstCourse(validation)}*/
+                    >
+                      View More
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p>No new notifications</p>
+            )}
             <button onClick={closeModal} style={closeButtonStyle}>Close</button>
           </div>
         </div>
@@ -133,12 +200,28 @@ const notificationStyle = {
   cursor: 'pointer',
 };
 
+const notificationBadgeStyle = {
+  position: 'absolute',
+  top: '-5px',
+  right: '-5px',
+  background: 'red',
+  color: 'white',
+  borderRadius: '50%',
+  width: '18px',
+  height: '18px',
+  fontSize: '12px',
+  textAlign: 'center',
+  fontWeight: 'bold',
+  lineHeight: '18px',
+};
+
 const starButtonStyle = {
   background: 'transparent',
   border: 'none',
   color: 'white',
   fontSize: '30px',
   cursor: 'pointer',
+  position: 'relative',
 };
 
 /* Back button styles */
@@ -184,6 +267,17 @@ const closeButtonStyle = {
   marginTop: '20px',
   cursor: 'pointer',
 };
+
+const viewDetailsButtonStyle = {
+  marginLeft: '10px',
+  padding: '5px 10px',
+  fontSize: '12px',
+  backgroundColor: '#28a745',
+  color: 'white',
+  border: 'none',
+  cursor: 'pointer',
+};
+
 
 /* Hover */
 const hoverStyle = {

@@ -58,7 +58,6 @@ exports.findAllProvisionalValidationsForDegreeinUni = async (req, res) => {
           //OR
           //(uniCodeDst = $1 AND degreeIdDst = $2 AND provisional = 1)     
         , [uniCode, degreeId]);
-
         if (!validations) {
             return res.status(404).json({ message: "Validation not found" });
         }
@@ -74,14 +73,38 @@ exports.findAllProvisionalValidationsForDegreeinUni = async (req, res) => {
 exports.findPendingRequestsForCourse = async (req, res) => {
     try {
         const { uniCode, degreeId, courseId } = req.params;
+       
+
         const validations = await db.any(`
         SELECT * FROM validation 
-        WHERE (uniCodeSrc = $1 AND degreeIdSrc = $2 AND courseIdSrc = $3 AND provisional == 2)
+        WHERE (uniCodeSrc = $1 AND degreeIdSrc = $2 AND courseIdSrc = $3 AND provisional = 2)
                ;`
           //OR
           //(uniCodeDst = $1 AND degreeIdDst = $2 AND provisional = 1)     
         , [uniCode, degreeId, courseId]);
+        //console.log("The validations2 are:",validations);
+        if (!validations) {
+            return res.status(404).json({ message: "Validation not found" });
+        }
 
+        res.status(200).json(validations);
+    } catch (err) {
+        res.status(500).json({ message: err.message || "Some error occurred" });
+    }
+};
+
+
+// Get all validations that belong to a certain university and degree that have been answered by a courseTeacher
+exports.findPendingAnswersForDegreeinUni = async (req, res) => {
+    try {
+        const { uniCode, degreeId } = req.params;
+        const validations = await db.any(`
+        SELECT * FROM validation 
+        WHERE (uniCodeSrc = $1 AND degreeIdSrc = $2 AND provisional = 3)     
+          OR
+          (uniCodeDst = $1 AND degreeIdDst = $2 AND provisional = 4)`     
+        , [uniCode, degreeId]);
+       // console.log("The validations1 are:",validations);
         if (!validations) {
             return res.status(404).json({ message: "Validation not found" });
         }

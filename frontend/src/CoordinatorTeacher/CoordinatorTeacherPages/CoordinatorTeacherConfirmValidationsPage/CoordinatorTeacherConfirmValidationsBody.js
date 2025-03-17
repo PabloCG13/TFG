@@ -49,7 +49,7 @@ const CoordinatorTeacherConfirmValidationBody = ({ teacherId }) => {
   useEffect(() => {
     const uniCode = degrees.unicode;
     const degreeId = degrees.degreeid;
-    fetch(`http://localhost:5000/api/validations/provisional/${uniCode}/${degreeId}`)
+    fetch(`http://localhost:5000/api/validations/provisionals/${uniCode}/${degreeId}`)
       .then(response => response.json())
       .then(data => {
         setValidations(data);
@@ -211,6 +211,25 @@ const CoordinatorTeacherConfirmValidationBody = ({ teacherId }) => {
     console.log(`Confirmed validation for Month: ${selectedMonth}, Year: ${selectedYear}`);
   };
 
+  const handleCancelPetition = (valid) =>{
+    console.log("Validation:", valid);
+    fetch(`http://localhost:5000/api/validations/${valid.unicodesrc}/${valid.degreeidsrc}/${valid.courseidsrc}/${valid.unicodedst}/${valid.degreeiddst}/${valid.courseiddst}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ provisional: 0 }),
+    })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error(`Failed to update provisional. Status: ${response.status}`);
+        }
+        return response.json();
+      })
+      .then(data => {
+        console.log("Successfully updated provisional:", data);
+        
+      })
+      .catch(error => console.error("Error updating provisional:", error));
+  };
 
   return (
     <div style={containerStyle}>
@@ -254,24 +273,36 @@ const CoordinatorTeacherConfirmValidationBody = ({ teacherId }) => {
                   <td style={tdStyle}>{valid.period}</td>
                   <td style={tdStyle}>{universities[valid.unicodedst]?.name || "Loading..."}</td>
                   <td>
-                    {valid.provisional === 2 ? (
-                      <span style={{ color: "orange", fontWeight: "bold" }}>Pending Confirmation</span>
-                    ) : (
-                      <>
-                        <td>
-                        <button style={buttonStyle} onClick={() => openModal(valid)}>
-                          Confirm
-                        </button>
-                        </td>
-                        <td>
-                          <button style={buttonStyle} onClick={() => handleAskCourseTeacher(valid)}>
-                          Ask Course Teacher
-                          </button>
-                        </td>
+  {valid.provisional === 2 ? (
+    <span style={{ color: "orange", fontWeight: "bold" }}>Pending Confirmation</span>
+  ) : (
+    <>
+      <td>
+        <button style={buttonStyle} onClick={() => openModal(valid)}>
+          Confirm
+        </button>
+      </td>
+      <td>
+        <button style={buttonStyle} onClick={() => handleCancelPetition(valid)}>
+          Cancel
+        </button>
+      </td>
+      <td>
+        {valid.provisional === 3 ? (
+          <span style={{ color: "green", fontWeight: "bold" }}>Suggestion: Accept</span>
+        ) : valid.provisional === 4 ? (
+          <span style={{ color: "red", fontWeight: "bold" }}>Suggestion: Reject</span>
+        ) : (
+          <button style={buttonStyle} onClick={() => handleAskCourseTeacher(valid)}>
+            Ask Course Teacher
+          </button>
+        )}
+      </td>
 
-                      </>
-                    )}
-                  </td>
+    </>
+  )}
+</td>
+
                 </tr>
               ))}
             </tbody>
