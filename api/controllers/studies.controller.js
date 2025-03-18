@@ -56,6 +56,21 @@ exports.findUniAndDegree = async (req, res) => {
     }
 };
 
+exports.findStudiesInUni = async (req, res) => {
+    try {
+        const { uniCode } = req.params;
+        const studies = await db.any("SELECT * FROM studies WHERE uniCode = $1", [uniCode]);
+
+        if (!studies) {
+            return res.status(404).json({ message: "Studies not found" });
+        }
+
+        res.status(200).json(studies);
+    } catch (err) {
+        res.status(500).json({ message: err.message || "Some error occurred" });
+    }
+};
+
 // Update a studies by the code in the request
 exports.update = async (req, res) => {
     try {

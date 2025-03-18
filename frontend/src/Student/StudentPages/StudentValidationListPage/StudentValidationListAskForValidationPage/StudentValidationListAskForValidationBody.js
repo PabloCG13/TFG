@@ -156,7 +156,7 @@ const StudentValidationListAskForValidationBody = ({ studentId }) => {
 
   const addPetition = async (srcCourse, dstCourse) => {
     try {
-      const dbResponseValidation = await fetch(`http://localhost:5000/api/validation`, {
+      const dbResponseValidation = await fetch(`http://localhost:5000/api/validations`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -411,6 +411,7 @@ const StudentValidationListAskForValidationBody = ({ studentId }) => {
                 </tbody>
               </table>
             </div>
+            {modalMessage && <p style={messageStyle}>{modalMessage}</p>}
             <button onClick={() => handlePetition(selectedCourse, selectedDstCourse)} style={acceptButtonStyle}>
                 Accept
               </button>
@@ -452,6 +453,17 @@ const highlightedRowStyle = {
   color: "white",
   fontWeight: "bold",
   cursor: "pointer",
+};
+
+const messageStyle = {
+  fontSize: '16px',
+  fontWeight: 'bold',
+  color: '#155724',
+  backgroundColor: '#d4edda',
+  padding: '10px',
+  borderRadius: '5px',
+  marginTop: '10px',
+  textAlign: 'center',
 };
 
 

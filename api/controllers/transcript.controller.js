@@ -56,7 +56,29 @@ exports.findStudentsInCourse = async (req,res) => {
 }
 
 
-
+exports.findNotificationStudentMark = async (req, res) => {
+    try {
+        const { studentId } = req.params;
+        //console.log("Student",studentId);
+        const transcripts = await db.any(
+            `SELECT t.*
+             FROM transcript t
+             JOIN student s ON t.studentId = s.studentId
+             WHERE s.studentId = $1 
+             AND s.lastAccess < t.lastAccess;`,
+            [studentId]
+        );
+        //console.log("Transcript:",transcripts);
+        if (!transcripts) {
+            return res.status(404).json({ message: "No new transcript updates for this student" });
+        }
+ 
+        res.status(200).json(transcripts);
+    } catch (err) {
+        res.status(500).json({ message: err.message || "Some error occurred" });
+    }
+ };
+ 
 
 exports.findErasmusStudents = async (req,res) => {
 	try{

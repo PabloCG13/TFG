@@ -7,6 +7,7 @@ const UniversityHomeBody = ({ uniCode }) => {
   const [teachers, setTeachers] = useState([]);
   const [courses, setCourses] = useState([]);
   const [degrees, setDegrees] = useState([]);
+  
 
   const [showStudentForm, setShowStudentForm] = useState(false);
   const [showTeacherForm, setShowTeacherForm] = useState(false);
@@ -27,6 +28,8 @@ const UniversityHomeBody = ({ uniCode }) => {
   const [selectedDegreeId, setSelectedDegreeId] = useState(""); 
   const [selectedCourseId, setSelectedCourseId] = useState("");
   const [selectedTeacherId, setSelectedTeacherId] = useState("");
+  const [refreshKey, setRefreshKey] = useState(0);
+  const [refreshKey2, setRefreshKey2] = useState(0);
 
   useEffect(() => {
     if (!uniCode) return;
@@ -35,11 +38,6 @@ const UniversityHomeBody = ({ uniCode }) => {
       .then((response) => response.json())
       .then((data) => setStudents(data))
       .catch((error) => console.error("Error fetching students:", error));
-
-    fetch(`http://localhost:5000/api/universities/${uniCode}/teachers`)
-      .then((response) => response.json())
-      .then((data) => setTeachers(data))
-      .catch((error) => console.error("Error fetching teachers:", error));
 
     fetch(`http://localhost:5000/api/universities/${uniCode}/courses`)
       .then((response) => response.json())
@@ -51,6 +49,39 @@ const UniversityHomeBody = ({ uniCode }) => {
       .then((data) => setDegrees(data))
       .catch((error) => console.error("Error fetching degrees:", error));  
   }, [uniCode]);
+
+  useEffect(() => {
+    if (!uniCode) return;
+    fetch(`http://localhost:5000/api/universities/${uniCode}/teachers`)
+    .then((response) => response.json())
+    .then((data) => setTeachers(data))
+    .catch((error) => console.error("Error fetching teachers:", error));
+  }, [uniCode,refreshKey]);
+
+  
+  useEffect(() => {
+    if (!uniCode) return;
+  
+    fetch(`http://localhost:5000/api/studies/uni/${uniCode}`)
+      .then((response) => response.json())
+      .then((studiesData) => {
+        setStudents((prevStudents) => {
+          const updatedStudents = prevStudents.map((student) => {
+            const matchingStudy = studiesData.find(
+              (study) => study.studentid === student.studentid
+            );
+  
+            return matchingStudy
+              ? { ...student, degreeid: matchingStudy.degreeid }
+              : student;
+          });
+  
+          return updatedStudents;
+        });
+      })
+      .catch((error) => console.error("Error fetching studies:", error));
+  }, [uniCode, refreshKey2]);
+  
 
   let body;
   let user;
@@ -201,6 +232,7 @@ const UniversityHomeBody = ({ uniCode }) => {
         const test = await dbResponseStudies.json(); 
         console.log(test);
         await updateAddressesTable(participantAddress);
+        setRefreshKey2(prev => prev +1);
         return true;
       } else {
           console.error("Failed to modify transcript:", transcriptData.error);
@@ -299,6 +331,7 @@ const UniversityHomeBody = ({ uniCode }) => {
     if (dbResponse.ok) {
         setMessage(`Degree registered successfully! ID: ${dbData.degreeid}`);
         console.log("Stored Degree:", dbData);
+        setRefreshKey(prev => prev +1);
         return true;
     } else {
         setMessage(`Failed to create a new entry in the Database error`);
@@ -334,6 +367,7 @@ const UniversityHomeBody = ({ uniCode }) => {
     if (dbResponse.ok) {
       setMessage(`Course registered successfully! ID: ${dbData.degreeid}`);
       console.log("Stored Course:", dbData);
+      setRefreshKey(prev => prev +1);
       return true;
     } else {
       setMessage(`Failed to create a new entry in the Database error`);
@@ -402,256 +436,6 @@ const UniversityHomeBody = ({ uniCode }) => {
     }
     
   };
-
-
-  /*
-  const handleAddEntry = async (type) => {
-    let body;
-    let user;
-    let password;
-    let role;
-    let namedb;
-    let newItem;
-
-    if (type === "students") {
-      const student = newStudent;
-      if (!student.studentid || !student.degreeid || !student.name || !student.surname|| !student.dni || !student.dob || student.password !== student.confirmPassword) {
-        alert("Please enter a valid ID and make sure passwords match");
-        return;
-      }
-
-      user = student.studentid;
-      password = student.password;
-      role = 1;
-      namedb = `${student.name}, ${student.surname}`;
-
-      body = JSON.stringify({ studentId: user, name: namedb, dob:student.dob, dni:student.dni });
-    } 
-    else if (type === "teachers") {
-      const teacher = newTeacher;
-      if (!teacher.teacherid || !teacher.name || !teacher.surname || teacher.password !== teacher.confirmPassword || !teacher.role) {
-        alert("Please enter a valid ID, make sure passwords match, and select a role");
-        return;
-      }
-
-      user = teacher.teacherid;
-      console.log("Teacher id:", user);
-      password = teacher.password;
-      role = teacher.role === "Degree Coordinator" ? 3 : 2; // Determine role based on selection
-      namedb = `${teacher.name} ${teacher.surname}`;
-      body = JSON.stringify({ teacherId: user, name: namedb});
-    } 
-    else if(type === "degrees"){//TODO: da un error al añadir un degree
-      const degree = newDegree;
-      if (!degree.teacherid || !degree.name || !degree.degreeid) {
-        alert("Please enter a valid ID, degree coordinator and name");
-        return;
-      }
-      
-      const dbResponse = await fetch("http://localhost:5000/api/degrees", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-            uniCode: uniCode, 
-            degreeId: degree.degreeid, 
-            name: degree.name,
-            teacherId: degree.teacherid
-        }),
-    });
-
-    const dbData = await dbResponse.json();
-    console.log(dbData);
-    if (dbResponse.ok) {
-        setMessage(`Degree registered successfully! ID: ${dbData.degreeid}`);
-        console.log("Stored Degree:", dbData);
-    } else {
-        setMessage(`Failed to create a new entry in the Database error`);
-        console.error("Database error:", dbData.error);
-    }
-      
-
-    }else if(type==="courses"){
-      const course = newCourse;
-      if (!course.teacherid || !course.name || !course.degreeid || !course.content || !course.credits || !course.period) {
-        alert("Please enter a valid ID, degree coordinator and name");
-        return;
-      }
-      
-      const dbResponse = await fetch("http://localhost:5000/api/courses", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-            uniCode: uniCode, 
-            degreeId: course.degreeid, 
-            courseId: course.courseid,
-            name: course.name,
-            content: course.content,
-            credits: course.credits,
-            period: course.period,
-            teacherId: course.teacherid
-        }),
-      });
-
-      const dbData = await dbResponse.json();
-      console.log(dbData);
-      if (dbResponse.ok) {
-        setMessage(`Course registered successfully! ID: ${dbData.degreeid}`);
-        console.log("Stored Course:", dbData);
-      } else {
-        setMessage(`Failed to create a new entry in the Database error`);
-        console.error("Database error:", dbData.error);
-      }
-    }
-    else {
-      if (!newEntry) return;
-    }
-
-    if(type === "students" || type === "teachers")
-    try {
-      // Add to the Blockchain first
-      //const participantAddress = "0xFFcf8FDEE72ac11b5c542428B35EEF5769C409f0"; // Change this as needed
-      
-      const addressResponse = await fetch(`http://localhost:5000/api/addresses/any-participant/null-participant`); 
-        
-      const addressData = await addressResponse.json();
-      console.log("Addressdata: ", addressData);
-      if (!addressResponse.ok || !addressData.addressid) {
-        setMessage("Failed to retrieve a free blockchain address.");
-        console.error("Address fetch error:", addressData);
-        return;
-      }
-      
-      const participantAddress = addressData.addressid; // Retrieved from API
-      console.log("Retrieved participant Address:", participantAddress);
-      
-
-      const response = await fetch("http://localhost:4000/addParticipant", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          address: participantAddress,
-          uni: universityAddress,
-          user: user,
-          passwd: password,
-          role: role
-        }),
-      });
-
-      const data = await response.json();
-
-      if (data.success && data.hash !== "Error") {
-        setMessage(`User added successfully to the Blockchain! Hash: ${data.hash}`);
-        console.log("User added successfully. Hash:", data.hash);
-        // TODO test API conectivity
-        // After successfully adding to the Blockchain, add to the backend
-
-        if(type ==="students"){
-          const transcriptResponse = await fetch("http://localhost:4000/modifyTranscript", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                file: JSON.parse(body),  // File data from the original request
-                addressStudent: participantAddress,
-                address: universityAddress,
-                type: 2
-              }),
-          });
-
-          const transcriptData = await transcriptResponse.json();
-          const transcriptHash = transcriptData.hash;
-
-          if (transcriptResponse.ok) {
-            console.log("Transcript modified successfully:", transcriptHash);
-            const dbResponseTranscript = await fetch(`http://localhost:5000/api/${type}`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ ...JSON.parse(body), hash: data.hash, transcriptHash: transcriptHash}), // Añadir hash al body
-            });
-            newItem = await dbResponseTranscript.json();   
-
-            const dbResponseStudies = await fetch(`http://localhost:5000/api/studies`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ studentId: newStudent.studentid, uniCode: uniCode, degreeId: newStudent.degreeid}), // Añadir hash al body
-            }); 
-            const test = await dbResponseStudies.json(); 
-            console.log(test);
-
-          } else {
-              console.error("Failed to modify transcript:", transcriptData.error);
-          }
-        } else{
-          const dbResponse = await fetch(`http://localhost:5000/api/${type}`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ ...JSON.parse(body), hash: data.hash}), // Añadir hash al body
-          });
-          newItem = await dbResponse.json();
-        }
-
-      } else {
-        if (data.hash === "Error") {
-          setMessage(`Failed to add user: ${data.hash}`);
-          console.error("Failed to add user:", data.hash);
-        } else {
-          setMessage(`Failed to add user: ${data.error}`);
-          console.error("Failed to add user:", data.error);
-        }
-      }
-      
-      try {
-        console.log("User:", user);
-        console.log("address:", participantAddress);
-        const updateResponse = await fetch(`http://localhost:5000/api/addresses/${participantAddress}`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ participantId: user, addressId: participantAddress }),  // Pass the user as body
-        });
-  
-        if (updateResponse.ok) {
-          console.log(`Address ${participantAddress} successfully updated with user: ${user}`);
-        } else {
-          console.error(`Failed to update address: ${participantAddress}`);
-        }
-      } catch (error) {
-        console.error("Failed to update address in the DB:", error);
-      }
-      
-    } catch (error) {
-      setMessage("API request failed.");
-      console.error("Error:", error);
-    }
-  
-    console.log("NEW ITEM:", newItem);
-    // Update state after successful addition to the DB
-    switch (type) {
-      case "students":
-        setStudents([...students, newItem]);
-        setShowStudentForm(false);
-        setNewStudent({ studentid: "", name:"", surname:"", dni:"", dob:"", password: "", confirmPassword: "" });
-        break;
-      case "teachers":
-        setTeachers([...teachers, newItem]);
-        setShowTeacherForm(false);
-        setNewTeacher({ teacherid: "", name:"", surname:"", role: "", password: "", confirmPassword: ""});
-        break;
-      case "courses":
-        setCourses([...courses, newCourse]);
-        setShowCourseForm(false);
-        setNewCourse({ degreeid:"", courseid:"", name:"", content:"", credits:"", period:"", teacherid:""});
-        break;
-      case "degrees":
-        setDegrees([...degrees, newDegree]);
-        setShowDegreeForm(false);
-        setNewDegree({ degreeid:"", name:"", teacherid:""});
-        break; 
-      default:
-        console.warn(`No state update handler for type: ${type}`);
-    }
-    
-    setNewEntry(""); // Reset input in all cases
-  };
-  */
 
   const handleStudentToCourse = async ({ degreeId, courseId, studentId, year, teacherId }) => {
 
@@ -787,6 +571,7 @@ const UniversityHomeBody = ({ uniCode }) => {
 
   // Function to handle the "Assign Coure" button click
   const handleAssignCourse = (student) => {
+    console.log("Student",student);
     setSelectedStudent({
       studentId: student.studentid,
       studentName: student.name,
@@ -823,7 +608,7 @@ const UniversityHomeBody = ({ uniCode }) => {
                   <td>{student.name || "N/A"}</td>
                   <td>{student.studentid}</td>
                   <td>{student.dob}</td>
-                   
+                  {/*<td>{student.degreeid}</td>*/}
                   <td>
                   <button onClick={() => handleAssignCourse(student)}> Assign Course </button>
                   </td>
@@ -954,7 +739,9 @@ const UniversityHomeBody = ({ uniCode }) => {
                   required 
               > 
                 <option value="" disabled>Select a course</option> 
-                {courses.map((course) => ( 
+                {/* .filter(course => course.degreeid === selectedStudent.degreeid)*/}
+                {courses
+                .map((course) => ( 
                   <option key={course.courseid} value={course.courseid}> {course.name} </option> 
                 ))} 
               </select> 

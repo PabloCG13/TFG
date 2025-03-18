@@ -156,13 +156,14 @@ const handleConfirm = async () => {
     const transcriptHashModified = transcriptData.hash;
     console.log("Transcript modified successfully:", transcriptHashModified);
 
-    
+    const currentTimestamp = new Date().toISOString();
     const dbResponse = await fetch(`http://localhost:5000/api/transcripts/${selectedStudent.unicode}/${selectedStudent.degreeid}/${selectedStudent.courseid}/${selectedStudent.studentid}/${selectedStudent.academicyear}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         provisional: prov, // Assuming provisional is still part of the request
         mark: selectedStudent.mark,
+        lastAccess: currentTimestamp,
       }),
     });
 
