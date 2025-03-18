@@ -7,12 +7,16 @@ const StudentValidationListAskForValidationBody = ({ studentId }) => {
   const [excludedUniversities, setExcludedUniversities] = useState([]);
   const [courses, setCourses] = useState({});
   const [selectedCourse, setSelectedCourse] = useState(null);
+  const [selectedDstCourse, setSelectedDstCourse] = useState(null);
   const [selectedUniversity, setSelectedUniversity] = useState(null);
   const [selectedDegree, setSelectedDegree] = useState(null);
   const [degreesInUni, setDegreesInUni] = useState([]);
   const [coursesInDegree, setCoursesInDegree] = useState([]);
   const location = useLocation();
   const { participantAddress } = location.state || {}; // Extract participantAddress
+  // State to control modal visibility
+  const [modalMessage, setModalMessage] = useState("");
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
 
   // Fetch studies
@@ -60,6 +64,21 @@ const StudentValidationListAskForValidationBody = ({ studentId }) => {
     });
   }, [studies]);
 
+  useEffect(()=>{
+    if(selectedCourse && selectedDstCourse){
+      setIsModalOpen(true);
+    }
+  }, [selectedCourse,selectedDstCourse]);
+  
+  
+    // Function to close modal
+    const closeModal = () => {
+      setIsModalOpen(false);
+      setSelectedCourse(null);
+      setSelectedDstCourse(null);
+      setModalMessage("");
+    };
+
 
   // Handle course row selection
   const handleCourseClick = (course) => {
@@ -103,6 +122,21 @@ const StudentValidationListAskForValidationBody = ({ studentId }) => {
     setSelectedCourse(null);
   };
 
+  // Handle back button for course details
+  const handleDstCourseClick = (course) => {
+    setSelectedDstCourse(course);
+    console.log("Course:", course);
+    // fetch(`http://localhost:5000/api/courses/${course.unicode}/${course.degreeid}/${course.courseid}`)
+    //   .then((response) => response.json())
+    //   .then((data) => {
+    //     setCoursesInDegree(data);
+    //   })
+    //   .catch((error) => console.error(`Error fetching courses for ${degree.unicode}, ${degree.degreeid}`, error));
+  };
+
+  const handleBackDstCourse = () => {
+    setSelectedDstCourse(null);
+  };
 
   // Handle back button for university details
   const handleBackUniversity = () => {
@@ -116,8 +150,73 @@ const StudentValidationListAskForValidationBody = ({ studentId }) => {
   // Handle back button for degree details
   const handleBackDegree = () => {
     setSelectedDegree(null);
+    setSelectedDstCourse(null);
     setCoursesInDegree([]);
   };
+
+  const addPetition = async (srcCourse, dstCourse) => {
+    try {
+      const dbResponseValidation = await fetch(`http://localhost:5000/api/validation`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          uniCodeSrc: srcCourse.unicode,
+          degreeIdSrc: srcCourse.degreeid,
+          courseIdSrc: srcCourse.courseid,
+          uniCodeDst: dstCourse.unicode,
+          degreeIdDst: dstCourse.degreeid,
+          courseIdDst: dstCourse.courseid,
+          token: "q", // Replace when we have a better idea
+          provisional: 0,
+        }),
+      });
+
+
+      if (!dbResponseValidation.ok) {
+        throw new Error(`Failed to add validation entry to DB. Status: ${dbResponseValidation.status}`);
+      }
+
+
+      const dbResponseValidates = await fetch(`http://localhost:5000/api/validates`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          uniCodeSrc: srcCourse.unicode,
+          degreeIdSrc: srcCourse.degreeid,
+          courseIdSrc: srcCourse.courseid,
+          uniCodeDst: dstCourse.unicode,
+          degreeIdDst: dstCourse.degreeid,
+          courseIdDst: dstCourse.courseid,
+          studentId: studentId,
+        }),
+      });
+
+
+      if (!dbResponseValidates.ok) {
+        throw new Error(`Failed to add validation entry to DB. Status: ${dbResponseValidates.status}`);
+      }
+
+
+      return true; // If both fetch calls succeed, return true
+    } catch (error) {
+      console.error("Error adding validation:", error);
+      return false; // If any error occurs, return false
+    }
+  };
+
+
+  const handlePetition = async (srcCourse, dstCourse) => {
+    console.log("srcCourse", srcCourse);
+    console.log("dstCourse", dstCourse);
+    
+    const result = await addPetition(srcCourse, dstCourse);
+    if (result) {
+      setModalMessage("✅ Petition successfully added!"); // Show success message
+    } else {
+      setModalMessage("❌ Error: Petition could not be added."); //  Show error message
+    }
+  };
+
 
 
   return (
@@ -182,7 +281,17 @@ const StudentValidationListAskForValidationBody = ({ studentId }) => {
       {/* Right Section - Universities */}
       <div style={sectionStyle}>
         <h2 style={titleStyle}>University List</h2>
-
+          {/* Course Details (if selected) */}
+          {selectedDstCourse && (
+          <div style={detailsContainerStyle}>
+            <h3>Course Details</h3>
+            <p><strong>Course ID:</strong> {selectedDstCourse.courseid}</p>
+            <p><strong>Course Name:</strong> {selectedDstCourse.name}</p>
+            <p><strong>Credits:</strong> {selectedDstCourse.credits}</p>
+            <p><strong>Period:</strong> {selectedDstCourse.period}</p>
+            <button style={backButtonStyle} onClick={handleBackDstCourse}>Back</button>
+          </div>
+        )}
 
         {/* Degree List (if a university is selected) */}
         {selectedUniversity && !selectedDegree && (
@@ -227,7 +336,7 @@ const StudentValidationListAskForValidationBody = ({ studentId }) => {
               </thead>
               <tbody>
                 {coursesInDegree.map((course) => (
-                  <tr key={course.courseid}>
+                  <tr key={course.courseid} onClick={() => handleDstCourseClick(course)}>
                     <td>{course.courseid}</td>
                     <td>{course.name}</td>
                     <th>{course.credits}</th>
@@ -260,7 +369,55 @@ const StudentValidationListAskForValidationBody = ({ studentId }) => {
             ))}
           </tbody>
         </table>
+
       </div>
+      {isModalOpen && (
+        <div style={modalOverlayStyle}>
+          <div style={modalStyle}>
+            <h2>Selected Courses</h2>
+            <div style={tableContainerStyle}>
+              {/* Left Table */}
+              <table border="1" style={tableStyle}>
+                <thead>
+                  <tr><th colSpan="5">My Course</th></tr>
+                  <tr><th>Course ID</th><th>Name</th><th>Credits</th><th>Period</th><th>Content</th></tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>{selectedCourse.courseid}</td>
+                    <td>{selectedCourse.name}</td>
+                    <td>{selectedCourse.credits}</td>
+                    <td>{selectedCourse.period}</td>
+                    <td>{selectedCourse.content}</td>
+                  </tr>
+                </tbody>
+              </table>
+
+
+              {/* Right Table */}
+              <table border="1" style={tableStyle}>
+                <thead>
+                  <tr><th colSpan="5">Destination Course</th></tr>
+                  <tr><th>Course ID</th><th>Name</th><th>Credits</th><th>Period</th><th>Content</th></tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>{selectedDstCourse.courseid}</td>
+                    <td>{selectedDstCourse.name}</td>
+                    <td>{selectedDstCourse.credits}</td>
+                    <td>{selectedDstCourse.period}</td>
+                    <td>{selectedDstCourse.content}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <button onClick={() => handlePetition(selectedCourse, selectedDstCourse)} style={acceptButtonStyle}>
+                Accept
+              </button>
+            <button onClick={closeModal} style={closeButtonStyle}>Close</button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
@@ -313,6 +470,74 @@ const backButtonStyle = {
   color: "white",
   border: "none",
   cursor: "pointer",
+};
+
+const modalOverlayStyle = {
+  position: 'fixed',
+  top: 0,
+  left: 0,
+  width: '100%',
+  height: '100%',
+  backgroundColor: 'rgba(0, 0, 0, 0.5)', 
+  display: 'flex',
+  justifyContent: 'center',
+  alignItems: 'center',
+  zIndex: 1000,
+};
+
+const modalStyle = {
+  backgroundColor: 'white',
+  padding: '20px',
+  borderRadius: '8px',
+  textAlign: 'center',
+  width: '80%',
+  maxWidth: '700px',
+  maxHeight: '90vh',
+  overflowY: 'auto',
+};
+
+const closeButtonStyle = {
+  backgroundColor: '#f44336',
+  color: 'white',
+  border: 'none',
+  padding: '10px',
+  marginTop: '20px',
+  cursor: 'pointer',
+};
+
+const buttonContainerStyle = {
+  display: 'flex',
+  justifyContent: 'center',
+  gap: '20px',
+};
+
+const acceptButtonStyle = {
+  backgroundColor: 'green',
+  color: 'white',
+  padding: '10px 20px',
+  border: 'none',
+  cursor: 'pointer',
+};
+
+const hoverStyle = {
+  backgroundColor: "#0056b3",
+};
+
+const tableContainerStyle = {
+  display: 'flex',
+  flexWrap: 'wrap',
+  justifyContent: 'space-around',
+  marginBottom: '20px',
+  widht: '100%',
+  gap: '20px',
+};
+
+const tableStyle = {
+  border: '1px solid #ddd',
+  padding: '8px',
+  flex: '1',
+  minWidth: '280px',
+  maxWidth: '45%',
 };
 
 

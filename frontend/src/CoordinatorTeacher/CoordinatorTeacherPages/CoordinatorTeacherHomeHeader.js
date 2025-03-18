@@ -1,8 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import perfil from '../../Logo/perfil.png'; // Import the image from Logo folder
-import { Link } from 'react-router-dom'; // Import Link to redirect
+import { Link, useLocation } from 'react-router-dom'; // Import Link to redirect
 
 const CoordinatorTeacherHomeHeader = ({teacherId}) => {
+
+  const location =  useLocation();
+  const { participantAddress } = location.state || {}; // Extract data
   // State to control modal visibility
   const [validations, setValidations] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -143,12 +146,15 @@ const CoordinatorTeacherHomeHeader = ({teacherId}) => {
                 {validations.map((validation, index) => (
                   <li key={index}>
                      There is an answer for the validation request for the course **{validation.courseidsrc}**  
-                    <button 
+                     <Link 
+                      to={`/CoordinatorTeacher/CoordinatorTeacherPages/CoordinatorTeacherConfirmValidationPage/CoordinatorTeacherConfirmValidation/${teacherId}`} // Route where it links to
+                      state={{ participantAddress }}  // Pass participantAddress" // Route where it links to
                       style={viewDetailsButtonStyle} 
-                      /*onClick={() => handleDstCourse(validation)}*/
+                      onMouseOver={(e) => Object.assign(e.target.style, hoverStyle)}
+                      onMouseOut={(e) => Object.assign(e.target.style, buttonStyle)}
                     >
-                      View More
-                    </button>
+                    View More
+                    </Link>
                   </li>
                 ))}
               </ul>

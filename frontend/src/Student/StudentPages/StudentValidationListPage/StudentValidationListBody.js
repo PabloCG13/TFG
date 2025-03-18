@@ -87,6 +87,17 @@ const StudentValidationListBody = ({ studentId }) => {
     if (!dbResponse.ok) throw new Error(`Failed to fetch studies. Status: ${dbResponse.status}`);
     console.log("response: ",dbResponse);
 
+    const dbResponseValidation = await fetch(`http://localhost:5000/api/validation`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ...JSON.parse(validatid), provisional: 0}), // Añadir hash al body
+    });
+
+    if (!dbResponseValidation.ok) {
+      console.error(`Failed to add validate entry to DB. Status: ${dbResponseValidation.status}`);
+      return false;
+    }
+
     const dbResponseValidates = await fetch(`http://localhost:5000/api/validates`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -97,6 +108,8 @@ const StudentValidationListBody = ({ studentId }) => {
       console.error(`Failed to add validate entry to DB. Status: ${dbResponseValidates.status}`);
       return false;
     }
+
+
 
   };
 
@@ -162,7 +175,7 @@ const StudentValidationListBody = ({ studentId }) => {
                   </td>
                   <td>
                   <span style={lockIconStyle}>
-                    {validatid.provisional === 0 ? "🔓" : "🔒"} 
+                    {validatid.provisional === 1 ? "🔒" : "🔓" } 
                   </span>
                   </td>
                   <td>

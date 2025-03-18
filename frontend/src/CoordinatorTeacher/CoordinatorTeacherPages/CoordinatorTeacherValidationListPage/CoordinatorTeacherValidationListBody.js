@@ -192,7 +192,7 @@ const CoordinatorTeacherValidationListBody = ({ teacherId }) => {
                   <td style={tdStyle}>{universities[valid.unicodedst]?.name || "Loading..."}</td>
                   <td>
                   <span style={lockIconStyle}>
-                    {valid.provisional === 0 ? "🔓" : "🔒"} 
+                    {valid.provisional === 1 ? "🔒" : "🔓"  } 
                   </span>
                   </td>
                 </tr>
