@@ -682,12 +682,14 @@ const addCourse = async (course) => {
                   <td>{course.period}</td>
                   <td>
 		  {course.syllabus_pdf ? (
-		    <embed
-		      src={`data:application/pdf;base64,${course.syllabus_pdf}`}
-		      width="600"
-		      height="400"
-		      type="application/pdf"
-		    />
+		    <a
+		      href={`data:application/pdf;base64,${course.syllabus_pdf}`}
+		      target="_blank"
+		      rel="noopener noreferrer"
+		      style={{ color: "blue", textDecoration: "underline", cursor: "pointer" }}
+		    >
+		      View Syllabus
+		    </a>
 		  ) : (
 		    "No Syllabus attached"
 		  )}
