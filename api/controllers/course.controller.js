@@ -1,19 +1,32 @@
 const db = require("../config/db.js"); // Import pg-promise instance
+const multer = require("multer");
+
+const storage = multer.memoryStorage();
+const upload = multer({ storage: storage });
 
 // Create course
 exports.create = async (req, res) => {
     try {
+	console.log("Course request body ", req.body);
+	console.log("Course request file ", req.file);
         const { uniCode, degreeId, courseId, name, content, credits, period, teacherId } = req.body;
+        const syllabusPdf = req.file.buffer;
         const query = `
-            INSERT INTO course (uniCode, degreeId, courseId, name, content, credits, period, teacherId)
-            VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *;
+            INSERT INTO course (uniCode, degreeId, courseId, name, content, credits, period, teacherId, syllabus_pdf)
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *;
         `;
-        const course = await db.one(query, [uniCode, degreeId, courseId, name, content, credits, period, teacherId]);
+
+        const course = await db.one(query, [
+            uniCode, degreeId, courseId, name, content, credits, period, teacherId, syllabusPdf
+        ]);
+
         res.status(201).json(course);
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
 };
+
+exports.uploadPdf = upload.single('syllabus_pdf');
 
 // Get all courses
 exports.findAll = async (req, res) => {
@@ -51,7 +64,7 @@ exports.findUniversityCourses = async (req, res) => {
         if (!course) {
             return res.status(404).json({ message: "Course not found" });
         }
-
+	console.log(course);
         res.status(200).json(course);
     } catch (err) {
         res.status(500).json({ message: err.message || "Some error occurred" });
@@ -77,7 +90,10 @@ exports.findDegreeCourses = async (req, res) => {
 exports.findOne = async (req, res) => {
     try {
         const { uniCode, degreeId, courseId } = req.params;
-        const course = await db.oneOrNone("SELECT * FROM course WHERE uniCode = $1 AND degreeId = $2 AND courseId = $3;", [uniCode, degreeId, courseId]);
+        const course = await db.oneOrNone(
+            "SELECT *, encode(syllabus_pdf, 'base64') AS syllabus_pdf FROM course WHERE uniCode = $1 AND degreeId = $2 AND courseId = $3;",
+            [uniCode, degreeId, courseId]
+        );
 
         if (!course) {
             return res.status(404).json({ message: "Course not found" });

@@ -18,7 +18,8 @@ const UniversityHomeBody = ({ uniCode }) => {
   const [newStudent, setNewStudent] = useState({ studentid: "", degreeid:"", name: "", surname: "", dni: "", dob:"", password: "", confirmPassword: "" });
   const [newTeacher, setNewTeacher] = useState({ teacherid: "", name: "", surname: "", role: "" , password: "", confirmPassword: ""});
   const [newDegree, setNewDegree] = useState({ degreeid:"", name:"", teacherid:"" });
-  const [newCourse, setNewCourse] = useState({ degreeid:"", courseid:"", name:"", content:"", credits:"", period:"", teacherid:""});
+  const [newCourse, setNewCourse] = useState({
+    degreeid: "", courseid: "", name: "", content: "", credits: "", period: "", teacherid: "", syllabus: null });
   
   const [message, setMessage] = useState(''); 
   const location =  useLocation();
@@ -39,10 +40,23 @@ const UniversityHomeBody = ({ uniCode }) => {
       .then((data) => setStudents(data))
       .catch((error) => console.error("Error fetching students:", error));
 
-    fetch(`http://localhost:5000/api/universities/${uniCode}/courses`)
-      .then((response) => response.json())
-      .then((data) => setCourses(data))
-      .catch((error) => console.error("Error fetching courses:", error));
+   fetch(`http://localhost:5000/api/universities/${uniCode}/courses`)
+  .then(response => response.json())
+  .then(data => {
+    // Convert syllabus PDF to base64 if it's binary
+    const updatedCourses = data.map(course => {
+      if (course.syllabus_pdf && course.syllabus_pdf.data) {
+        const binaryData = new Uint8Array(course.syllabus_pdf.data);
+        const base64String = btoa(
+          binaryData.reduce((data, byte) => data + String.fromCharCode(byte), "")
+        );
+        return { ...course, syllabus_pdf: base64String };
+      }
+      return course;
+    });
+    setCourses(updatedCourses);
+  })
+  .catch(error => console.error("Error fetching courses:", error));
     console.log("Course:", courses);
     fetch(`http://localhost:5000/api/universities/${uniCode}/degrees`)
       .then((response) => response.json())
@@ -81,15 +95,13 @@ const UniversityHomeBody = ({ uniCode }) => {
       })
       .catch((error) => console.error("Error fetching studies:", error));
   }, [uniCode, refreshKey2]);
-  
-
+    
   let body;
   let user;
   let password;
   let role;
   let namedb;
   let newItem;
-
   const handleAddParticipantToBlockchain = async () => {
     try {  
       const addressResponse = await fetch(`http://localhost:5000/api/addresses/any-participant/null-participant`); 
@@ -340,41 +352,49 @@ const UniversityHomeBody = ({ uniCode }) => {
     }
       
   }
+// Handle file input for syllabus PDF
+  const handleFileChange = (e) => {
+    setNewCourse({ ...newCourse, syllabus: e.target.files[0] });
+};
 
-  const addCourse = async (course) => {
-    if (!course.teacherid || !course.name || !course.degreeid || !course.content || !course.credits || !course.period) {
-      alert("Please enter a valid ID, degree coordinator and name");
-      return false;
+const addCourse = async (course) => {
+        if (!course.teacherid || !course.name || !course.degreeid || !course.content || !course.credits || !course.period) {
+        alert("Please enter all required fields.");
+        return false;
     }
-    
+
+    const formData = new FormData();
+    formData.append("uniCode", uniCode);
+    formData.append("degreeId", course.degreeid);
+    formData.append("courseId", course.courseid);
+    formData.append("name", course.name);
+    formData.append("content", course.content);
+    formData.append("credits", course.credits);
+    formData.append("period", course.period);
+    formData.append("teacherId", course.teacherid);
+    if (course.syllabus) {
+        formData.append("syllabus_pdf", course.syllabus);
+    }
+
+    console.log("form data: ", formData);
     const dbResponse = await fetch("http://localhost:5000/api/courses", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-          uniCode: uniCode, 
-          degreeId: course.degreeid, 
-          courseId: course.courseid,
-          name: course.name,
-          content: course.content,
-          credits: course.credits,
-          period: course.period,
-          teacherId: course.teacherid
-      }),
+        method: "POST",
+        body: formData,
     });
 
     const dbData = await dbResponse.json();
     console.log(dbData);
     if (dbResponse.ok) {
-      setMessage(`Course registered successfully! ID: ${dbData.degreeid}`);
-      console.log("Stored Course:", dbData);
-      setRefreshKey(prev => prev +1);
-      return true;
+        setMessage(`Course registered successfully! ID: ${dbData.courseId}`);
+        setRefreshKey(prev => prev + 1);
+        return true;
     } else {
-      setMessage(`Failed to create a new entry in the Database error`);
-      console.error("Database error:", dbData.error);
-      return false;
+        setMessage(`Failed to create a new entry in the Database`);
+        console.error("Database error:", dbData.error);
+        return false;
     }
-  }
+    
+};
 
   const updateState = (type) => {
     switch (type) {
@@ -647,7 +667,7 @@ const UniversityHomeBody = ({ uniCode }) => {
              <button onClick={() => setShowCourseForm(true)}>Add Course</button> 
             <table style={tableStyle}>
               <thead>
-                <tr><th>NAME</th><th>ID</th><th>DegreeID</th><th>TeacherID</th><th>Content</th><th>Credits</th><th>Period</th></tr>
+                <tr><th>NAME</th><th>ID</th><th>DegreeID</th><th>TeacherID</th><th>Content</th><th>Credits</th><th>Period</th><th>Syllabus</th></tr>
               </thead>
               <tbody>
               {courses.map((course) => {
@@ -660,6 +680,18 @@ const UniversityHomeBody = ({ uniCode }) => {
                   <td>{course.content}</td>
                   <td>{course.credits}</td>
                   <td>{course.period}</td>
+                  <td>
+		  {course.syllabus_pdf ? (
+		    <embed
+		      src={`data:application/pdf;base64,${course.syllabus_pdf}`}
+		      width="600"
+		      height="400"
+		      type="application/pdf"
+		    />
+		  ) : (
+		    "No Syllabus attached"
+		  )}
+		</td>
                   </tr>
                 );
               })}
@@ -836,6 +868,7 @@ const UniversityHomeBody = ({ uniCode }) => {
               <input type="number" placeholder="Credits" value={newCourse.credits} onChange={(e) => setNewCourse({ ...newCourse, credits: e.target.value })} />
               <input type="text" placeholder="Period" value={newCourse.period} onChange={(e) => setNewCourse({ ...newCourse, period: e.target.value })} />
               <input type="text" placeholder="Coordinator teacher ID" value={newCourse.teacherid} onChange={(e) => setNewCourse({ ...newCourse, teacherid: e.target.value })} />
+              <input type="file" accept="application/pdf" onChange={handleFileChange} />
               <button onClick={() => handleAddEntry("courses")}>Submit</button>
               <button onClick={() => setShowCourseForm(false)}>Cancel</button>
             </div>

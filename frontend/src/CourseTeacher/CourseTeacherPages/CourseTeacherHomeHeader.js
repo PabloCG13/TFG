@@ -104,7 +104,7 @@ const CourseTeacherHomeHeader = ({ teacherId }) => {
 
     console.log("Uni:", uniCode, "degreeID:", degreeId, "courseId", courseId);
 
-    fetch(`http://localhost:5000/api//courses/${uniCode}/${degreeId}/${courseId}`)
+    fetch(`http://localhost:5000/api/courses/${uniCode}/${degreeId}/${courseId}`)
       .then(response => {
         if (!response.ok) {
           throw new Error(`Failed to update lastAccess. Status: ${response.status}`);
@@ -229,7 +229,7 @@ const CourseTeacherHomeHeader = ({ teacherId }) => {
                       <th>Course ID</th>
                       <th>Period</th>
                       <th>Credits</th>
-                      {/*<th>Content</th>*/}
+                      <th>Syllabus</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -239,7 +239,18 @@ const CourseTeacherHomeHeader = ({ teacherId }) => {
                       <td>{srcCourse.courseid}</td>
                       <td>{srcCourse.period}</td>
                       <td>{srcCourse.credits}</td>
-                      {/*<td>{srcCourse.content}</td>*/}
+                      <td>
+		  {srcCourse.syllabus_pdf ? (
+		    <embed
+		      src={`data:application/pdf;base64,${srcCourse.syllabus_pdf}`}
+		      width="600"
+		      height="400"
+		      type="application/pdf"
+		    />
+		  ) : (
+		    "No Syllabus attached"
+		  )}
+		</td>
                     </tr>
                   </tbody>
                 </table>
@@ -256,7 +267,7 @@ const CourseTeacherHomeHeader = ({ teacherId }) => {
                       <th>Course ID</th>
                       <th>Period</th>
                       <th>Credits</th>
-                      {/*<th>Content</th>*/}
+                      <th>Syllabus</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -266,7 +277,18 @@ const CourseTeacherHomeHeader = ({ teacherId }) => {
                       <td>{dstCourse.courseid}</td>
                       <td>{dstCourse.period}</td>
                       <td>{dstCourse.credits}</td>
-                     {/*} <td>{dstCourse.content}</td>*/}
+                     <td>
+		  {dstCourse.syllabus_pdf ? (
+		    <embed
+		      src={`data:application/pdf;base64,${dstCourse.syllabus_pdf}`}
+		      width="600"
+		      height="400"
+		      type="application/pdf"
+		    />
+		  ) : (
+		    "No Syllabus attached"
+		  )}
+		</td>
                     </tr>
                   </tbody>
                 </table>

@@ -6,4 +6,4 @@ WORKDIR /app
 RUN npm install nodemon -g
 
 EXPOSE 5000
-CMD echo 1; npm install pg pg-promise; echo 2; npx nodemon app.js
+CMD echo 1; npm install pg pg-promise multer; echo 2; npx nodemon app.js

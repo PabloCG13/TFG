@@ -46,10 +46,10 @@ CREATE TABLE IF NOT EXISTS course (
     degreeId VARCHAR(30) NOT NULL,
     courseId VARCHAR(30) NOT NULL,
     name VARCHAR(50) NOT NULL,
-    content TEXT NOT NULL,
     credits INTEGER NOT NULL,
     period VARCHAR(30) NOT NULL,
     teacherId VARCHAR(4) NOT NULL,
+    syllabus_pdf BYTEA,
     PRIMARY KEY (uniCode, degreeId, courseId),
     FOREIGN KEY (uniCode, degreeId) REFERENCES degree (uniCode, degreeId) ON DELETE CASCADE,
     FOREIGN KEY (teacherId) REFERENCES teacher (teacherId) ON DELETE SET NULL
@@ -143,8 +143,8 @@ SELECT 'S001', 'Jane Smith', TO_DATE('15/03/2000', 'DD/MM/YYYY'), '12345678A', N
 WHERE NOT EXISTS (SELECT 1 FROM student WHERE studentId = 'S001');
 
 -- Insert course if not exists
-INSERT INTO course (uniCode, degreeId, courseId, name, content, credits, period, teacherId)
-SELECT 'U001', 'CS101', 'BP1', 'Basics of programming', 'Content', 6, '1st Semester', 'T001'
+INSERT INTO course (uniCode, degreeId, courseId, name, credits, period, teacherId)
+SELECT 'U001', 'CS101', 'BP1', 'Basics of programming', 6, '1st Semester', 'T001'
 WHERE NOT EXISTS (SELECT 1 FROM course WHERE uniCode = 'U001' AND degreeId = 'CS101' AND courseId = 'BP1');
 
 -- Insert studies if not exists

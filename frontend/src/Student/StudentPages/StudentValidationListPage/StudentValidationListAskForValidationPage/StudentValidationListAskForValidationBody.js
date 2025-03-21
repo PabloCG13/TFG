@@ -388,7 +388,18 @@ const StudentValidationListAskForValidationBody = ({ studentId }) => {
                     <td>{selectedCourse.name}</td>
                     <td>{selectedCourse.credits}</td>
                     <td>{selectedCourse.period}</td>
-                    <td>{selectedCourse.content}</td>
+                    <td>
+		  {selectedCourse.syllabus_pdf ? (
+		    <embed
+		      src={`data:application/pdf;base64,${selectedCourse.syllabus_pdf}`}
+		      width="600"
+		      height="400"
+		      type="application/pdf"
+		    />
+		  ) : (
+		    "No Syllabus attached"
+		  )}
+		</td>
                   </tr>
                 </tbody>
               </table>
@@ -406,7 +417,18 @@ const StudentValidationListAskForValidationBody = ({ studentId }) => {
                     <td>{selectedDstCourse.name}</td>
                     <td>{selectedDstCourse.credits}</td>
                     <td>{selectedDstCourse.period}</td>
-                    <td>{selectedDstCourse.content}</td>
+                    <td>
+		  {selectedDstCourse.syllabus_pdf ? (
+		    <embed
+		      src={`data:application/pdf;base64,${selectedDstCourse.syllabus_pdf}`}
+		      width="600"
+		      height="400"
+		      type="application/pdf"
+		    />
+		  ) : (
+		    "No Syllabus attached"
+		  )}
+		</td>
                   </tr>
                 </tbody>
               </table>
