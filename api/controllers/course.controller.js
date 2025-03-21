@@ -9,15 +9,15 @@ exports.create = async (req, res) => {
     try {
 	console.log("Course request body ", req.body);
 	console.log("Course request file ", req.file);
-        const { uniCode, degreeId, courseId, name, content, credits, period, teacherId } = req.body;
+        const { uniCode, degreeId, courseId, name, credits, period, teacherId } = req.body;
         const syllabusPdf = req.file.buffer;
         const query = `
-            INSERT INTO course (uniCode, degreeId, courseId, name, content, credits, period, teacherId, syllabus_pdf)
-            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *;
+            INSERT INTO course (uniCode, degreeId, courseId, name, credits, period, teacherId, syllabus_pdf)
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *;
         `;
 
         const course = await db.one(query, [
-            uniCode, degreeId, courseId, name, content, credits, period, teacherId, syllabusPdf
+            uniCode, degreeId, courseId, name, credits, period, teacherId, syllabusPdf
         ]);
 
         res.status(201).json(course);

@@ -6,7 +6,7 @@ const CoordinatorTeacherConfirmMarksBody = ({teacherId}) => {
   const [selectedYear, setSelectedYear] = useState("All");
   const [students, setStudents] = useState([]);
   const [teacher, setTeacher] = useState([]);
-  const [newCourse, setNewCourse] = useState({ degreeid:"", courseid:"", name:"", content:"", credits:"", period:"", teacherid:""});
+  const [newCourse, setNewCourse] = useState({ degreeid:"", courseid:"", name:"", credits:"", period:"", teacherid:""});
   const [newEntry, setNewEntry] = useState("");
   const [message, setMessage] = useState(''); 
   const location =  useLocation();

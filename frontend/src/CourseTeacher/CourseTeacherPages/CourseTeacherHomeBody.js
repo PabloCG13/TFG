@@ -5,7 +5,7 @@ const CourseTeacherHomeBody = ({teacherId}) => {
   const [selectedYear, setSelectedYear] = useState("All");
   const [students, setStudents] = useState([]);
   const [teacher, setTeacher] = useState([]);
-  const [course, setCourse] = useState({ degreeid:"", courseid:"", name:"", content:"", credits:"", period:"", teacherid:""});
+  const [course, setCourse] = useState({ degreeid:"", courseid:"", name:"", credits:"", period:"", teacherid:""});
   const [newEntry, setNewEntry] = useState("");
   const [message, setMessage] = useState(''); 
   const location =  useLocation();

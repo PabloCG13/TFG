@@ -380,7 +380,7 @@ const StudentValidationListAskForValidationBody = ({ studentId }) => {
               <table border="1" style={tableStyle}>
                 <thead>
                   <tr><th colSpan="5">My Course</th></tr>
-                  <tr><th>Course ID</th><th>Name</th><th>Credits</th><th>Period</th><th>Content</th></tr>
+                  <tr><th>Course ID</th><th>Name</th><th>Credits</th><th>Period</th><th>Syllabus</th></tr>
                 </thead>
                 <tbody>
                   <tr>
@@ -409,7 +409,7 @@ const StudentValidationListAskForValidationBody = ({ studentId }) => {
               <table border="1" style={tableStyle}>
                 <thead>
                   <tr><th colSpan="5">Destination Course</th></tr>
-                  <tr><th>Course ID</th><th>Name</th><th>Credits</th><th>Period</th><th>Content</th></tr>
+                  <tr><th>Course ID</th><th>Name</th><th>Credits</th><th>Period</th><th>Syllabus</th></tr>
                 </thead>
                 <tbody>
                   <tr>

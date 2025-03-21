@@ -19,7 +19,7 @@ const UniversityHomeBody = ({ uniCode }) => {
   const [newTeacher, setNewTeacher] = useState({ teacherid: "", name: "", surname: "", role: "" , password: "", confirmPassword: ""});
   const [newDegree, setNewDegree] = useState({ degreeid:"", name:"", teacherid:"" });
   const [newCourse, setNewCourse] = useState({
-    degreeid: "", courseid: "", name: "", content: "", credits: "", period: "", teacherid: "", syllabus: null });
+    degreeid: "", courseid: "", name: "", credits: "", period: "", teacherid: "", syllabus: null });
   
   const [message, setMessage] = useState(''); 
   const location =  useLocation();
@@ -358,7 +358,7 @@ const UniversityHomeBody = ({ uniCode }) => {
 };
 
 const addCourse = async (course) => {
-        if (!course.teacherid || !course.name || !course.degreeid || !course.content || !course.credits || !course.period) {
+        if (!course.teacherid || !course.name || !course.degreeid || !course.credits || !course.period) {
         alert("Please enter all required fields.");
         return false;
     }
@@ -368,7 +368,6 @@ const addCourse = async (course) => {
     formData.append("degreeId", course.degreeid);
     formData.append("courseId", course.courseid);
     formData.append("name", course.name);
-    formData.append("content", course.content);
     formData.append("credits", course.credits);
     formData.append("period", course.period);
     formData.append("teacherId", course.teacherid);
@@ -411,7 +410,7 @@ const addCourse = async (course) => {
       case "courses":
         setCourses([...courses, newCourse]);
         setShowCourseForm(false);
-        setNewCourse({ degreeid:"", courseid:"", name:"", content:"", credits:"", period:"", teacherid:""});
+        setNewCourse({ degreeid:"", courseid:"", name:"", credits:"", period:"", teacherid:""});
         break;
       case "degrees":
         setDegrees([...degrees, newDegree]);
@@ -667,7 +666,7 @@ const addCourse = async (course) => {
              <button onClick={() => setShowCourseForm(true)}>Add Course</button> 
             <table style={tableStyle}>
               <thead>
-                <tr><th>NAME</th><th>ID</th><th>DegreeID</th><th>TeacherID</th><th>Content</th><th>Credits</th><th>Period</th><th>Syllabus</th></tr>
+                <tr><th>NAME</th><th>ID</th><th>DegreeID</th><th>TeacherID</th><th>Credits</th><th>Period</th><th>Syllabus</th></tr>
               </thead>
               <tbody>
               {courses.map((course) => {
@@ -677,7 +676,6 @@ const addCourse = async (course) => {
                   <td>{course.courseid}</td>
                   <td>{course.degreeid}</td>
                   <td>{course.teacherid}</td>
-                  <td>{course.content}</td>
                   <td>{course.credits}</td>
                   <td>{course.period}</td>
                   <td>
@@ -866,7 +864,6 @@ const addCourse = async (course) => {
               ))}
               </select>
               <input type="text" placeholder="Name" value={newCourse.name} onChange={(e) => setNewCourse({ ...newCourse, name: e.target.value })} />
-              <input type="text" placeholder="Content description" value={newCourse.content} onChange={(e) => setNewCourse({ ...newCourse, content: e.target.value })} />
               <input type="number" placeholder="Credits" value={newCourse.credits} onChange={(e) => setNewCourse({ ...newCourse, credits: e.target.value })} />
               <input type="text" placeholder="Period" value={newCourse.period} onChange={(e) => setNewCourse({ ...newCourse, period: e.target.value })} />
               <input type="text" placeholder="Coordinator teacher ID" value={newCourse.teacherid} onChange={(e) => setNewCourse({ ...newCourse, teacherid: e.target.value })} />
