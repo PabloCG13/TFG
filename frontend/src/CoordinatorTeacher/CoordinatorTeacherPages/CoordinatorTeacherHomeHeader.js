@@ -27,7 +27,7 @@ const CoordinatorTeacherHomeHeader = ({teacherId}) => {
             throw new Error("degreeid is missing in API response");
           }
 
-          console.log("Extracted degree ID:", data.degreeid);
+          console.log("Extracted degree ID:", data.degreeid, data.unicode);
           return fetch(`http://localhost:5000/api/validations/provisional/answers/${data.unicode}/${data.degreeid}`);
         })
         .then(response => {

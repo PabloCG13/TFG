@@ -14,12 +14,11 @@ const UniversityHomeBody = ({ uniCode }) => {
   const [showDegreeForm, setShowDegreeForm] = useState(false);
   const [showCourseForm, setShowCourseForm] = useState(false);
   const [newEntry, setNewEntry] = useState("");
-
+  
   const [newStudent, setNewStudent] = useState({ studentid: "", degreeid:"", name: "", surname: "", dni: "", dob:"", password: "", confirmPassword: "" });
   const [newTeacher, setNewTeacher] = useState({ teacherid: "", name: "", surname: "", role: "" , password: "", confirmPassword: ""});
   const [newDegree, setNewDegree] = useState({ degreeid:"", name:"", teacherid:"" });
-  const [newCourse, setNewCourse] = useState({
-    degreeid: "", courseid: "", name: "", credits: "", period: "", teacherid: "", syllabus: null });
+  const [newCourse, setNewCourse] = useState({ degreeid: "", courseid: "", name: "", credits: "", period: "", teacherid: "", syllabus: null });
   
   const [message, setMessage] = useState(''); 
   const location =  useLocation();
@@ -187,8 +186,6 @@ const UniversityHomeBody = ({ uniCode }) => {
 
     body = JSON.stringify({ studentId: user, name: namedb, dob:student.dob, dni:student.dni });
     
-
-    
     try{
       // Check if the teacher already exists
       const studentExistsResponse = await fetch(`http://localhost:5000/api/students/${user}`);
@@ -255,9 +252,7 @@ const UniversityHomeBody = ({ uniCode }) => {
       console.error("Error:", error);
       return false;
     }
-  
   }
-
 
   const addTeacher = async (teacher) => {
     if (!teacher.teacherid || !teacher.name || !teacher.surname || teacher.password !== teacher.confirmPassword || !teacher.role) {
@@ -722,19 +717,36 @@ const addCourse = async (course) => {
           </>
         )}
 
-
         {showStudentForm && (
           <div style={modalStyle}>
             <div style={formStyle}>
               <h2>Add Student</h2>
               <input type="text" placeholder="ID" value={newStudent.studentid} onChange={(e) => setNewStudent({ ...newStudent, studentid: e.target.value })} />
               {/* Dropdown for role selection */}
-              <select key={newStudent.degreeid} value={newStudent.degreeid} onChange={(e) => setNewStudent({ ...newStudent, degreeid: e.target.value })} style={inputStyle}>
-              <option value="" disabled>Select Degree</option>
-              {degrees.map((degree) => (
-              <option key={degree.degreeid} value={degree.degreeid}>{degree.name}</option>
-              ))}
+              <select
+              onChange={(e) => {
+                const newDegreeId = e.target.value;
+                setSelectedDegreeId(newDegreeId); // Update selectedDegreeId
+                console.log("selectedDegreeId updated to:", newDegreeId); 
+                setNewStudent({ ...newStudent, degreeid: newDegreeId})
+              }}
+              style={inputStyle}  
+
+              >
+                {/* If there is more than one degree, invisible Default Option is "". If not is the degreeid of the only degree on the list. */}
+                {degrees.length > 1 ? (
+                  <option value="" hidden>Select Degree</option> 
+                  ) : (
+                  <option value={selectedDegreeId} hidden>Select Degree</option> 
+                )}
+
+                {degrees.map((degree) => (
+                  <option key={degree.degreeid} value={degree.degreeid}>
+                    {degree.name}
+                  </option>
+                ))}
               </select>
+            
               <input type="text" placeholder="Name" value={newStudent.name} onChange={(e) => setNewStudent({ ...newStudent, name: e.target.value })} />
               <input type="text" placeholder="Surname" value={newStudent.surname} onChange={(e) => setNewStudent({ ...newStudent, surname: e.target.value })} />
               <input type="text" placeholder="DNI" value={newStudent.dni} onChange={(e) => setNewStudent({ ...newStudent, dni: e.target.value })} />
