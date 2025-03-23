@@ -17,6 +17,12 @@ const StudentValidationListAskForValidationBody = ({ studentId }) => {
   // State to control modal visibility
   const [modalMessage, setModalMessage] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
+  // Left
+  const [showTable, setShowTable] = useState(true); 
+  // Right
+  const [showUniversityTable, setShowUniversityTable] = useState(true);
+  const [showSelectedDegreeTable, setShowSelectedDegreeTable] = useState(false);
+  const [showSelectedCoursesTable, setShowSelectedCoursesTable] = useState(false);
 
 
   // Fetch studies
@@ -74,8 +80,9 @@ const StudentValidationListAskForValidationBody = ({ studentId }) => {
     // Function to close modal
     const closeModal = () => {
       setIsModalOpen(false);
-      setSelectedCourse(null);
+      //setSelectedCourse(null);
       setSelectedDstCourse(null);
+      setShowSelectedCoursesTable(true);
       setModalMessage("");
     };
 
@@ -83,6 +90,7 @@ const StudentValidationListAskForValidationBody = ({ studentId }) => {
   // Handle course row selection
   const handleCourseClick = (course) => {
     setSelectedCourse(course);
+    setShowTable(false); // Hide table on course click
   };
 
 
@@ -91,6 +99,8 @@ const StudentValidationListAskForValidationBody = ({ studentId }) => {
     setSelectedUniversity(uni);
     setSelectedDegree(null);
     setCoursesInDegree([]);
+    setShowUniversityTable(false); // Hide the table
+    setShowSelectedDegreeTable(true);
 
 
     fetch(`http://localhost:5000/api/universities/${uni.unicode}/degrees`)
@@ -107,6 +117,8 @@ const StudentValidationListAskForValidationBody = ({ studentId }) => {
   const handleDegreeClick = (degree) => {
     setSelectedDegree(degree);
     console.log("Degree:",degree);
+    setShowSelectedDegreeTable(false);
+    setShowSelectedCoursesTable(true);
 
     fetch(`http://localhost:5000/api/courses/degree/${degree.unicode}/${degree.degreeid}`)
       .then((response) => response.json())
@@ -120,10 +132,12 @@ const StudentValidationListAskForValidationBody = ({ studentId }) => {
   // Handle back button for course details
   const handleBackCourse = () => {
     setSelectedCourse(null);
+    setShowTable(true); // Show the table again
   };
 
   // Handle back button for course details
   const handleDstCourseClick = (course) => {
+    setShowSelectedCoursesTable(false);
     setSelectedDstCourse(course);
     console.log("Course:", course);
     // fetch(`http://localhost:5000/api/courses/${course.unicode}/${course.degreeid}/${course.courseid}`)
@@ -136,6 +150,7 @@ const StudentValidationListAskForValidationBody = ({ studentId }) => {
 
   const handleBackDstCourse = () => {
     setSelectedDstCourse(null);
+    setShowSelectedCoursesTable(true);
   };
 
   // Handle back button for university details
@@ -144,6 +159,8 @@ const StudentValidationListAskForValidationBody = ({ studentId }) => {
     setDegreesInUni([]);
     setSelectedDegree(null);
     setCoursesInDegree([]);
+    setShowUniversityTable(true); // Show the table again
+    setShowSelectedDegreeTable(false);
   };
 
 
@@ -152,6 +169,8 @@ const StudentValidationListAskForValidationBody = ({ studentId }) => {
     setSelectedDegree(null);
     setSelectedDstCourse(null);
     setCoursesInDegree([]);
+    setShowSelectedCoursesTable(false);
+    setShowSelectedDegreeTable(true);
   };
 
   const addPetition = async (srcCourse, dstCourse) => {
@@ -240,41 +259,42 @@ const StudentValidationListAskForValidationBody = ({ studentId }) => {
 
 
         {/* Course Table */}
-        {studies.map(({ unicode, degreeid }) => (
-          <div key={`${unicode}-${degreeid}`}>
-            <h3>University: {unicode} Degree: {degreeid}</h3>
-            <table border="1">
-              <thead>
-                <tr>
-                  <th>Course ID</th>
-                  <th>Course Name</th>
-                  <th>Credits</th>
-                  <th>Period</th>
-                </tr>
-              </thead>
-              <tbody>
-                {courses[`${unicode}-${degreeid}`] && courses[`${unicode}-${degreeid}`].length > 0 ? (
-                  courses[`${unicode}-${degreeid}`].map((course) => (
-                    <tr
-                      key={course.courseid}
-                      onClick={() => handleCourseClick(course)}
-                      style={selectedCourse && selectedCourse.courseid === course.courseid ? highlightedRowStyle : {}}
-                    >
-                      <td>{course.courseid}</td>
-                      <td>{course.name}</td>
-                      <td>{course.credits}</td>
-                      <td>{course.period}</td>
-                    </tr>
-                  ))
-                ) : (
+        {showTable &&
+          studies.map(({ unicode, degreeid }) => (
+            <div key={`${unicode}-${degreeid}`}>
+              <h3>University: {unicode} Degree: {degreeid}</h3>
+              <table border="1">
+                <thead>
                   <tr>
-                    <td colSpan="4">No courses available</td>
+                    <th>Course ID</th>
+                    <th>Course Name</th>
+                    <th>Credits</th>
+                    <th>Period</th>
                   </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
-        ))}
+                </thead>
+                <tbody>
+                  {courses[`${unicode}-${degreeid}`] && courses[`${unicode}-${degreeid}`].length > 0 ? (
+                    courses[`${unicode}-${degreeid}`].map((course) => (
+                      <tr
+                        key={course.courseid}
+                        onClick={() => handleCourseClick(course)}
+                        style={selectedCourse && selectedCourse.courseid === course.courseid ? highlightedRowStyle : {}}
+                      >
+                        <td>{course.courseid}</td>
+                        <td>{course.name}</td>
+                        <td>{course.credits}</td>
+                        <td>{course.period}</td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan="4">No courses available</td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          ))}     
       </div>
 
 
@@ -294,7 +314,7 @@ const StudentValidationListAskForValidationBody = ({ studentId }) => {
         )}
 
         {/* Degree List (if a university is selected) */}
-        {selectedUniversity && !selectedDegree && (
+        {showSelectedDegreeTable && (
           <div style={detailsContainerStyle}>
             <h3>Degrees Offered at {selectedUniversity.name}</h3>
             <table border="1">
@@ -322,7 +342,7 @@ const StudentValidationListAskForValidationBody = ({ studentId }) => {
 
 
         {/* Courses in Selected Degree */}
-        {selectedDegree && (
+        {showSelectedCoursesTable && (
           <div style={detailsContainerStyle}>
             <h3>Courses in {selectedDegree.name}</h3>
             <table border="1">
@@ -351,96 +371,104 @@ const StudentValidationListAskForValidationBody = ({ studentId }) => {
 
 
         {/* University Table */}
-        <table border="1">
-          <thead>
-            <tr>
-              <th>University Code</th>
-              <th>Name</th>
-              <th>University Location</th>
-            </tr>
-          </thead>
-          <tbody>
-            {excludedUniversities.map((uni) => (
-              <tr key={uni.unicode} onClick={() => handleUniversityClick(uni)} style={highlightedRowStyle}>
-                <td>{uni.unicode}</td>
-                <td>{uni.name}</td>
-                <td>{uni.location}</td>
+        {showUniversityTable && (
+          <table border="1">
+            <thead>
+              <tr>
+                <th>University Code</th>
+                <th>Name</th>
+                <th>University Location</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {excludedUniversities.map((uni) => (
+                <tr 
+                  key={uni.unicode} 
+                  onClick={() => handleUniversityClick(uni)} 
+                  style={highlightedRowStyle}
+                >
+                  <td>{uni.unicode}</td>
+                  <td>{uni.name}</td>
+                  <td>{uni.location}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
 
       </div>
       {isModalOpen && (
-        <div style={modalOverlayStyle}>
-          <div style={modalStyle}>
-            <h2>Selected Courses</h2>
-            <div style={tableContainerStyle}>
-              {/* Left Table */}
-              <table border="1" style={tableStyle}>
-                <thead>
-                  <tr><th colSpan="5">My Course</th></tr>
-                  <tr><th>Course ID</th><th>Name</th><th>Credits</th><th>Period</th><th>Syllabus</th></tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td>{selectedCourse.courseid}</td>
-                    <td>{selectedCourse.name}</td>
-                    <td>{selectedCourse.credits}</td>
-                    <td>{selectedCourse.period}</td>
-                    <td>
-		  {selectedCourse.syllabus_pdf ? (
-		    <embed
-		      src={`data:application/pdf;base64,${selectedCourse.syllabus_pdf}`}
-		      width="600"
-		      height="400"
-		      type="application/pdf"
-		    />
-		  ) : (
-		    "No Syllabus attached"
-		  )}
-		</td>
-                  </tr>
-                </tbody>
-              </table>
+      <div style={modalOverlayStyle}>
+        <div style={modalStyle}>
+          <h2>Selected Courses</h2>
+          <div style={tableContainerStyle}>
+            {/* My Course Table */}
+            <table border="1" style={tableStyle}>
+              <thead>
+                <tr><th colSpan="4">My Course</th></tr>
+                <tr><th>Course ID</th><th>Name</th><th>Credits</th><th>Period</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>{selectedCourse.courseid}</td>
+                  <td>{selectedCourse.name}</td>
+                  <td>{selectedCourse.credits}</td>
+                  <td>{selectedCourse.period}</td>
+                </tr>
+                <tr>
+                  <td colSpan="4"><strong>Syllabus:</strong> {selectedCourse.syllabus_pdf ? (
+                    <embed
+                      src={`data:application/pdf;base64,${selectedCourse.syllabus_pdf}`}
+                      width="600"
+                      height="400"
+                      type="application/pdf"
+                    />
+                  ) : (
+                    "No Syllabus attached"
+                  )}</td>
+                </tr>
+              </tbody>
+            </table>
 
-
-              {/* Right Table */}
-              <table border="1" style={tableStyle}>
-                <thead>
-                  <tr><th colSpan="5">Destination Course</th></tr>
-                  <tr><th>Course ID</th><th>Name</th><th>Credits</th><th>Period</th><th>Syllabus</th></tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td>{selectedDstCourse.courseid}</td>
-                    <td>{selectedDstCourse.name}</td>
-                    <td>{selectedDstCourse.credits}</td>
-                    <td>{selectedDstCourse.period}</td>
-                    <td>
-		  {selectedDstCourse.syllabus_pdf ? (
-		    <embed
-		      src={`data:application/pdf;base64,${selectedDstCourse.syllabus_pdf}`}
-		      width="600"
-		      height="400"
-		      type="application/pdf"
-		    />
-		  ) : (
-		    "No Syllabus attached"
-		  )}
-		</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-            {modalMessage && <p style={messageStyle}>{modalMessage}</p>}
+            {/* Destination Course Table */}
+            <table border="1" style={tableStyle}>
+              <thead>
+                <tr><th colSpan="4">Destination Course</th></tr>
+                <tr><th>Course ID</th><th>Name</th><th>Credits</th><th>Period</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>{selectedDstCourse.courseid}</td>
+                  <td>{selectedDstCourse.name}</td>
+                  <td>{selectedDstCourse.credits}</td>
+                  <td>{selectedDstCourse.period}</td>
+                </tr>
+                <tr>
+                  <td colSpan="4"><strong>Syllabus:</strong> {selectedDstCourse.syllabus_pdf ? (
+                    <embed
+                      src={`data:application/pdf;base64,${selectedDstCourse.syllabus_pdf}`}
+                      width="600"
+                      height="400"
+                      type="application/pdf"
+                    />
+                  ) : (
+                    "No Syllabus attached"
+                  )}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          {modalMessage && <p style={messageStyle}>{modalMessage}</p>}
+          <div style={buttonContainerStyle}>
             <button onClick={() => handlePetition(selectedCourse, selectedDstCourse)} style={acceptButtonStyle}>
-                Accept
-              </button>
+              Accept
+            </button>
             <button onClick={closeModal} style={closeButtonStyle}>Close</button>
           </div>
         </div>
-      )}
+      </div>
+    )}
+
     </div>
   );
 };
@@ -491,9 +519,13 @@ const messageStyle = {
 
 const detailsContainerStyle = {
   textAlign: "center",
-  padding: "10px",
+  padding: "20px",
   backgroundColor: "#e8e8e8",
   marginBottom: "10px",
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems:'center',
+  gap: '20px',
 };
 
 
@@ -522,20 +554,22 @@ const modalOverlayStyle = {
 const modalStyle = {
   backgroundColor: 'white',
   padding: '20px',
-  borderRadius: '8px',
+  borderRadius: '10px',
   textAlign: 'center',
   width: '80%',
-  maxWidth: '700px',
-  maxHeight: '90vh',
+  maxWidth: '900px',
   overflowY: 'auto',
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems:'center',
 };
 
 const closeButtonStyle = {
-  backgroundColor: '#f44336',
+  backgroundColor: 'red',
   color: 'white',
   border: 'none',
-  padding: '10px',
-  marginTop: '20px',
+  padding: '10px 20px',
+  borderRadius: '5px',
   cursor: 'pointer',
 };
 
@@ -548,8 +582,9 @@ const buttonContainerStyle = {
 const acceptButtonStyle = {
   backgroundColor: 'green',
   color: 'white',
-  padding: '10px 20px',
   border: 'none',
+  padding: '10px 20px',
+  borderRadius: '5px',
   cursor: 'pointer',
 };
 

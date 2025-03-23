@@ -7,6 +7,10 @@ const UniversityHomeBody = ({ uniCode }) => {
   const [teachers, setTeachers] = useState([]);
   const [courses, setCourses] = useState([]);
   const [degrees, setDegrees] = useState([]);
+  const [teacherRoles, setTeacherRoles] = useState([
+    "Course Coordinator",
+    "Degree Coordinator",
+  ]);
   
 
   const [showStudentForm, setShowStudentForm] = useState(false);
@@ -28,8 +32,12 @@ const UniversityHomeBody = ({ uniCode }) => {
   const [selectedDegreeId, setSelectedDegreeId] = useState(""); 
   const [selectedCourseId, setSelectedCourseId] = useState("");
   const [selectedTeacherId, setSelectedTeacherId] = useState("");
+  const [selectedTeacherRole, setSelectedTeacherRole] = useState("");
+  
   const [refreshKey, setRefreshKey] = useState(0);
   const [refreshKey2, setRefreshKey2] = useState(0);
+
+  const [erasmus, setErasmus] = useState(false); // Estado para Erasmus
 
   useEffect(() => {
     if (!uniCode) return;
@@ -764,81 +772,100 @@ const addCourse = async (course) => {
           <div style={modalStyle}> 
            <div style={formStyle}> 
             <h3 style={formTitleStyle}> Select Course for {selectedStudent.studentName} </h3> 
-              {/* Course selection dropdown */} 
-              <div style={formGroupStyle}> 
-                <label htmlFor="course" style={labelStyle}> Select a Course </label> 
-                <select 
-                  id="course" 
-                  onChange={(e) => { 
-                    const selectedCourseId = e.target.value; 
-                    const selectedCourse = courses.find(course => course.courseid === selectedCourseId); 
-                    
-                    if (selectedCourse) { 
-                      setSelectedDegreeId(selectedCourse.degreeid); 
-                      setSelectedCourseId(selectedCourseId);
-                      setSelectedTeacherId(selectedCourse.teacherid); 
-                    } 
-                  }} 
-                  style={inputStyle} 
-                  required 
-              > 
-                <option value="" disabled>Select a course</option> 
-                {/* .filter(course => course.degreeid === selectedStudent.degreeid)*/}
-                {courses
-                .map((course) => ( 
-                  <option key={course.courseid} value={course.courseid}> {course.name} </option> 
-                ))} 
-              </select> 
-            </div> 
+              {/* Dropdown for role selection */}
+              <select
+              onChange={(e) => {
+                const newCourseId = e.target.value;
+                setSelectedCourseId(newCourseId); // Update selectedCourseId
+                console.log("selectedCourseId updated to:", newCourseId); 
+                setNewStudent({ ...newStudent, courseid: newCourseId})
+              }}
+              style={inputStyle}  
+
+              >
+                {/* If there is more than one course, invisible Default Option is "". If not is the courseid of the only course on the list. */}
+                {courses.length > 1 ? (
+                  <option value="" hidden>Select a Course</option> 
+                  ) : (
+                  <option value={selectedCourseId} hidden>Select a Course</option> 
+                )}
+
+                {courses.map((course) => (
+                  <option key={course.courseid} value={course.courseid}>
+                    {course.name}
+                  </option>
+                ))}
+              </select>
             
-            {/* Year input field */} 
-            <div style={formGroupStyle}> 
-              <label htmlFor="year" style={labelStyle}> Year: </label> 
-              <input 
-                type="number" 
-                id="year" value={newStudent.year || ""} 
-                onChange={(e) => setNewStudent({ ...newStudent, year: e.target.value })} 
-                style={inputStyle} 
-                placeholder="Enter year" 
-                required 
-              /> 
-            </div>    
-          
-            {/* Submit button */} 
-            <div style={submitButtonContainerStyle}> 
+              {/* Year input field */} 
+              <div style={formGroupStyle}> 
+                <label htmlFor="year" style={labelStyle}> Year: </label> 
+                <input 
+                  type="number" 
+                  id="year" value={newStudent.year || ""} 
+                  onChange={(e) => setNewStudent({ ...newStudent, year: e.target.value })} 
+                  style={inputStyle} 
+                  placeholder="Enter year" 
+                  required 
+                /> 
+              </div>
+
+              {/* Erasmus Checkbox */}
+              <div style={formGroupStyle}>
+                <label htmlFor="erasmus" style={labelStyle}> Erasmus: </label>
+                <input
+                  type="checkbox"
+                  id="erasmus"
+                  checked={erasmus}
+                  onChange={(e) => setErasmus(e.target.checked)} // Update 
+                />
+                <span> Erasmus (Checked means Erasmus)</span>
+              </div> 
+            
+              {/* Submit button */} 
+              <div style={submitButtonContainerStyle}> 
+                <button onClick={() => { 
+                  // Extract values from selectedStudentId, selectedDegreeId and selectedTeacherId 
+                  const degreeId = selectedDegreeId;
+                  const courseId = selectedCourseId;
+                  const studentId = selectedStudent.studentId; 
+                  const { year } = newStudent; 
+                  const teacherId = selectedTeacherId;
+                  console.log("degreeID:", degreeId);
+                  console.log("courseID:", courseId);
+                  console.log("studentID:", studentId);
+                  console.log("Year:", year);
+                  console.log("teacherId:",teacherId);
+                  try { 
+                    handleStudentToCourse({ 
+                      degreeId: degreeId,
+                      courseId: courseId,
+                      studentId: studentId, 
+                      year: year, 
+                      teacherId: teacherId, 
+                  }); 
+                  
+                  console.log('Course assigned successfully'); 
+                  // Reset form or close modal after submit (optional) 
+                  setSelectedStudent(null); 
+                  // Reset the selected student (optional) 
+                  setNewStudent({});
+                  // Reset checkbox  
+                  setErasmus(false); 
+                  
+                  } catch (error) { 
+                    console.error('Error assigning student to course:', error); 
+                  } 
+                }}  style={buttonStyle}> Submit </button> 
+              </div>
+
+              {/* Cancel button */}
               <button onClick={() => { 
-                // Extract values from selectedStudentId, selectedDegreeId and selectedTeacherId 
-                const degreeId = selectedDegreeId;
-                const courseId = selectedCourseId;
-                const studentId = selectedStudent.studentId; 
-                const { year } = newStudent; 
-                const teacherId = selectedTeacherId;
-                console.log("degreeID:", degreeId);
-                console.log("courseID:", courseId);
-                console.log("studentID:", studentId);
-                console.log("Year:", year);
-                console.log("teacherId:",teacherId);
-                try { 
-                  handleStudentToCourse({ 
-                    degreeId: degreeId,
-                    courseId: courseId,
-                    studentId: studentId, 
-                    year: year, 
-                    teacherId: teacherId, 
-                }); 
-                
-                console.log('Course assigned successfully'); 
-                // Reset form or close modal after submit (optional) 
                 setSelectedStudent(null); 
-                // Reset the selected student (optional) 
-                setNewStudent({}); 
-                } catch (error) { 
-                  console.error('Error assigning student to course:', error); 
-                } 
-              }}  style={buttonStyle}> Submit </button> 
+                setErasmus(false); // Reset checkbox
+              }}>Cancel</button>
+
             </div>
-            <button onClick ={() => setSelectedStudent(false)}>Cancel</button>
-          </div>
         </div> )}
 
         {showTeacherForm && (
@@ -846,12 +873,23 @@ const addCourse = async (course) => {
             <div style={formStyle}>
               <h2>Add Teacher</h2>
               <input type="text" placeholder="ID" value={newTeacher.teacherid} onChange={(e) => setNewTeacher({ ...newTeacher, teacherid: e.target.value })} />
-              
+
               {/* Dropdown for role selection */}
-              <select value={newTeacher.role} onChange={(e) => setNewTeacher({ ...newTeacher, role: e.target.value })} style={inputStyle}>
-                <option value="">Select Role</option>
-                <option value="Course Coordinator">Course Coordinator</option>
-                <option value="Degree Coordinator">Degree Coordinator</option>
+              <select
+                onChange={(e) => {
+                  const newTeacherRole = e.target.value;
+                  setSelectedTeacherRole(newTeacherRole); // Update selectedCourseId
+                  console.log("selectedTeacherRole updated to:", newTeacherRole); 
+                  setNewTeacher({ ...newTeacher, role: newTeacherRole})
+                }}
+                style={inputStyle}  
+                >
+                <option value="" hidden>Select Role</option> 
+                {teacherRoles.map((role, index) => (
+                    <option key={index} value={role}>
+                    {role}
+                    </option>
+                ))}  
               </select>
 
               <input type="text" placeholder="Name" value={newTeacher.name} onChange={(e) => setNewTeacher({ ...newTeacher, name: e.target.value })} />
@@ -869,12 +907,32 @@ const addCourse = async (course) => {
             <div style={formStyle}>
               <h4>Add Course</h4>
               <input type="text" placeholder="ID" value={newCourse.courseid} onChange={(e) => setNewCourse({ ...newCourse, courseid: e.target.value })} />
-              <select value={newCourse.degreeid} onChange={(e) => setNewCourse({ ...newCourse, degreeid: e.target.value })} style={inputStyle}>
-              <option value="" disabled>Select Degree</option>
-              {degrees.map((degree) => (
-              <option key={degree.degreeid} value={degree.degreeid}> {degree.degreeid}</option>
-              ))}
+
+              {/* Dropdown for role selection */}
+              <select
+              onChange={(e) => {
+                const newDegreeId = e.target.value;
+                setSelectedDegreeId(newDegreeId); // Update selectedCourseId
+                console.log("selectedDegreeId updated to:", newDegreeId); 
+                setNewCourse({ ...newCourse, degreeid: newDegreeId });
+              }}
+              style={inputStyle}  
+
+              >
+                {/* If there is more than one degree, invisible Default Option is "". If not is the degreeid of the only degree on the list. */}
+                {degrees.length > 1 ? (
+                  <option value="" hidden>Select Degree</option> 
+                  ) : (
+                  <option value={selectedDegreeId} hidden>Select Degree</option> 
+                )}
+
+                {degrees.map((course) => (
+                  <option key={course.courseid} value={course.courseid}>
+                    {course.name}
+                  </option>
+                ))}
               </select>
+
               <input type="text" placeholder="Name" value={newCourse.name} onChange={(e) => setNewCourse({ ...newCourse, name: e.target.value })} />
               <input type="number" placeholder="Credits" value={newCourse.credits} onChange={(e) => setNewCourse({ ...newCourse, credits: e.target.value })} />
               <input type="text" placeholder="Period" value={newCourse.period} onChange={(e) => setNewCourse({ ...newCourse, period: e.target.value })} />
