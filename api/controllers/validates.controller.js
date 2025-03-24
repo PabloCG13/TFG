@@ -44,6 +44,23 @@ exports.findAllValidationsForStudent = async (req, res) => {
     }
 };
 
+
+// Get one validates by coursesrc and coursedst
+exports.findStudentsForValidations = async (req, res) => {
+    try {
+        const { uniCodeSrc, degreeIdSrc, courseIdSrc, uniCodeDst, degreeIdDst, courseIdDst } = req.params;
+        const validates = await db.any("SELECT * FROM validates WHERE uniCodeSrc = $1 AND degreeIdSrc = $2 AND courseIdSrc = $3 AND uniCodeDst = $4 AND degreeIdDst = $5 AND courseIdDst = $6;", [uniCodeSrc, degreeIdSrc, courseIdSrc, uniCodeDst, degreeIdDst, courseIdDst]);
+
+        if (!validates) {
+            return res.status(404).json({ message: "validates not found" });
+        }
+
+        res.status(200).json(validates);
+    } catch (err) {
+        res.status(500).json({ message: err.message || "Some error occurred" });
+    }
+};
+
 // Get one validates by code
 exports.findOne = async (req, res) => {
     try {

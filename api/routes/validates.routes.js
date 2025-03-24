@@ -8,6 +8,8 @@ module.exports = app => {
     router.get("/validates/", validates.findAll);
 
     router.get("/validates/:studentId", validates.findAllValidationsForStudent);
+
+    router.get("/validates/validation/:uniCodeSrc/:degreeIdSrc/:courseIdSrc/:uniCodeDst/:degreeIdDst/:courseIdDst", validates.findStudentsForValidations);
   
     router.get("/validates/:uniCodeSrc/:degreeIdSrc/:courseIdSrc/:uniCodeDst/:degreeIdDst/:courseIdDst/:studentId", validates.findOne);
   

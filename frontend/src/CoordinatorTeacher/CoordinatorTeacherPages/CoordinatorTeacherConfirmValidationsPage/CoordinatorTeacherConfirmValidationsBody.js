@@ -87,6 +87,7 @@ const CoordinatorTeacherConfirmValidationBody = ({ teacherId }) => {
   const closeModal = () => {
     setIsModalOpen(false);
   };
+
   const changePasswordCall = async () => {
     try {
       const response = await fetch("http://localhost:4000/consult", {
@@ -163,7 +164,148 @@ const CoordinatorTeacherConfirmValidationBody = ({ teacherId }) => {
    
   };
  
+  const handleBlockchain = async (teacherDst, unicodesrc, degreeidsrc, courseidsrc, unicodedst, degreeiddst, courseiddst) => {
+    // Get the address of the teacher of the DstCourse
+    const dbResponse = await fetch(`http://localhost:5000/api/addresses/participant/${teacherDst}`);
+    const dbData = await dbResponse.json();
+  
+  
+    if (!dbResponse.ok || !dbData.addressid) {
+      setMessage("No blockchain address found for this user. Please contact support.");
+      console.error("Database error:", dbData);
+      return;
+    }
+  
+  
+    const courseDstAddress = dbData.addressid;
+    console.log("Fetched Address from DB:", courseDstAddress);
+  
+  
+    // Get srcUni address
+    const dbResponseUni = await fetch(`http://localhost:5000/api/addresses/participant/${unicodesrc}`);
+    const dbDataUni = await dbResponseUni.json(); // <-- FIXED: was dbResponse
+  
+  
+    if (!dbResponseUni.ok || !dbDataUni.addressid) {
+      setMessage("No blockchain address found for this user. Please contact support.");
+      console.error("Database error:", dbDataUni); // <-- FIXED: was dbData
+      return;
+    }
+  
+  
+    const uniAddress = dbDataUni.addressid; // <-- FIXED: was dbData
+    console.log("Fetched Address from DB:", uniAddress);
+  
+  
+    // Get validation entries
+    const dbStudentsResponse = await fetch(`http://localhost:5000/api/validates/validation/${unicodesrc}/${degreeidsrc}/${courseidsrc}/${unicodedst}/${degreeiddst}/${courseiddst}`);
+    const dbDataStudents = await dbStudentsResponse.json();
+  
+  
+    if (!dbStudentsResponse.ok) {
+      console.error("Database error:", dbDataStudents); // <-- FIXED: was dbData
+      return;
+    }
+  
+  
+    const studentAddresses = [];
+  
+  
+    for (const student of dbDataStudents) {
+      try {
+        const res = await fetch(`http://localhost:5000/api/addresses/participant/${student.studentid}`);
+        const data = await res.json();
+  
+  
+        if (res.ok && data.addressid) {
+          studentAddresses.push({
+            studentid: student.studentid,
+            address: data.addressid
+          });
+  
+  
+          // Get list of allowed teachers
+          const teachersResponse = await fetch("http://localhost:4000/getTeachersAllowed", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              address: data.addressid
+            }),
+          });
+  
+  
+          if (!teachersResponse.ok) {
+            console.error(`Failed to fetch teachers for student ${student.studentid}. Status: ${teachersResponse.status}`);
+            continue;
+          }
+  
+          const teachersData = await teachersResponse.json();
+  
+          if (!Array.isArray(teachersData.teachers)) {
+            console.error(`Malformed teachers data for student ${student.studentid}`, teachersData);
+            continue;
+          }
+          //Check if DegreeCoord is already allowed to modify the transcript of this student
+          const teacherAlreadyAllowed = teachersData.teachers.includes(courseDstAddress);
+          console.log("teacher addresses for", student.studentid, "are", teachersData.teachers);
+          console.log("Is teacher already allowed?", teacherAlreadyAllowed);
+          //If not add him
+          if (!teacherAlreadyAllowed) {
+            try {
+              const validationResponse = await fetch("http://localhost:4000/addTeacherToTranscript", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  addressTeacher: participantAddress,
+                  addressUniversity: uniAddress,
+                  addressStudent: data.addressid
+                }),
+              });
+  
+              if (!validationResponse.ok) {
+                const errorText = await validationResponse.text();
+                console.error(`Failed to add validation for student ${student.studentid}. Status: ${validationResponse.status}`, errorText);
+              } else {
+                console.log(`Validation successfully added for student ${student.studentid}`);
+              }
+            } catch (error) {
+              console.error(`Network or server error while adding validation for student ${student.studentid}:`, error);
+            }
+          }
 
+          //add the courseDstTeacher to the teachers that can modify the student's transcript
+          try {
+            const validationResponse = await fetch("http://localhost:4000/addTeacherToTranscript", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                addressTeacher: courseDstAddress,
+                addressUniversity: uniAddress,
+                addressStudent: data.addressid
+              }),
+            });
+
+            if (!validationResponse.ok) {
+              const errorText = await validationResponse.text();
+              console.error(`Failed to add validation for student ${student.studentid}. Status: ${validationResponse.status}`, errorText);
+            } else {
+              console.log(`Validation successfully added for student ${student.studentid}`);
+            }
+          } catch (error) {
+            console.error(`Network or server error while adding validation for student ${student.studentid}:`, error);
+          }
+        } else {
+          console.warn(`No address found for student ${student.studentid}`);
+        }
+      } catch (err) {
+        console.error(`Error fetching address for student ${student.studentid}:`, err);
+      }
+    }
+
+    console.log("Collected student addresses:", studentAddresses);
+  };
+  
+    
   // Function to confirm validation after selecting month and year
   const handleConfirmValidation = async () => {
     if (!selectedMonth || !selectedYear) {
@@ -190,22 +332,31 @@ const CoordinatorTeacherConfirmValidationBody = ({ teacherId }) => {
     .catch(error => console.error("Error updating provisional:", error));
 
 
-    // Blockchain call (Example)
+    // Blockchain call 
     const courseSrc = `${data.unicodesrc}, ${data.degreeidsrc}, ${data.courseidsrc}`;
     const courseDst = `${data.unicodedst}, ${data.degreeiddst}, ${data.courseiddst}`;
 
+    try{
+      await fetch("http://localhost:4000/addValidation", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        address: participantAddress,
+        srcCour: courseSrc,
+        dstCour: courseDst,
+        _month: selectedMonth,
+        _year: selectedYear
+      }),
+    });
 
-    // await fetch("http://localhost:4000/addValidation", {
-    //   method: "POST",
-    //   headers: { "Content-Type": "application/json" },
-    //   body: JSON.stringify({
-    //     address: participantAddress,
-    //     srcCour: courseSrc,
-    //     dstCour: courseDst,
-    //     _month: selectedMonth,
-    //     _year: selectedYear
-    //   }),
-    // });
+
+    
+
+    }catch (error) {
+      console.error("Error making API request:", error);
+      setMessage("Server error. Please try again later.");
+    }
+    
 
 
     console.log(`Confirmed validation for Month: ${selectedMonth}, Year: ${selectedYear}`);

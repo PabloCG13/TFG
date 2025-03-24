@@ -84,19 +84,14 @@ const StudentValidationListBody = ({ studentId }) => {
 
     const dbResponse = await fetch(`http://localhost:5000/api/validates/${studentId}`);
 
+
     if (!dbResponse.ok) throw new Error(`Failed to fetch studies. Status: ${dbResponse.status}`);
-    console.log("response: ",dbResponse);
-
-    const dbResponseValidation = await fetch(`http://localhost:5000/api/validation`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ...JSON.parse(validatid), provisional: 0}), // Añadir hash al body
-    });
-
-    if (!dbResponseValidation.ok) {
-      console.error(`Failed to add validate entry to DB. Status: ${dbResponseValidation.status}`);
-      return false;
+    
+    if(dbResponse.length > 10){
+      return;
     }
+    
+    console.log("response: ",dbResponse);
 
     const dbResponseValidates = await fetch(`http://localhost:5000/api/validates`, {
       method: "POST",
