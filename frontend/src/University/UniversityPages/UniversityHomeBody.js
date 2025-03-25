@@ -198,7 +198,6 @@ const UniversityHomeBody = ({ uniCode }) => {
       // Check if the teacher already exists
       const studentExistsResponse = await fetch(`http://localhost:5000/api/students/${user}`);
   
-  
       if (studentExistsResponse.ok) {
         // If the API returns a 200 response, the teacher **already exists**, return error
         console.error(`Student with ID ${user} already exists!`);
@@ -775,10 +774,16 @@ const addCourse = async (course) => {
               {/* Dropdown for role selection */}
               <select
               onChange={(e) => {
-                const newCourseId = e.target.value;
-                setSelectedCourseId(newCourseId); // Update selectedCourseId
-                console.log("selectedCourseId updated to:", newCourseId); 
-                setNewStudent({ ...newStudent, courseid: newCourseId})
+                const selectedCourseId = e.target.value; 
+                const selectedCourse = courses.find(course => course.courseid === selectedCourseId); 
+
+                if (selectedCourse) { 
+                  setSelectedDegreeId(selectedCourse.degreeid); 
+                  setSelectedCourseId(selectedCourseId);
+                  console.log("selectedCourseId updated to:", selectedCourseId);
+                  setSelectedTeacherId(selectedCourse.teacherid); 
+                  //setNewStudent({ ...newStudent, courseid: selectedCourseId})
+                } 
               }}
               style={inputStyle}  
 
