@@ -9,6 +9,8 @@ const { addTeacherToTranscript } = require("./addTeacherToTranscript")
 const { modifyTranscript } = require("./modifyTranscript");
 const { addValidation } = require("./addValidation");
 const { transferValidation } = require("./transferValidation");
+const { getTeachersAllowed } = require("./getTeachersAllowed");
+
 
 
 const crypto = require("crypto");
@@ -17,7 +19,7 @@ const { Web3 } = require("web3");
 
 // Set up Web3 connection
 const web3 = new Web3("http://ganache:8545"); // Change if necessary
-const contractAddress = "0x67B5656d60a809915323Bf2C40A8bEF15A152e3e";
+const contractAddress = "0xCfEB869F69431e42cdB54A4F4f105C19C080A601";
 const contract = new web3.eth.Contract(contractJson.abi, contractAddress);
 
 const app = express();
@@ -97,6 +99,25 @@ app.post("/consult", async (req, res) => {
         }
 
         const result = await consult(address, user, passwd, role, type);
+
+        if (result === "Error" || result === null) {
+            return res.status(500).json({ error: "Failed to consult" });
+        }
+        res.status(200).json({ success: true, result });
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+app.post("/getTeachersAllowed", async (req, res) => {
+    try {
+        const { address } = req.body;
+
+        if(!address) {
+            return res.status(400).json({ error: "Missing required fields" });
+        }
+
+        const result = await consult(address);
 
         if (result === "Error" || result === null) {
             return res.status(500).json({ error: "Failed to consult" });

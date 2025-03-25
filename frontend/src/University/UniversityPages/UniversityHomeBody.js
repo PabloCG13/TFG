@@ -931,9 +931,9 @@ const addCourse = async (course) => {
                   <option value={selectedDegreeId} hidden>Select Degree</option> 
                 )}
 
-                {degrees.map((course) => (
-                  <option key={course.courseid} value={course.courseid}>
-                    {course.name}
+                {degrees.map((degree) => (
+                  <option key={degree.degreeid} value={degree.degreeid}>
+                    {degree.name}
                   </option>
                 ))}
               </select>
