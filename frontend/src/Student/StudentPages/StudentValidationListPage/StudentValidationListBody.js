@@ -96,7 +96,7 @@ const StudentValidationListBody = ({ studentId }) => {
     const dbResponseValidates = await fetch(`http://localhost:5000/api/validates`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ...JSON.parse(validatid), studentId: studentId}), // Añadir hash al body
+      body: JSON.stringify({ ...JSON.parse(validatid), studentId: studentId, provisional: 0}), // Añadir hash al body
     });
 
     if (!dbResponseValidates.ok) {
@@ -108,6 +108,14 @@ const StudentValidationListBody = ({ studentId }) => {
 
   };
 
+  const handleProvisional = (provisional) =>{
+    if (provisional === 0) return "Created";
+    if (provisional === 1) return "Accepted";
+    if (provisional === 2) return "Pending Actions";
+    if (provisional === 3) return "Sugested to be accepted";
+    if (provisional === 4) return "Sugested to be rejected";
+    if (provisional === 5) return "Rejected";
+  };
   return (
     <div style={containerStyle}>
       <div style={mainContentStyle}>
@@ -147,7 +155,7 @@ const StudentValidationListBody = ({ studentId }) => {
                 <th style={thStyle}>Destination Course</th>
                 <th style={thStyle}>Validity Period</th>
                 <th style={thStyle}>University Name</th>
-                <th style={thStyle}>Provisional</th>
+                <th style={thStyle}>Status</th>
                 {/* TODO: Add a button that only appears if it is provisional 
                 and origin course unicode and degreeId is the same */}
 
@@ -168,11 +176,7 @@ const StudentValidationListBody = ({ studentId }) => {
                       <div>Loading...</div>
                     )}
                   </td>
-                  <td>
-                  <span style={lockIconStyle}>
-                    {validatid.provisional === 1 ? "🔒" : "🔓" } 
-                  </span>
-                  </td>
+                  <td style={tdStyle}>{handleProvisional(validatid.provisional)}</td>
                   <td>
                   <button style={buttonStyle} onClick={() => handlePetition(validatid)}>
                   Choose

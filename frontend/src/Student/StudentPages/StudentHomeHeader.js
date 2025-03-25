@@ -9,39 +9,70 @@ const StudentHomeHeader = ({studentId}) => {
   // State to control modal visibility
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [marks, setMarks] = useState([]);
+  const [validations, setValidations] = useState([]);
+
+  const fetchMarks = () => {
+    fetch(`http://localhost:5000/api/transcripts/notification/${studentId}`)
+      .then(response => {
+        if (!response.ok) {
+          throw new Error(`Failed to fetch degree. Status: ${response.status}`);
+        }
+        return response.json();
+      })
+      .then(data => {
+        console.log("Data:",data);
+        if (!data[0].degreeid) {
+          throw new Error("degreeid is missing in API response");
+        }
+
+        console.log("Extracted degree ID:", data[0].degreeid);
+        setMarks(data);
+      })
+      .catch(error => console.error("Error:", error));
+  };
+
+
+  const fetchValidations = () => {
+    fetch(`http://localhost:5000/api/validates/notification/${studentId}`)
+      .then(response => {
+        if (!response.ok) {
+          throw new Error(`Failed to fetch validations. Status: ${response.status}`);
+        }
+        return response.json();
+      })
+      .then(data => {
+        console.log("Data:",data);
+        if (!data) {
+          throw new Error("data is missing in API response");
+        }
+
+        console.log("Extracted validations:", data);
+        setValidations(data);
+      })
+      .catch(error => console.error("Error:", error));
+  };
 
   useEffect(() => {
     if (!studentId) return;
 
+    // Initial fetch
+    fetchValidations();
 
-    const fetchMarks = () => {
-      fetch(`http://localhost:5000/api/transcripts/notification/${studentId}`)
-        .then(response => {
-          if (!response.ok) {
-            throw new Error(`Failed to fetch degree. Status: ${response.status}`);
-          }
-          return response.json();
-        })
-        .then(data => {
-          console.log("Data:",data);
-          if (!data[0].degreeid) {
-            throw new Error("degreeid is missing in API response");
-          }
+    // Fetch every 30 seconds
+    const interval = setInterval(fetchValidations, 30000);
 
-          console.log("Extracted degree ID:", data[0].degreeid);
-          setMarks(data);
-        })
-        .catch(error => console.error("Error:", error));
-    };
+    // Cleanup function
+    return () => clearInterval(interval);
+  }, [studentId]);
 
+  useEffect(() => {
+    if (!studentId) return;
 
     // Initial fetch
     fetchMarks();
 
-
     // Fetch every 30 seconds
     const interval = setInterval(fetchMarks, 30000);
-
 
     // Cleanup function
     return () => clearInterval(interval);
@@ -74,6 +105,17 @@ const StudentHomeHeader = ({studentId}) => {
      })
      .then(data => console.log("Successfully updated lastAccess:", data))
      .catch(error => console.error("Error updating lastAccess:", error));
+  };
+
+  const handleValidationClick = (valid) => {
+    console.log("data", valid);
+    const dbResponseValidates = fetch(`http://localhost:5000/api/validates/${valid.unicodesrc}/${valid.degreeidsrc}/${valid.courseidsrc}/${valid.unicodedst}/${valid.degreeiddst}/${valid.courseiddst}/${valid.studentid}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ provisional: valid.newprovisional}), // Añadir hash al body
+    });
+
+    console.log("Repsonse:", dbResponseValidates);
   };
 
   return (
@@ -118,8 +160,8 @@ const StudentHomeHeader = ({studentId}) => {
               onClick={openModal}
             >
               <span className="star">★</span>
-              {marks.length > 0 && (
-                <span style={notificationBadgeStyle}>{marks.length}</span>
+              {(marks.length > 0 || validations.length > 0) && (
+                <span style={notificationBadgeStyle}>{marks.length+validations.length}</span>
               )}
             </button>
           </div>
@@ -127,33 +169,56 @@ const StudentHomeHeader = ({studentId}) => {
       </header>
 
       {isModalOpen && (
-        <div style={modalOverlayStyle} onClick={closeModal}>
-          <div style={modalStyle} onClick={(e) => e.stopPropagation()}>
-            <h2>Notifications</h2>
-            {marks.length > 0 ? (
-              <ul>
-                {marks.map((marks, index) => (
-                  <li key={index}>
-                    Your grade for **{marks.courseid}** is now definitive 
-                     <Link 
-                      to={`/Student/StudentPages/StudentTranscriptPage/StudentTranscript/${studentId}`} // Route where it links to
-                      state={{ participantAddress }}  // Pass participantAddress" // Route where it links to
-                      style={viewDetailsButtonStyle} 
-                      onMouseOver={(e) => Object.assign(e.target.style, hoverStyle)}
-                      onMouseOut={(e) => Object.assign(e.target.style, buttonStyle)}
-                    >
-                    View More
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <p>No new notifications</p>
-            )}
-            <button onClick={closeModal} style={closeButtonStyle}>Close</button>
-          </div>
-        </div>
+  <div style={modalOverlayStyle} onClick={closeModal}>
+    <div style={modalStyle} onClick={(e) => e.stopPropagation()}>
+      <h2>Notifications</h2>
+
+
+      {(marks.length > 0 || validations.length > 0) ? (
+        <ul>
+          {marks.map((mark, index) => (
+            <li key={`mark-${index}`}>
+              Your grade for <strong>{mark.courseid}</strong> is now definitive
+              <Link
+                to={`/Student/StudentPages/StudentTranscriptPage/StudentTranscript/${studentId}`}
+                state={{ participantAddress }}
+                style={viewDetailsButtonStyle}
+                
+                onMouseOver={(e) => Object.assign(e.target.style, hoverStyle)}
+                onMouseOut={(e) => Object.assign(e.target.style, buttonStyle)}
+              >
+                View More
+              </Link>
+            </li>
+          ))}
+
+
+          {validations.map((val, index) => (
+            <li key={`val-${index}`}>
+              Your validation petition for <strong>{val.courseidsrc}</strong> has changed to a new state
+              <Link
+                to={`/Student/StudentPages/StudentValidationListPage/StudentValidationList/${studentId}`}
+                state={{ participantAddress }}
+                style={viewDetailsButtonStyle}
+                onClick={() => handleValidationClick(val)}
+                onMouseOver={(e) => Object.assign(e.target.style, hoverStyle)}
+                onMouseOut={(e) => Object.assign(e.target.style, buttonStyle)}
+              >
+                View More
+              </Link>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p>No new notifications</p>
       )}
+
+
+      <button onClick={closeModal} style={closeButtonStyle}>Close</button>
+    </div>
+  </div>
+)}
+
     </div>
   );
 };

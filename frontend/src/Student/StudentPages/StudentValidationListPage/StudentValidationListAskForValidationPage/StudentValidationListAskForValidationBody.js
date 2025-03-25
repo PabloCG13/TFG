@@ -207,6 +207,7 @@ const StudentValidationListAskForValidationBody = ({ studentId }) => {
           degreeIdDst: dstCourse.degreeid,
           courseIdDst: dstCourse.courseid,
           studentId: studentId,
+          provisional: 0
         }),
       });
 
