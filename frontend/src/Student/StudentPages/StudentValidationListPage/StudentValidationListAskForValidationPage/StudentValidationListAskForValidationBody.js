@@ -52,23 +52,44 @@ const StudentValidationListAskForValidationBody = ({ studentId }) => {
   }, [studentId]);
 
 
+  const arrayBufferToBase64 = (buffer) => {
+    let binary = '';
+    const bytes = new Uint8Array(buffer);
+    const len = bytes.byteLength;
+    for (let i = 0; i < len; i++) {
+      binary += String.fromCharCode(bytes[i]);
+    }
+    return window.btoa(binary);
+  };
+
   // Fetch available courses for each (uniCode, degreeId)
-  useEffect(() => {
-    if (studies.length === 0) return;
+useEffect(() => {
+  if (studies.length === 0) return;
 
 
-    studies.forEach(({ unicode, degreeid }) => {
-      fetch(`http://localhost:5000/api/courses/remaining/${unicode}/${degreeid}/${studentId}`)
-        .then((response) => response.json())
-        .then((data) => {
-          setCourses((prevCourses) => ({
-            ...prevCourses,
-            [`${unicode}-${degreeid}`]: data,
-          }));
-        })
-        .catch((error) => console.error(`Error fetching courses for ${unicode}, ${degreeid}:`, error));
-    });
-  }, [studies]);
+  studies.forEach(({ unicode, degreeid }) => {
+    fetch(`http://localhost:5000/api/courses/remaining/${unicode}/${degreeid}/${studentId}`)
+      .then((response) => response.json())
+      .then((data) => {
+        // Convert syllabus_pdf to base64 if present
+        const processedCourses = data.map((course) => {
+          if (course.syllabus_pdf && course.syllabus_pdf.data) {
+            return {
+              ...course,
+              syllabus_pdf: arrayBufferToBase64(course.syllabus_pdf.data),
+            };
+          }
+          return course;
+        });
+
+        setCourses((prevCourses) => ({
+          ...prevCourses,
+          [`${unicode}-${degreeid}`]: processedCourses,
+        }));
+      })
+      .catch((error) => console.error(`Error fetching courses for ${unicode}, ${degreeid}:`, error));
+  });
+}, [studies]);
 
   useEffect(()=>{
     if(selectedCourse && selectedDstCourse){
@@ -90,6 +111,7 @@ const StudentValidationListAskForValidationBody = ({ studentId }) => {
   // Handle course row selection
   const handleCourseClick = (course) => {
     setSelectedCourse(course);
+    console.log("selected course: ", course);
     setShowTable(false); // Hide table on course click
   };
 
@@ -123,7 +145,17 @@ const StudentValidationListAskForValidationBody = ({ studentId }) => {
     fetch(`http://localhost:5000/api/courses/degree/${degree.unicode}/${degree.degreeid}`)
       .then((response) => response.json())
       .then((data) => {
-        setCoursesInDegree(data);
+        // Convert syllabus_pdf to base64 if present
+        const processedCourses = data.map((course) => {
+          if (course.syllabus_pdf && course.syllabus_pdf.data) {
+            return {
+              ...course,
+              syllabus_pdf: arrayBufferToBase64(course.syllabus_pdf.data),
+            };
+          }
+          return course;
+        });
+        setCoursesInDegree(processedCourses);
       })
       .catch((error) => console.error(`Error fetching courses for ${degree.unicode}, ${degree.degreeid}`, error));
   };
@@ -139,7 +171,7 @@ const StudentValidationListAskForValidationBody = ({ studentId }) => {
   const handleDstCourseClick = (course) => {
     setShowSelectedCoursesTable(false);
     setSelectedDstCourse(course);
-    console.log("Course:", course);
+    console.log("Destination Course:", course);
     // fetch(`http://localhost:5000/api/courses/${course.unicode}/${course.degreeid}/${course.courseid}`)
     //   .then((response) => response.json())
     //   .then((data) => {
@@ -417,11 +449,9 @@ const StudentValidationListAskForValidationBody = ({ studentId }) => {
                   <td>{selectedCourse.period}</td>
                 </tr>
                 <tr>
-                  <td colSpan="4"><strong>Syllabus:</strong> {selectedCourse.syllabus_pdf ? (
+                  <td colSpan="4"><strong>Syllabus:</strong>{selectedCourse.syllabus_pdf ? (
                     <embed
                       src={`data:application/pdf;base64,${selectedCourse.syllabus_pdf}`}
-                      width="600"
-                      height="400"
                       type="application/pdf"
                     />
                   ) : (

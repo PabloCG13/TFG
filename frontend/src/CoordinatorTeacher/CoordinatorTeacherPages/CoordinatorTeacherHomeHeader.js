@@ -9,8 +9,10 @@ const CoordinatorTeacherHomeHeader = ({teacherId}) => {
   // State to control modal visibility
   const [validations, setValidations] = useState([]);
   const [newValidations, setNewValidations] = useState([]);
+  const [erasmusGradeConfirmations, setErasmusGradeConfirmations] = useState([]);
+  
   const [isModalOpen, setIsModalOpen] = useState(false);
-
+/*
   const fetchValidations = () => {
     let degreeInfo = null; // To store the unicode and degreeid
   
@@ -55,7 +57,35 @@ const CoordinatorTeacherHomeHeader = ({teacherId}) => {
       })
       .catch(error => console.error("Error:", error));
   };  
+*/
+  const fetchValidations = () => {
+  let degreeInfo = null; // To store the unicode and degreeid
 
+  fetch(`http://localhost:5000/api/degrees/${teacherId}`)
+    .then(response => response.json())
+    .then(data => {
+      if (!data.degreeid || !data.unicode) {
+        throw new Error("degreeid or unicode is missing in API response");
+      }
+      degreeInfo = data;
+      console.log("Extracted degree ID:", data.degreeid, data.unicode);
+      return Promise.all([
+        fetch(`http://localhost:5000/api/validations/provisional/answers/${data.unicode}/${data.degreeid}`).then(res => res.json()),
+        fetch(`http://localhost:5000/api/validations/provisional/notification/${data.unicode}/${data.degreeid}`).then(res => res.json()),
+        fetch(`http://localhost:5000/api/transcripts/notification/erasmus/${data.unicode}/${data.degreeid}`).then(res => res.json())
+      ]);
+    })
+    .then(([validData, newValidData, erasmusData]) => {
+      setValidations(validData);
+      setNewValidations(newValidData);
+      setErasmusGradeConfirmations(erasmusData);
+      console.log("Updated validations:", validData);
+      console.log("Updated new validations:", newValidData);
+      console.log("Erasmus students grade confirmations:", erasmusData);
+    })
+    .catch(error => console.error("Error fetching API info:", error));
+};
+  
   
   useEffect(() => {
     if (!teacherId) return;
@@ -145,8 +175,8 @@ const CoordinatorTeacherHomeHeader = ({teacherId}) => {
               onClick={openModal}
             >
               <span className="star">★</span>
-              {(validations.length > 0 || newValidations.length > 0) && (
-                <span style={notificationBadgeStyle}>{validations.length + newValidations.length}</span>
+              {(validations.length > 0 || newValidations.length > 0 || erasmusGradeConfirmations.length > 0) && (
+                <span style={notificationBadgeStyle}>{validations.length + newValidations.length + erasmusGradeConfirmations.length}</span>
               )}
             </button>
           </div>
@@ -193,6 +223,27 @@ const CoordinatorTeacherHomeHeader = ({teacherId}) => {
             ) : (
               <p>No new notifications</p>
             )}
+            {erasmusGradeConfirmations.length > 0 && (
+		  <>
+		    <h3>Erasmus Mark Changes Notifications</h3>
+		    <ul>
+		      {erasmusGradeConfirmations.map((confirmation, index) => (
+			<li key={index}>
+			  Student <strong>{confirmation.studentid}</strong> has been graded by Erasmus teacher {confirmation.teacherid} on subject {confirmation.courseid}
+			  <Link 
+			    to={`/CoordinatorTeacher/CoordinatorTeacherPages/CoordinatorTeacherConfirmMarksPage/CoordinatorTeacherConfirmMarks/${teacherId}`} 
+			    state={{ confirmation }}
+			    style={viewDetailsButtonStyle}
+                            onMouseOver={(e) => Object.assign(e.target.style, hoverStyle)}
+                      	    onMouseOut={(e) => Object.assign(e.target.style, buttonStyle)}
+			  >
+			    View More
+			  </Link>
+			</li>
+		      ))}
+		    </ul>
+		  </>
+		)}
             <button onClick={closeModal} style={closeButtonStyle}>Close</button>
           </div>
         </div>

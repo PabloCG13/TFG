@@ -78,8 +78,8 @@ const StudentValidationListBody = ({ studentId }) => {
     setFilteredValidations(results);
   }, [searchTerm, validityPeriod, universityName, validations, universities]);
 
-  const handlePetition = async (validatid) =>{
-    console.log("He pulsado el boton");
+  const handleNotifyPetition = async (validatid) =>{
+    console.log("He pulsado el boton de Notify");
     console.log("Validation selected:",validatid);
 
     const dbResponse = await fetch(`http://localhost:5000/api/validates/${studentId}`);
@@ -87,7 +87,7 @@ const StudentValidationListBody = ({ studentId }) => {
 
     if (!dbResponse.ok) throw new Error(`Failed to fetch studies. Status: ${dbResponse.status}`);
     
-    if(dbResponse.length > 10){
+    if(dbResponse.length > 10){ //limite de validations que puedo pedir
       return;
     }
     
@@ -108,10 +108,21 @@ const StudentValidationListBody = ({ studentId }) => {
 
   };
 
+  const handleChoosePetition = async (validatid) =>{
+    console.log("He pulsado el boton de Choose");
+    console.log("Validation selected:",validatid);
+
+   //TODO añadir validation al transcript. Se asume que el usuario sabe lo que hace.
+
+
+
+  };
+
+
   const handleProvisional = (provisional) =>{
-    if (provisional === 0) return "Created";
-    if (provisional === 1) return "Accepted";
-    if (provisional === 2) return "Pending Actions";
+    if (provisional === 0) return "Pending";
+    if (provisional === 1) return "Definitive";
+    if (provisional === 2) return "Pending coordinator suggestion";
     if (provisional === 3) return "Sugested to be accepted";
     if (provisional === 4) return "Sugested to be rejected";
     if (provisional === 5) return "Rejected";
@@ -178,8 +189,13 @@ const StudentValidationListBody = ({ studentId }) => {
                   </td>
                   <td style={tdStyle}>{handleProvisional(validatid.provisional)}</td>
                   <td>
-                  <button style={buttonStyle} onClick={() => handlePetition(validatid)}>
+                  <button style={buttonStyle} onClick={() => handleChoosePetition(validatid)}>
                   Choose
+                  </button>
+                </td>
+                  <td>
+                  <button style={buttonStyle} onClick={() => handleNotifyPetition(validatid)}>
+                  Notify
                   </button>
                 </td>
                 </tr>

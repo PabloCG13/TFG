@@ -103,6 +103,27 @@ exports.findErasmusStudents = async (req,res) => {
 	}
 }
 
+exports.findErasmusStudentsWithPendingGrades = async (req,res) => {//TODO in the query: provisional = 0 or 1?
+	try{
+    	const { uniCode, degreeId } = req.params; 
+    	const transcripts = await db.any(`
+            SELECT t.*
+            FROM transcript t
+            JOIN studies s ON t.studentId = s.studentId
+            WHERE s.degreeId = $2 AND s.uniCode = $1  
+            AND t.degreeId <> s.degreeId  
+            AND t.uniCode <> s.uniCode  
+            AND t.erasmus = 1
+            AND t.provisional = 0
+            AND t.mark IS NOT NULL;
+        `, [uniCode, degreeId]);
+
+    	res.status(200).json(transcripts);
+	} catch (err) {
+    	res.status(500).json({ message: err.message || "Some error occurred" });
+	}
+}
+
 // Get one transcript by code
 exports.findOne = async (req, res) => {
     try {

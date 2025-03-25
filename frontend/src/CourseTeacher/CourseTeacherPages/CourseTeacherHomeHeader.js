@@ -10,12 +10,27 @@ const CourseTeacherHomeHeader = ({ teacherId }) => {
   const [srcCourse, setSrcCourse] = useState("");
   const [dstCourse, setDstCourse] = useState("");
 
+  const arrayBufferToBase64 = (buffer) => {
+    let binary = '';
+    const bytes = new Uint8Array(buffer);
+    const len = bytes.byteLength;
+    for (let i = 0; i < len; i++) {
+      binary += String.fromCharCode(bytes[i]);
+    }
+    return window.btoa(binary);
+  };
+
   useEffect(()=>{
     fetch(`http://localhost:5000/api/courses/teacher/${teacherId}`)
     .then((response) => response.json())
-    .then((data) => setSrcCourse(data))
+    .then((data) => {
+    const course = data;
+    	 if (course.syllabus_pdf && course.syllabus_pdf.data) {
+    	 	course.syllabus_pdf = arrayBufferToBase64(course.syllabus_pdf.data);
+      }
+    setSrcCourse(course);})
     .catch((error) => console.error("Error fetching course info:", error));
-  }, [teacherId])
+  }, [teacherId]);
 
   const fetchValidations = () => {
     fetch(`http://localhost:5000/api/courses/teacher/${teacherId}`)
@@ -63,6 +78,7 @@ const CourseTeacherHomeHeader = ({ teacherId }) => {
   }, [teacherId]);
 
 
+  
   // Function to open modal
   const openModal = () => {
     setIsModalOpen(true);
@@ -195,7 +211,7 @@ const CourseTeacherHomeHeader = ({ teacherId }) => {
               <ul>
                 {validations.map((validation, index) => (
                   <li key={index}>
-                     There is a new validation request for the course **{validation.courseidsrc}**  
+                     There is a new validation request for the course <strong>{validation.courseidsrc}</strong>  
                     <button 
                       style={viewDetailsButtonStyle} 
                       onClick={() => handleDstCourse(validation)}
