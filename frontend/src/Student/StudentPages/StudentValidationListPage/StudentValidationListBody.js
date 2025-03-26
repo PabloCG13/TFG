@@ -107,6 +107,9 @@ const StudentValidationListBody = ({ studentId }) => {
 
 
   };
+//TODO Add logic to NOT display the buttons when a student is already taking a valdation, or is already waiting for a notification. Will need API calls to retrieve the student's erasmus courses from the transcript & his requested validations from validates. 
+
+
 
   const handleChoosePetition = async (validatid) =>{
     console.log("He pulsado el boton de Choose");
@@ -189,14 +192,17 @@ const StudentValidationListBody = ({ studentId }) => {
                   </td>
                   <td style={tdStyle}>{handleProvisional(validatid.provisional)}</td>
                   <td>
-                  <button style={buttonStyle} onClick={() => handleChoosePetition(validatid)}>
-                  Choose
-                  </button>
-                </td>
-                  <td>
-                  <button style={buttonStyle} onClick={() => handleNotifyPetition(validatid)}>
-                  Notify
-                  </button>
+                  	{validatid.provisional !== 5 && (
+		          validatid.provisional === 1 ? (
+				  <button style={buttonStyle} onClick={() => handleChoosePetition(validatid)}>
+				  Choose
+				  </button>
+                  	  ) : (
+				  <button style={buttonStyle} onClick={() => handleNotifyPetition(validatid)}>
+				  Notify
+				  </button>
+			  )
+			)}
                 </td>
                 </tr>
               ))}

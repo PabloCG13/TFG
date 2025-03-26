@@ -368,7 +368,7 @@ const CoordinatorTeacherConfirmValidationBody = ({ teacherId }) => {
     fetch(`http://localhost:5000/api/validations/${valid.unicodesrc}/${valid.degreeidsrc}/${valid.courseidsrc}/${valid.unicodedst}/${valid.degreeiddst}/${valid.courseiddst}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ provisional: 0 }),
+      body: JSON.stringify({ provisional: 5 }),
     })
       .then(response => {
         if (!response.ok) {
@@ -378,9 +378,21 @@ const CoordinatorTeacherConfirmValidationBody = ({ teacherId }) => {
       })
       .then(data => {
         console.log("Successfully updated provisional:", data);
-        
+        setFilteredValidations(prevValidations => prevValidations.map(v =>
+	      	v.unicodesrc === valid.unicodesrc &&
+	      	v.degreeidsrc === valid.degreeidsrc &&
+	      	v.courseidrc === valid.courseidrc &&
+	      	v.unicodedst === valid.unicodedst &&
+	      	v.degreeiddst === valid.degreeiddst &&
+	      	v.courseiddst === valid.courseiddst
+	      		? { ...v, provisional: 5}
+	      			: v
+	      		)
+      	);
       })
       .catch(error => console.error("Error updating provisional:", error));
+
+     
   };
 
   return (

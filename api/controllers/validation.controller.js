@@ -47,13 +47,13 @@ exports.findAllValidationsForDegreeinUni = async (req, res) => {
 };
 
 
-// Get all validations that belong to a certain university and degree that have not been approved
+// Get all validations that belong to a certain university and degree that have not been approved/rejected
 exports.findAllProvisionalValidationsForDegreeinUni = async (req, res) => {
     try {
         const { uniCode, degreeId } = req.params;
         const validations = await db.any(`
         SELECT * FROM validation 
-        WHERE (uniCodeSrc = $1 AND degreeIdSrc = $2 AND provisional <> 1)
+        WHERE (uniCodeSrc = $1 AND degreeIdSrc = $2 AND provisional <> 1 AND provisional <> 5)
                ;`
           //OR
           //(uniCodeDst = $1 AND degreeIdDst = $2 AND provisional = 1)     
@@ -123,9 +123,9 @@ exports.findPendingAnswersForDegreeinUni = async (req, res) => {
         SELECT * FROM validation 
         WHERE (uniCodeSrc = $1 AND degreeIdSrc = $2 AND provisional = 3)     
           OR
-          (uniCodeDst = $1 AND degreeIdDst = $2 AND provisional = 4)`     
+          (uniCodeSrc = $1 AND degreeIdSrc = $2 AND provisional = 4)`     
         , [uniCode, degreeId]);
-       // console.log("The validations1 are:",validations);
+        //console.log("The validations1 are:",validations);
         if (!validations) {
             return res.status(404).json({ message: "Validation not found" });
         }
