@@ -124,6 +124,25 @@ exports.findErasmusStudentsWithPendingGrades = async (req,res) => {//TODO in the
 	}
 }
 
+exports.findErasmusCoursesForAStudent = async (req,res) => {
+	try{
+    	const { studentId } = req.params;
+    	const transcripts = await db.any(`
+            SELECT t.*
+            FROM transcript t
+            JOIN studies s ON t.studentId = s.studentId
+            WHERE s.studentId = $1
+            AND t.degreeId <> s.degreeId  
+            AND t.uniCode <> s.uniCode  
+            AND t.erasmus = 1;
+        `, [studentId]);
+
+    	res.status(200).json(transcripts);
+	} catch (err) {
+    	res.status(500).json({ message: err.message || "Some error occurred" });
+	}
+}
+
 // Get one transcript by code
 exports.findOne = async (req, res) => {
     try {

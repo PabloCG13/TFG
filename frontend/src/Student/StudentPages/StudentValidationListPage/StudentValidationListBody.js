@@ -11,6 +11,8 @@ const StudentValidationListBody = ({ studentId }) => {
   const [showFilters, setShowFilters] = useState(false);
   const [uniqueUnicodes, setUniqueUnicodes] = useState([]);
   const [universities, setUniversities] = useState({});
+  const [studentTranscript, setStudentTranscript] = useState([]);
+  const [studentValidates, setStudentValidates] = useState([]);
   const location = useLocation();
   const { participantAddress } = location.state || {};
 
@@ -78,6 +80,31 @@ const StudentValidationListBody = ({ studentId }) => {
     setFilteredValidations(results);
   }, [searchTerm, validityPeriod, universityName, validations, universities]);
 
+  useEffect(() => {
+
+      fetch(`http://localhost:5000/api/validates/${studentId}`)
+        .then(response => {
+          if (!response.ok) {
+            throw new Error(`Failed to fetch student validation petitions for ${studentId}. Status: ${response.status}`);
+          }
+          return response.json();
+        })
+        .then(data => setStudentValidates(data))
+        .catch(error => console.error("Error fetching student validation petitions:", error));
+      fetch(`http://localhost:5000/api/transcripts/erasmusTranscript/${studentId}`)
+        .then(response => {
+          if (!response.ok) {
+            throw new Error(`Failed to fetch erasmus courses in transcript for ${studentId}. Status: ${response.status}`);
+          }
+          return response.json();
+        })
+        .then(data => setStudentTranscript(data))
+        .catch(error => console.error("Error fetching student erasmus courses in transcript:", error));
+    console.log("validates ",studentValidates);
+    console.log("transcript ",studentTranscript);
+  }, [studentId]);
+
+
   const handleNotifyPetition = async (validatid) =>{
     console.log("He pulsado el boton de Notify");
     console.log("Validation selected:",validatid);
@@ -107,15 +134,14 @@ const StudentValidationListBody = ({ studentId }) => {
 
 
   };
-//TODO Add logic to NOT display the buttons when a student is already taking a valdation, or is already waiting for a notification. Will need API calls to retrieve the student's erasmus courses from the transcript & his requested validations from validates. 
 
 
 
   const handleChoosePetition = async (validatid) =>{
     console.log("He pulsado el boton de Choose");
     console.log("Validation selected:",validatid);
-
-   //TODO añadir validation al transcript. Se asume que el usuario sabe lo que hace.
+	
+   //TODO añadir validation al transcript. Se asume que el usuario sabe lo que hace. Hay que añadir a la estructura de studentTranscript también para que desaparezca el boton de choose. Además, hay que poner un academic year.
 
 
 
@@ -126,8 +152,8 @@ const StudentValidationListBody = ({ studentId }) => {
     if (provisional === 0) return "Pending";
     if (provisional === 1) return "Definitive";
     if (provisional === 2) return "Pending coordinator suggestion";
-    if (provisional === 3) return "Sugested to be accepted";
-    if (provisional === 4) return "Sugested to be rejected";
+    if (provisional === 3) return "Suggested to be accepted";
+    if (provisional === 4) return "Suggested to be rejected";
     if (provisional === 5) return "Rejected";
   };
   return (
@@ -170,6 +196,7 @@ const StudentValidationListBody = ({ studentId }) => {
                 <th style={thStyle}>Validity Period</th>
                 <th style={thStyle}>University Name</th>
                 <th style={thStyle}>Status</th>
+                <th style={thStyle}>Action</th>
                 {/* TODO: Add a button that only appears if it is provisional 
                 and origin course unicode and degreeId is the same */}
 
@@ -178,7 +205,20 @@ const StudentValidationListBody = ({ studentId }) => {
               </tr>
             </thead>
             <tbody>
-              {filteredValidations.map((validatid) => (
+              {filteredValidations.map((validatid) => {
+              	const hasTakenCourse = studentTranscript.some(
+              		(course) => course.courseid === validatid.courseiddst && course.erasmus === 1);
+              	const alreadyWaitingNotification = studentValidates.some(
+              	(v) =>
+              		v.unicodesrc === validatid.unicodesrc &&
+              		v.degreeidsrc === validatid.degreeidsrc &&
+              		v.courseidsrc === validatid.courseidsrc &&
+              		v.unicodedst === validatid.unicodedst &&
+              		v.degreeiddst === validatid.degreeiddst &&
+              		v.courseiddst === validatid.courseiddst &&
+              		v.provisional !== 1);
+              return (
+              
                 <tr key={validatid.unicode}>
                   <td style={tdStyle}>{validatid.unicodesrc}, {validatid.degreeidsrc}, {validatid.courseidsrc}</td>
                   <td style={tdStyle}>{validatid.unicodedst}, {validatid.degreeiddst}, {validatid.courseiddst}</td>
@@ -193,7 +233,11 @@ const StudentValidationListBody = ({ studentId }) => {
                   <td style={tdStyle}>{handleProvisional(validatid.provisional)}</td>
                   <td>
                   	{validatid.provisional !== 5 && (
-		          validatid.provisional === 1 ? (
+                  	  hasTakenCourse ? (
+                  	  	<span>Already taken</span>
+                  	  ) : alreadyWaitingNotification ? (
+                  	  	<span>Pending Notification</span>
+                  	  ) : validatid.provisional === 1 ? (
 				  <button style={buttonStyle} onClick={() => handleChoosePetition(validatid)}>
 				  Choose
 				  </button>
@@ -205,7 +249,8 @@ const StudentValidationListBody = ({ studentId }) => {
 			)}
                 </td>
                 </tr>
-              ))}
+              );
+              })}
             </tbody>
           </table>
     
