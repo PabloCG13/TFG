@@ -312,32 +312,18 @@ const CoordinatorTeacherConfirmValidationBody = ({ teacherId }) => {
       alert("Please select a month and year before confirming.");
       return;
     }
-
+    const valP= `${selectedMonth}/${selectedYear}`;
 
     const data = selectedValidation;
 
-
-    // Make the PUT request to update validation
-    fetch(`http://localhost:5000/api/validations/${data.unicodesrc}/${data.degreeidsrc}/${data.courseidsrc}/${data.unicodedst}/${data.degreeiddst}/${data.courseiddst}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ provisional: 1 }),
-    })
-    .then(response => response.json())
-    .then(data => {
-      setRefreshKey(prev => prev + 1);
-      console.log("Successfully updated provisional:", data);
-      closeModal();
-    })
-    .catch(error => console.error("Error updating provisional:", error));
 
 
     // Blockchain call 
     const courseSrc = `${data.unicodesrc}, ${data.degreeidsrc}, ${data.courseidsrc}`;
     const courseDst = `${data.unicodedst}, ${data.degreeiddst}, ${data.courseiddst}`;
-
+    let tokenId;
     try{
-      await fetch("http://localhost:4000/addValidation", {
+      const response = await fetch("http://localhost:4000/addValidation", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -348,15 +334,30 @@ const CoordinatorTeacherConfirmValidationBody = ({ teacherId }) => {
         _year: selectedYear
       }),
     });
-
-
-    
-
+    const data = await response.json();
+    if(!data.success)
+      throw new Error(`Failed to add Validation Status: ${response.status}`);
+    console.log("data result", data.result);
+    tokenId = data.result;
     }catch (error) {
       console.error("Error making API request:", error);
       setMessage("Server error. Please try again later.");
+      return;
     }
     
+    // Make the PUT request to update validation
+    fetch(`http://localhost:5000/api/validations/${data.unicodesrc}/${data.degreeidsrc}/${data.courseidsrc}/${data.unicodedst}/${data.degreeiddst}/${data.courseiddst}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ token:tokenId, period: valP, provisional: 1 }),
+    })
+    .then(response => response.json())
+    .then(data => {
+      setRefreshKey(prev => prev + 1);
+      console.log("Successfully updated provisional:", data);
+      closeModal();
+    })
+    .catch(error => console.error("Error updating provisional:", error));
 
 
     console.log(`Confirmed validation for Month: ${selectedMonth}, Year: ${selectedYear}`);

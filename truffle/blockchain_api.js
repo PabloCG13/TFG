@@ -183,13 +183,14 @@ app.post("/modifyTranscript", async (req, res) => {
 app.post("/addValidation", async (req, res) => {
     try {
         const { address, srcCour, dstCour, _month, _year } = req.body;
-
+        console.log("params", req.body);
         if(!address || !srcCour || !dstCour || !_month || !_year) {
             return res.status(400).json({ error: "Missing required fields" });
         }
 
         const result = await addValidation(address, srcCour, dstCour, _month, _year);
-        res.status(200).json({ success: true, result });
+        console.log("Result", result);
+        res.status(200).json({ success: true, result: result });
     } catch (error) {
         res.status(500).json({ success: false, error: error.message });
     }

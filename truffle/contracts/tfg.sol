@@ -103,6 +103,7 @@ contract tfg {
     }
 
     event ParticipantAdded(string message);
+    event ValidationAdded(uint tokenId);
 
     function addUniversity(
         string memory hash,
@@ -299,6 +300,7 @@ contract tfg {
         );
 
         validations.setValidityPeriod(degreeCoord, id, month, year);
+        emit ValidationAdded(id);
         return id;
     }
 
