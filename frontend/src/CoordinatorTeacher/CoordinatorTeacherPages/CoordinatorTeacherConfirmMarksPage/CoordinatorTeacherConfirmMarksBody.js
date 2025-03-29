@@ -422,7 +422,7 @@ const handleFinalConfirm = async (selStudent) => {
                     {student.provisional === 0 ? "🔓" : "🔒"} 
                   </span>
                 </td>
-                {student.mark !== null && (
+                {(student.mark !== null && student.provisional !== 1)  ? (
                   <>
                   <td>
                   <button style={buttonStyle} onClick={() => openModal(student)}>
@@ -435,6 +435,8 @@ const handleFinalConfirm = async (selStudent) => {
                   Confirm
                   </button></td>
                   </>
+                ) : (
+                  <span style={{ color: "green", fontWeight: "bold" }}>Mark Confirmed</span>
                 )}
                 
               </tr>

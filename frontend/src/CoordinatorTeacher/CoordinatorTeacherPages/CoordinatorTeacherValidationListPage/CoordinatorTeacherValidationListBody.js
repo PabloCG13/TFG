@@ -19,6 +19,13 @@ const CoordinatorTeacherValidationListBody = ({ teacherId }) => {
   const [uniqueUnicodes, setUniqueUnicodes] = useState([]);
   const [universities, setUniversities] = useState({});
   const [degrees, setDegrees] = useState("");
+  const [selectedValidation, setSelectedValidation] = useState(null);
+  const [refreshKey, setRefreshKey] = useState(0);
+
+    // Modal states
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [selectedMonth, setSelectedMonth] = useState("");
+    const [selectedYear, setSelectedYear] = useState("");
 
   // Fetch teacher info
   useEffect(() => {
@@ -55,7 +62,7 @@ const CoordinatorTeacherValidationListBody = ({ teacherId }) => {
         setUniqueUnicodes([...uniqueUnicodesSet]);
       })
       .catch(error => console.error("Error fetching validations:", error));
-  }, [degrees]);
+  }, [degrees, refreshKey]);
 
   // Fetch university details for each unique university code
   useEffect(() => {
@@ -137,6 +144,69 @@ const CoordinatorTeacherValidationListBody = ({ teacherId }) => {
     }
   };
 
+  // Function to confirm validation after selecting month and year
+  const extendValidation = async () => {
+    if (!selectedMonth || !selectedYear) {
+      alert("Please select a month and year before confirming.");
+      return;
+    }
+    const valP= `${selectedMonth}-${selectedYear}`;
+
+   console.log("validation: ",selectedValidation);
+
+    // Blockchain call 
+    try{
+      const response = await fetch("http://localhost:4000/updateValidation", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        address: participantAddress,
+        tokenId: selectedValidation.token,
+        _month: selectedMonth,
+        _year: selectedYear
+      }),
+    });
+    const data = await response.json();
+    if(!data.success)
+      throw new Error(`Failed to update Validation Status: ${response.status}`);
+   
+    }catch (error) {
+      console.error("Error making API request:", error);
+      setMessage("Server error. Please try again later.");
+      return;
+    }
+    
+    // Make the PUT request to update validation
+    fetch(`http://localhost:5000/api/validations/${selectedValidation.unicodesrc}/${selectedValidation.degreeidsrc}/${selectedValidation.courseidsrc}/${selectedValidation.unicodedst}/${selectedValidation.degreeiddst}/${selectedValidation.courseiddst}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ period: valP}),
+    })
+    .then(response => response.json())
+    .then(data => {
+      setRefreshKey(prev => prev + 1);
+      console.log("Successfully updated provisional:", data);
+      closeModal();
+    })
+    .catch(error => console.error("Error updating provisional:", error));
+
+
+    console.log(`Confirmed validation for Month: ${selectedMonth}, Year: ${selectedYear}`);
+  };
+
+    // Open modal to set Month and Year before confirming validation
+  const openModal = (valid) => {
+      setSelectedValidation(valid);
+      setSelectedMonth("");
+      setSelectedYear("");
+      setIsModalOpen(true);
+  };
+
+  // Close modal
+  const closeModal = () => {
+    setIsModalOpen(false);
+  };
+
   return (
     <div style={containerStyle}>
       {/* Sidebar with teacher profile */}
@@ -195,12 +265,35 @@ const CoordinatorTeacherValidationListBody = ({ teacherId }) => {
                     {valid.provisional === 1 ? "🔒" : "🔓"  } 
                   </span>
                   </td>
+
+                   {valid.provisional === 1 && (
+                     <>
+                     <td>
+                     <button style={buttonStyle} onClick={() => openModal(valid)}>
+                     Extend
+                     </button>
+                   </td>
+                   </>
+                )}
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
       </div>
+      {/* Modal for selecting Month and Year */}
+      {isModalOpen && (
+        <div style={modalOverlayStyle} onClick={closeModal}>
+          <div style={modalStyle} onClick={(e) => e.stopPropagation()}>
+            <h2>Select Month and Year</h2>
+            <label>Month:</label>
+            <input type="number" min="1" max="12" value={selectedMonth} onChange={(e) => setSelectedMonth(e.target.value)} />
+            <label>Year:</label>
+            <input type="number" min="2000" max="2100" value={selectedYear} onChange={(e) => setSelectedYear(e.target.value)} />
+            <button style={buttonStyle} onClick={extendValidation}>Confirm</button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
@@ -310,6 +403,27 @@ const lockIconStyle = {
   width: '20px',
   height: '20px',
   verticalAlign: 'middle', // Para alinear el ícono con el checkbox
+};
+
+const modalOverlayStyle = {
+  position: "fixed",
+  top: 0,
+  left: 0,
+  width: "100%",
+  height: "100%",
+  backgroundColor: "rgba(0, 0, 0, 0.5)",
+  display: "flex",
+  justifyContent: "center",
+  alignItems: "center",
+  zIndex: 1000,
+};
+
+const modalStyle = {
+  backgroundColor: "white",
+  padding: "20px",
+  borderRadius: "8px",
+  textAlign: "center",
+  width: "400px",
 };
 
 

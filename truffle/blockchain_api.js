@@ -8,8 +8,10 @@ const { askForTranscript } = require("./askForTranscript");
 const { addTeacherToTranscript } = require("./addTeacherToTranscript") 
 const { modifyTranscript } = require("./modifyTranscript");
 const { addValidation } = require("./addValidation");
+const { updateValidation } = require("./updateValidation");
 const { transferValidation } = require("./transferValidation");
 const { getTeachersAllowed } = require("./getTeachersAllowed");
+
 
 
 
@@ -191,6 +193,22 @@ app.post("/addValidation", async (req, res) => {
         const result = await addValidation(address, srcCour, dstCour, _month, _year);
         console.log("Result", result);
         res.status(200).json({ success: true, result: result });
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+
+app.post("/updateValidation", async (req, res) => {
+    try {
+        const { address, tokenId, _month, _year } = req.body;
+        console.log("params", req.body);
+        if(!address || !tokenId || !_month || !_year) {
+            return res.status(400).json({ error: "Missing required fields" });
+        }
+
+        const result = await updateValidation(address, tokenId, _month, _year);
+        res.status(200).json({ success: true, result });
     } catch (error) {
         res.status(500).json({ success: false, error: error.message });
     }

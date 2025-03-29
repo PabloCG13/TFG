@@ -437,35 +437,35 @@ const CoordinatorTeacherConfirmValidationBody = ({ teacherId }) => {
                   <td style={tdStyle}>{valid.period}</td>
                   <td style={tdStyle}>{universities[valid.unicodedst]?.name || "Loading..."}</td>
                   <td>
-  {valid.provisional === 2 ? (
-    <span style={{ color: "orange", fontWeight: "bold" }}>Pending Confirmation</span>
-  ) : (
-    <>
-      <td>
-        <button style={buttonStyle} onClick={() => openModal(valid)}>
-          Confirm
-        </button>
-      </td>
-      <td>
-        <button style={buttonStyle} onClick={() => handleCancelPetition(valid)}>
-          Cancel
-        </button>
-      </td>
-      <td>
-        {valid.provisional === 3 ? (
-          <span style={{ color: "green", fontWeight: "bold" }}>Suggestion: Accept</span>
-        ) : valid.provisional === 4 ? (
-          <span style={{ color: "red", fontWeight: "bold" }}>Suggestion: Reject</span>
-        ) : (
-          <button style={buttonStyle} onClick={() => handleAskCourseTeacher(valid)}>
-            Ask Course Teacher
-          </button>
-        )}
-      </td>
+                  {valid.provisional === 2 ? (
+                    <span style={{ color: "orange", fontWeight: "bold" }}>Pending Confirmation</span>
+                  ) : (
+                    <>
+                      <td>
+                        <button style={buttonStyle} onClick={() => openModal(valid)}>
+                          Confirm
+                        </button>
+                      </td>
+                      <td>
+                        <button style={buttonStyle} onClick={() => handleCancelPetition(valid)}>
+                          Cancel
+                        </button>
+                      </td>
+                      <td>
+                        {valid.provisional === 3 ? (
+                          <span style={{ color: "green", fontWeight: "bold" }}>Suggestion: Accept</span>
+                        ) : valid.provisional === 4 ? (
+                          <span style={{ color: "red", fontWeight: "bold" }}>Suggestion: Reject</span>
+                        ) : (
+                          <button style={buttonStyle} onClick={() => handleAskCourseTeacher(valid)}>
+                            Ask Course Teacher
+                          </button>
+                        )}
+                      </td>
 
-    </>
-  )}
-</td>
+                    </>
+                  )}
+                </td>
 
                 </tr>
               ))}
