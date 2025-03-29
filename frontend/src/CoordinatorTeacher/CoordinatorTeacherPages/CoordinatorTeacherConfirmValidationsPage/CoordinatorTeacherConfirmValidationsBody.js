@@ -312,7 +312,7 @@ const CoordinatorTeacherConfirmValidationBody = ({ teacherId }) => {
       alert("Please select a month and year before confirming.");
       return;
     }
-    const valP= `${selectedMonth}/${selectedYear}`;
+    const valP= `${selectedMonth}-${selectedYear}`;
 
     const data = selectedValidation;
 

@@ -202,17 +202,17 @@ const handleConfirm = async () => {
 };
 
 // TODO check it works properly. The part needed is not done yet
-const handleFinalConfirm = async () => {
+const handleFinalConfirm = async (selStudent) => {
   // Actualizar la nota en el estado de students sin hacer un nuevo fetch
   setStudents(prevStudents => prevStudents.map(student => {
-    if (student.studentid === selectedStudent.studentid) {
-      return { ...student, mark: selectedStudent.mark }; // Actualiza solo la nota del estudiante modificado
+    if (student.studentid === selStudent.studentid) {
+      return { ...student, mark: selStudent.mark }; // Actualiza solo la nota del estudiante modificado
     }
     return student;
   }));
 
   try {
-    const dbResponse = await fetch(`http://localhost:5000/api/transcripts/${selectedStudent.unicode}/${selectedStudent.degreeid}/${selectedStudent.courseid}/${selectedStudent.studentid}/${selectedStudent.academicyear}`, {
+    const dbResponse = await fetch(`http://localhost:5000/api/transcripts/${selStudent.unicode}/${selStudent.degreeid}/${selStudent.courseid}/${selStudent.studentid}/${selStudent.academicyear}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -228,7 +228,7 @@ const handleFinalConfirm = async () => {
       throw new Error('Failed to update mark');
     }
 
-    const dbResponseAddress = await fetch(`http://localhost:5000/api/addresses/participant/${selectedStudent.studentid}`);
+    const dbResponseAddress = await fetch(`http://localhost:5000/api/addresses/participant/${selStudent.studentid}`);
     if (!dbResponseAddress.ok) {
       throw new Error(`Failed to fetch student address. Status: ${dbResponseAddress.status}`);
     }
@@ -236,7 +236,7 @@ const handleFinalConfirm = async () => {
     const dbData = await dbResponseAddress.json();
     console.log("Student address:", dbData);
 
-    const dbResponseTranscript = await fetch(`http://localhost:5000/api/transcripts/${selectedStudent.studentid}`);
+    const dbResponseTranscript = await fetch(`http://localhost:5000/api/transcripts/${selStudent.studentid}`);
     if (!dbResponseTranscript.ok) {
       throw new Error(`Failed to fetch transcript. Status: ${dbResponseTranscript.status}`);
     }
@@ -264,18 +264,18 @@ const handleFinalConfirm = async () => {
     const transcriptHashModified = transcriptData.hash;
     console.log("Transcript modified successfully:", transcriptHashModified);
 
-    const updateResponse = await fetch(`http://localhost:5000/api/students/${selectedStudent.studentid}`, {
+    const updateResponse = await fetch(`http://localhost:5000/api/students/${selStudent.studentid}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ transcriptHash: transcriptHashModified }),
     });
 
     if (!updateResponse.ok) {
-      throw new Error(`Failed to update student ${selectedStudent.studentid}. Status: ${updateResponse.status}`);
+      throw new Error(`Failed to update student ${selStudent.studentid}. Status: ${updateResponse.status}`);
     }
 
     const updateData = await updateResponse.json();
-    console.log(`Student ${selectedStudent.studentid} updated successfully with transcriptHash:`, updateData);
+    console.log(`Student ${selStudent.studentid} updated successfully with transcriptHash:`, updateData);
 
   } catch (error) {
     console.error("Error:", error);
@@ -431,7 +431,7 @@ const handleFinalConfirm = async () => {
                 </td>
                 <td>
                   {/*TODO fix so it works*/}
-                  <button style={buttonStyle} onClick={handleFinalConfirm}>
+                  <button style={buttonStyle} onClick={() => handleFinalConfirm(student)}>
                   Confirm
                   </button></td>
                   </>

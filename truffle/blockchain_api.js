@@ -19,7 +19,7 @@ const { Web3 } = require("web3");
 
 // Set up Web3 connection
 const web3 = new Web3("http://ganache:8545"); // Change if necessary
-const contractAddress = "0xCfEB869F69431e42cdB54A4F4f105C19C080A601";
+const contractAddress = "0x5b1869D9A4C187F2EAa108f3062412ecf0526b24";
 const contract = new web3.eth.Contract(contractJson.abi, contractAddress);
 
 const app = express();
@@ -116,8 +116,8 @@ app.post("/getTeachersAllowed", async (req, res) => {
         if(!address) {
             return res.status(400).json({ error: "Missing required fields" });
         }
-
-        const result = await consult(address);
+        console.log("Adress", address);
+        const result = await getTeachersAllowed(address);
 
         if (result === "Error" || result === null) {
             return res.status(500).json({ error: "Failed to consult" });
@@ -168,7 +168,7 @@ app.post("/addTeacherToTranscript", async (req, res) => {
 app.post("/modifyTranscript", async (req, res) => {
     try {
         const { file, addressStudent, address, type } = req.body;
-
+        
         if(!file || !addressStudent || !address || !type) {
             return res.status(400).json({ error: "Missing required fields" });
         }

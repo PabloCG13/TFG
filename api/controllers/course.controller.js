@@ -55,7 +55,7 @@ exports.findTeachersCourse = async (req, res) => {
 };
 
 
-// Get one course by unicode
+// Get courses by unicode
 exports.findUniversityCourses = async (req, res) => {
     try {
         const { uniCode } = req.params;

@@ -47,7 +47,7 @@ const StudentTranscriptBody= ({studentId}) => {
       if (data.success && data.result === true) {
         console.log("hash",data.hash);
         // Show on the
-        setModalMessage("Hash of the transcript:", data.hash);
+        setModalMessage(`Hash of the transcript: ${data.hash}` );
       } else {
         console.log("hash",data.hash);
         setModalMessage("Not the correct transcript. Please try again.");
