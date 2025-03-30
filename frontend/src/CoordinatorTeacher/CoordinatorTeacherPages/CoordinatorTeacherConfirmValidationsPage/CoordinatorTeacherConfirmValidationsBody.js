@@ -40,18 +40,23 @@ const CoordinatorTeacherConfirmValidationBody = ({ teacherId }) => {
       .catch(error => console.error("Error fetching teacher info:", error));
     fetch(`http://localhost:5000/api/degrees/${teacherId}`)
       .then(response => response.json())
-      .then(data => setDegrees(data))
+      .then(data => {
+        console.log("degrees", data);
+        setDegrees(data);})
       .catch(error => console.error("Error fetching degree info:", error));
   }, [teacherId, refreshKey]);
 
 
   // Fetch all validations
   useEffect(() => {
+    if(!degrees) return; 
     const uniCode = degrees.unicode;
     const degreeId = degrees.degreeid;
+    console.log("Uni", uniCode , degreeId);
     fetch(`http://localhost:5000/api/validations/provisionals/${uniCode}/${degreeId}`)
       .then(response => response.json())
       .then(data => {
+        console.log("Provisional Validations",data);
         setValidations(data);
         setFilteredValidations(data);
         const uniqueUnicodesSet = new Set(data.map(v => v.unicodedst));
@@ -426,6 +431,7 @@ const CoordinatorTeacherConfirmValidationBody = ({ teacherId }) => {
                 <th style={thStyle}>Destination Course</th>
                 <th style={thStyle}>Validity Period</th>
                 <th style={thStyle}>Destination University Name</th>
+                <th style={thStyle}>Number of Current Petitions</th>
                 <th style={thStyle}>Actions</th>
               </tr>
             </thead>
@@ -436,6 +442,7 @@ const CoordinatorTeacherConfirmValidationBody = ({ teacherId }) => {
                   <td style={tdStyle}>{valid.unicodedst}, {valid.degreeiddst}, {valid.courseiddst}</td>
                   <td style={tdStyle}>{valid.period}</td>
                   <td style={tdStyle}>{universities[valid.unicodedst]?.name || "Loading..."}</td>
+                  <td style={tdStyle}>{valid.num_validations}</td>
                   <td>
                   {valid.provisional === 2 ? (
                     <span style={{ color: "orange", fontWeight: "bold" }}>Pending Confirmation</span>

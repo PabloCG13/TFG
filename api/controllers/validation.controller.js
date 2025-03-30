@@ -51,22 +51,41 @@ exports.findAllValidationsForDegreeinUni = async (req, res) => {
 exports.findAllProvisionalValidationsForDegreeinUni = async (req, res) => {
     try {
         const { uniCode, degreeId } = req.params;
+
+
         const validations = await db.any(`
-        SELECT * FROM validation 
-        WHERE (uniCodeSrc = $1 AND degreeIdSrc = $2 AND provisional <> 1 AND provisional <> 5)
-               ;`
-          //OR
-          //(uniCodeDst = $1 AND degreeIdDst = $2 AND provisional = 1)     
-        , [uniCode, degreeId]);
-        if (!validations) {
-            return res.status(404).json({ message: "Validation not found" });
+            SELECT 
+                v.*,
+                COUNT(val.studentId) AS num_validations
+            FROM validation v
+            LEFT JOIN validates val
+              ON v.uniCodeSrc = val.uniCodeSrc AND
+                 v.degreeIdSrc = val.degreeIdSrc AND
+                 v.courseIdSrc = val.courseIdSrc AND
+                 v.uniCodeDst = val.uniCodeDst AND
+                 v.degreeIdDst = val.degreeIdDst AND
+                 v.courseIdDst = val.courseIdDst
+            WHERE v.uniCodeSrc = $1 AND v.degreeIdSrc = $2 
+              AND v.provisional NOT IN (1, 5)
+            GROUP BY 
+                v.uniCodeSrc, v.degreeIdSrc, v.courseIdSrc,
+                v.uniCodeDst, v.degreeIdDst, v.courseIdDst,
+                v.token, v.period, v.provisional
+            ORDER BY v.uniCodeDst, v.degreeIdDst, v.courseIdDst
+        `, [uniCode, degreeId]);
+
+
+        if (!validations || validations.length === 0) {
+            return res.status(404).json({ message: "No validations found" });
         }
+
 
         res.status(200).json(validations);
     } catch (err) {
         res.status(500).json({ message: err.message || "Some error occurred" });
     }
 };
+
 
 // Get all validations that belong to a certain university and degree that have not been approved
 exports.findAllNewProvisionalValidationsForDegreeinUni = async (req, res) => {
