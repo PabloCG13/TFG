@@ -178,7 +178,11 @@ const StudentHomeHeader = ({studentId}) => {
         <ul>
           {marks.map((mark, index) => (
             <li key={`mark-${index}`}>
-              Your grade for <strong>{mark.courseid}</strong> is now definitive
+              {mark.provisional === 0 ? (
+                 <>Your grade for <strong>{mark.courseid}</strong> is now provisonal</>
+              ):(
+                <>Your grade for <strong>{mark.courseid}</strong> is now definitive</>
+              )}
               <Link
                 to={`/Student/StudentPages/StudentTranscriptPage/StudentTranscript/${studentId}`}
                 state={{ participantAddress }}

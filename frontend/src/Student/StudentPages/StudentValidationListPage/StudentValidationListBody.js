@@ -132,17 +132,24 @@ const StudentValidationListBody = ({ studentId }) => {
     const dbResponseValidates = await fetch(`http://localhost:5000/api/validates`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ...JSON.parse(validatid), studentId: studentId, provisional: 0}), // Añadir hash al body
+      body: JSON.stringify({       
+        uniCodeSrc: validatid.unicodesrc,
+        degreeIdSrc: validatid.degreeidsrc,
+        courseIdSrc: validatid.courseidsrc,
+        uniCodeDst: validatid.unicodedst,
+        degreeIdDst: validatid.degreeiddst,
+        courseIdDst: validatid.courseiddst,
+        studentId: studentId,
+        provisional: 0
+      }), 
     });
 
     if (!dbResponseValidates.ok) {
       console.error(`Failed to add validate entry to DB. Status: ${dbResponseValidates.status}`);
       return false;
     }
-
-
-
   };
+  
   const handleBlockchain = async (validatid, year, unicodesrc, degreeidsrc, courseidsrc, unicodedst, degreeiddst, courseiddst) => {
     //Get the teacherId of the dstCourse
     const dbDstResponse = await fetch(`http://localhost:5000/api/courses/${unicodedst}/${degreeiddst}/${courseiddst}`);
@@ -295,10 +302,10 @@ const StudentValidationListBody = ({ studentId }) => {
       } catch (err) {
         console.error(`Error fetching address for student ${student.studentid}:`, err);
       }
-      changeTranscript(unicodedst,degreeiddst,courseiddst,studentId,year,teacherDst,courseDstAddress,degreeCoordAddress);
+      changeTranscript(unicodesrc, degreeidsrc, courseidsrc, unicodedst,degreeiddst,courseiddst,studentId,year,teacherDst,courseDstAddress,degreeCoordAddress);
   };
 
-  const changeTranscript = async(uniCode, degreeId, courseId, studentId, year, teacherId, dstCourseAddess, degreeCoordAddress) => {
+  const changeTranscript = async(unicodesrc, degreeidsrc, courseidsrc, uniCode, degreeId, courseId, studentId, year, teacherId, dstCourseAddess, degreeCoordAddress) => {
       console.log("uniCode desde la funcion:", uniCode);
       console.log("degreeID desde la funcion:", degreeId);
       console.log("courseID desde la funcion:", courseId);
@@ -320,6 +327,9 @@ const StudentValidationListBody = ({ studentId }) => {
             erasmus: 1,
             provisional: 0, // Assuming provisional is still part of the request
             teacherId: teacherId,
+            uniCodeSrc: unicodesrc,
+            degreeIdSrc: degreeidsrc, 
+            courseIdSrc: courseidsrc,
           }),
         });
         

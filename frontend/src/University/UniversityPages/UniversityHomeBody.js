@@ -360,9 +360,9 @@ const UniversityHomeBody = ({ uniCode }) => {
 };
 
 const addCourse = async (course) => {
-        if (!course.teacherid || !course.name || !course.degreeid || !course.credits || !course.period) {
-        alert("Please enter all required fields.");
-        return false;
+    if (!course.teacherid || !course.name || !course.degreeid || !course.credits || !course.period) {
+      alert("Please enter all required fields.");
+      return false;
     }
 
     const formData = new FormData();
@@ -459,7 +459,23 @@ const addCourse = async (course) => {
   };
 
   const handleStudentToCourse = async ({ degreeId, courseId, studentId, year, teacherId }) => {
-
+    if(erasmus){
+      try{
+      const dbResponse = await fetch(`http://localhost:5000/api/transcripts/validation/${uniCode}/${degreeId}/${courseId}/${studentId}/`);
+      
+      if (dbResponse.ok) {
+        const responseJson = await dbResponse.json();
+        console.log('Course assignment response:', responseJson);
+      } else {
+        throw new Error('Failed to assign course');
+      }
+      return;
+    } catch (error) {
+      console.error("Error:", error.message);
+      setMessage(error.message); // Display error to the user
+      return;
+    }
+    }
     console.log("degreeID desde la funcion:", degreeId);
     console.log("courseID desde la funcion:", courseId);
     console.log("studentID desde la funcion:", studentId);
@@ -479,6 +495,9 @@ const addCourse = async (course) => {
           erasmus: 0,
           provisional: 0, // Assuming provisional is still part of the request
           teacherId: teacherId,
+          uniCodeSrc: null,
+          degreeIdSrc: null,
+          courseIdSrc: null,
         }),
       });
       

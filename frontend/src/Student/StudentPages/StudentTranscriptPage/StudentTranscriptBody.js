@@ -79,8 +79,9 @@ const StudentTranscriptBody= ({studentId}) => {
             </tr>
           </thead>
           <tbody>
-            {studentCourse.map((course) => (
-              <tr key={course.courseid}>
+          {studentCourse.map((course) => (
+            <React.Fragment key={course.courseid}>
+              <tr>
                 <td>{course.degreeid}</td>
                 <td>{course.courseid}</td>
                 <td>{course.mark}</td>
@@ -92,7 +93,16 @@ const StudentTranscriptBody= ({studentId}) => {
                 <td>{course.academicyear}</td>
                 <td>{course.erasmus}</td>
               </tr>
-            ))}
+              {course.erasmus === 1 && (
+                <tr>
+                  <td colSpan={6} style={{ textAlign: 'center', color: '#007bff', fontStyle: 'italic' }}>
+                    This course has been validated by {course.degreeidsrc}, {course.courseidsrc}
+                  </td>
+                </tr>
+              )}
+            </React.Fragment>
+          ))}
+
           </tbody>
         </table>
         </div>

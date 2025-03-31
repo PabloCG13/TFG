@@ -188,7 +188,7 @@ const CoordinatorTeacherHomeHeader = ({teacherId}) => {
         <div style={modalOverlayStyle} onClick={closeModal}>
           <div style={modalStyle} onClick={(e) => e.stopPropagation()}>
             <h2>Notifications</h2>
-            {(validations.length > 0 || newValidations.length > 0) ? (
+            {(validations.length > 0 || newValidations.length > 0 || erasmusGradeConfirmations.length > 0) ? (
               <ul>
                 {validations.map((validation, index) => (
                   <li key={index}>
@@ -219,31 +219,30 @@ const CoordinatorTeacherHomeHeader = ({teacherId}) => {
                     </Link>
                 </li>
               ))}
+
+           
+                {erasmusGradeConfirmations.map((confirmation, index) => (
+            <li key={index}>
+              Student <strong>{confirmation.studentid}</strong> has been graded by Erasmus teacher {confirmation.teacherid} on subject {confirmation.courseid}
+              <Link 
+                to={`/CoordinatorTeacher/CoordinatorTeacherPages/CoordinatorTeacherConfirmMarksPage/CoordinatorTeacherConfirmMarks/${teacherId}`} 
+                state={{ confirmation }}
+                style={viewDetailsButtonStyle}
+                                  onMouseOver={(e) => Object.assign(e.target.style, hoverStyle)}
+                                  onMouseOut={(e) => Object.assign(e.target.style, buttonStyle)}
+              >
+                View More
+              </Link>
+            </li>
+                ))}
+             
               </ul>
+
+
             ) : (
               <p>No new notifications</p>
             )}
-            {erasmusGradeConfirmations.length > 0 && (
-		  <>
-		    <h3>Erasmus Mark Changes Notifications</h3>
-		    <ul>
-		      {erasmusGradeConfirmations.map((confirmation, index) => (
-			<li key={index}>
-			  Student <strong>{confirmation.studentid}</strong> has been graded by Erasmus teacher {confirmation.teacherid} on subject {confirmation.courseid}
-			  <Link 
-			    to={`/CoordinatorTeacher/CoordinatorTeacherPages/CoordinatorTeacherConfirmMarksPage/CoordinatorTeacherConfirmMarks/${teacherId}`} 
-			    state={{ confirmation }}
-			    style={viewDetailsButtonStyle}
-                            onMouseOver={(e) => Object.assign(e.target.style, hoverStyle)}
-                      	    onMouseOut={(e) => Object.assign(e.target.style, buttonStyle)}
-			  >
-			    View More
-			  </Link>
-			</li>
-		      ))}
-		    </ul>
-		  </>
-		)}
+           
             <button onClick={closeModal} style={closeButtonStyle}>Close</button>
           </div>
         </div>

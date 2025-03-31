@@ -3,12 +3,12 @@ const db = require("../config/db.js"); // Import pg-promise instance
 // Create transcript
 exports.create = async (req, res) => {
     try {
-        const { uniCode, degreeId, courseId, studentId, academicYear, provisional, erasmus, mark, lastAccess, teacherId } = req.body;
+        const { uniCode, degreeId, courseId, studentId, academicYear, provisional, erasmus, mark, lastAccess, teacherId, uniCodeSrc, degreeIdSrc, courseIdSrc } = req.body;
         const query = `
-            INSERT INTO transcript (uniCode, degreeId, courseId, studentId, academicYear, provisional, erasmus, mark, lastAccess, teacherId)
-            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING *;
+            INSERT INTO transcript (uniCode, degreeId, courseId, studentId, academicYear, provisional, erasmus, mark, lastAccess, teacherId, uniCodeSrc, degreeIdSrc, courseIdSrc)
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13) RETURNING *;
         `;
-        const transcript = await db.one(query, [uniCode, degreeId, courseId, studentId, academicYear, provisional, erasmus, mark, lastAccess, teacherId]);
+        const transcript = await db.one(query, [uniCode, degreeId, courseId, studentId, academicYear, provisional, erasmus, mark, lastAccess, teacherId, uniCodeSrc, degreeIdSrc, courseIdSrc]);
         res.status(201).json(transcript);
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -40,10 +40,10 @@ exports.findStudent = async (req,res) => {
     }
 }
 
-exports.findStudentsInCourse = async (req,res) => {
+exports.findValidatedCourse = async (req,res) => {
 	try{
-    	const { uniCode, degreeId, courseId } = req.params;
-    	const transcripts = await db.any(`SELECT * FROM transcript WHERE uniCode = $1 AND degreeId = $2 AND courseId = $3;`, [uniCode, degreeId, courseId]);
+    	const { uniCode, degreeId, courseId, studentId } = req.params;
+    	const transcripts = await db.oneOrNone(`SELECT * FROM transcript WHERE uniCodeSrc = $1 AND degreeIdSrc = $2 AND courseIdSrc = $3 AND studentId = $4;`, [uniCode, degreeId, courseId, studentId]);
     	
     	if (transcripts.length === 0) {
         	return res.status(404).json({ message: "No courses found for this student" });
@@ -55,6 +55,22 @@ exports.findStudentsInCourse = async (req,res) => {
 	}
 }
 
+
+exports.findStudentsInCourse = async (req,res) => {
+	try{
+    	const { uniCode, degreeId, courseId } = req.params;
+        console.log("Parametros", req.params);
+    	const transcripts = await db.any(`SELECT * FROM transcript WHERE uniCode = $1 AND degreeId = $2 AND courseId = $3;`, [uniCode, degreeId, courseId]);
+    	
+        if (!transcripts) {
+        	return res.status(404).json({ message: "No erasmus course found for this student" });
+    	}
+
+    	res.status(200).json(transcripts);
+	} catch (err) {
+    	res.status(500).json({ message: err.message || "Some error occurred" });
+	}
+}
 
 exports.findNotificationStudentMark = async (req, res) => {
     try {

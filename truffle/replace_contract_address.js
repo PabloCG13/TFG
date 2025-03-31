@@ -27,7 +27,7 @@ const files = [
     "addTeacherToTranscript.js",
     "modifyTranscript.js",
     "addValidation.js",
-    "updateValidation",
+    "updateValidation.js",
     "transferValidation.js",
     "getTeachersAllowed.js",
     "blockchain_api.js"

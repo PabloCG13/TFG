@@ -13,6 +13,8 @@ module.exports = app => {
 
     router.get("/validations/provisional/notification/:uniCode/:degreeId", validations.findAllNewProvisionalValidationsForDegreeinUni);
 
+    router.get("/validations/provisional/related/:uniCode/:degreeId/:courseId/:uniCodeDst/:degreeIdDst", validations.findRelatedValidationsForCourseinUni);
+
     router.get("/validations/provisional/requests/:uniCode/:degreeId/:courseId", validations.findPendingRequestsForCourse);
 
     router.get("/validations/provisional/answers/:uniCode/:degreeId", validations.findPendingAnswersForDegreeinUni);

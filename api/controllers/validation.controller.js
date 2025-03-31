@@ -75,7 +75,7 @@ exports.findAllProvisionalValidationsForDegreeinUni = async (req, res) => {
         `, [uniCode, degreeId]);
 
 
-        if (!validations || validations.length === 0) {
+        if (!validations) {
             return res.status(404).json({ message: "No validations found" });
         }
 
@@ -85,6 +85,63 @@ exports.findAllProvisionalValidationsForDegreeinUni = async (req, res) => {
         res.status(500).json({ message: err.message || "Some error occurred" });
     }
 };
+
+// Get all validations that belong to a certain university and degree that have not been approved/rejected
+exports.findRelatedValidationsForCourseinUni = async (req, res) => {
+    try {
+        const { uniCode, degreeId, courseId, uniCodeDst, degreeIdDst } = req.params;
+
+
+        const validations = await db.any(`
+        (
+            SELECT 
+                v1.*, v2.*
+            FROM 
+                validation v1
+            JOIN 
+                validation v2
+                ON v1.uniCodeDst = v2.uniCodeSrc
+                AND v1.degreeIdDst = v2.degreeIdSrc
+                AND v1.courseIdDst = v2.courseIdSrc
+            WHERE 
+                v1.uniCodeSrc = $1
+                AND v1.degreeIdSrc = $2
+                AND v1.courseIdSrc = $3
+                AND v2.uniCodeDst = $4
+                AND v2.degreeIdDst = $5
+          )
+          UNION
+          (
+            SELECT 
+                v2.*, v1.*
+            FROM 
+                validation v1
+            JOIN 
+                validation v2
+                ON v1.uniCodeDst = v2.uniCodeSrc
+                AND v1.degreeIdDst = v2.degreeIdSrc
+                AND v1.courseIdDst = v2.courseIdSrc
+            WHERE 
+                v1.uniCodeSrc = $4
+                AND v1.degreeIdSrc = $5
+                AND v2.courseIdDst = $3
+                AND v2.uniCodeSrc = $1
+                AND v2.degreeIdSrc = $2
+          );   
+        `, [uniCode, degreeId, courseId, uniCodeDst, degreeIdDst]);
+
+
+        if (!validations) {
+            return res.status(404).json({ message: "No validations found" });
+        }
+
+
+        res.status(200).json(validations);
+    } catch (err) {
+        res.status(500).json({ message: err.message || "Some error occurred" });
+    }
+};
+
 
 
 // Get all validations that belong to a certain university and degree that have not been approved

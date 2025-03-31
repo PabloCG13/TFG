@@ -13,6 +13,7 @@ module.exports = app => {
 
     router.get("/transcripts/erasmus/:uniCode/:degreeId", transcripts.findErasmusStudents);
     
+    router.get("/transcripts/validation/:uniCode/:degreeId/:courseId/:studentId",transcripts.findValidatedCourse);
     
     router.get("/transcripts/erasmusTranscript/:studentId", transcripts.findErasmusCoursesForAStudent);
     
