@@ -77,8 +77,8 @@ CREATE TABLE IF NOT EXISTS validation (
 -- Create transcript table
 CREATE TABLE IF NOT EXISTS transcript (
     uniCode VARCHAR(4) NOT NULL,
-    degreeId VARCHAR(4) NOT NULL,
-    courseId VARCHAR(4) NOT NULL,
+    degreeId VARCHAR(30) NOT NULL,
+    courseId VARCHAR(30) NOT NULL,
     studentId VARCHAR(4) NOT NULL,
     academicYear VARCHAR(30) NOT NULL,
     provisional INTEGER NOT NULL,
@@ -87,8 +87,8 @@ CREATE TABLE IF NOT EXISTS transcript (
     lastAccess TIMESTAMP,
     teacherId VARCHAR(4),
     uniCodeSrc VARCHAR(4),
-    degreeIdSrc VARCHAR(4),
-    courseIdSrc VARCHAR(4),
+    degreeIdSrc VARCHAR(30),
+    courseIdSrc VARCHAR(30),
     PRIMARY KEY (uniCode, degreeId, courseId, studentId, academicYear),
     FOREIGN KEY (uniCode, degreeId, courseId) REFERENCES course (uniCode, degreeId, courseId) ON DELETE CASCADE,
     FOREIGN KEY (uniCodeSrc, degreeIdSrc, courseIdSrc) REFERENCES course (uniCode, degreeId, courseId) ON DELETE CASCADE,

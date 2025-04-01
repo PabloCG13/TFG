@@ -5,6 +5,7 @@ const StudentUniversityInformationBody = ({ studentId }) => {
     const [universities, setUniversities] = useState([]);
     const [degreesByUniversity, setDegreesByUniversity] = useState({});
     const [degreeDetailsByUniversity, setDegreeDetailsByUniversity] = useState({});
+    const [courseDetailsByDegree, setCourseDetailsByDegree] = useState({});
     const location = useLocation();
 
     useEffect(() => {
@@ -19,7 +20,7 @@ const StudentUniversityInformationBody = ({ studentId }) => {
                 if (!Array.isArray(studiesData) || studiesData.length === 0) {
                     throw new Error("No universities found for this student.");
                 }
-		console.log("Studies data: ", studiesData);
+		        console.log("Studies data: ", studiesData);
                 // Organize degrees by university
                 const universityDegreeMap = {};
                 studiesData.forEach(({ unicode, degreeid }) => {
@@ -61,18 +62,26 @@ const StudentUniversityInformationBody = ({ studentId }) => {
                         if (!degreeResponse.ok) throw new Error(`Failed to fetch degree ${degreeId} at ${uniCode}`);
                         const degreeData = await degreeResponse.json();
 			
-			console.log("Degree data: ", degreeData);
+			            console.log("Degree data: ", degreeData);
                         // Fetch teacher details
                         const teacherResponse = await fetch(`http://localhost:5000/api/teachers/${degreeData.teacherid}`);
                         if (!teacherResponse.ok) throw new Error(`Failed to fetch teacher ${degreeData.teacherid}`);
                         const teacherData = await teacherResponse.json();
 			
-			console.log("Teacher data: ", teacherData);
+			            console.log("Teacher data: ", teacherData);
+
+                        const courseResponse = await fetch(`http://localhost:5000/api/courses/degree/teachers/${uniCode}/${degreeId}`);
+                        if (!courseResponse.ok) throw new Error(`Failed to fetch courses for ${uniCode}/${degreeId}`);
+                        const courseData = await courseResponse.json();
+			
+			            console.log("Teacher data: ", courseData);
+                        //const courseTeachers = [... new Set(courseData.map(t => t.name))]
                         // Store degree with teacher name
                         degreeDetailsMap[uniCode].push({
                             degreeId: degreeId,
                             name: degreeData.name,
-                            teacherName: teacherData.name
+                            teacherName: teacherData.name,
+                            courseTeachers: courseData
                         });
                     } catch (error) {
                         console.error("Error fetching degree/teacher:", error);
@@ -100,7 +109,32 @@ const StudentUniversityInformationBody = ({ studentId }) => {
                     <ul>
                         {degreeDetailsByUniversity[uni.unicode]?.map(degree => (
                             <li key={degree.degreeid}>
-                                {degree.name} - Coordinator: {degree.teacherName}
+
+                                <strong>{degree.name}</strong> <br />
+                                - Coordinator: {degree.teacherName}  <br />
+                                <table style={{ borderCollapse: "collapse", width: "100%", marginTop: "10px" }}>
+                                <thead>
+                                    <tr>
+                                    <th style={tableHeaderStyle}>Teacher ID</th>
+                                    <th style={tableHeaderStyle}>Name</th>
+                                    <th style={tableHeaderStyle}>Course Name</th>
+                                    <th style={tableHeaderStyle}>Period</th>
+                                    <th style={tableHeaderStyle}>Credits</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {degree.courseTeachers.map((teacher, i) => (
+                                    <tr key={i}>
+                                        <td style={tableCellStyle}>{teacher.teacherid}</td>
+                                        <td style={tableCellStyle}>{teacher.teachername}</td>
+                                        <td style={tableCellStyle}>{teacher.name}</td>
+                                        <td style={tableCellStyle}>{teacher.period}</td>
+                                        <td style={tableCellStyle}>{teacher.credits}</td>
+                                    </tr>
+                                    ))}
+                                </tbody>
+                                </table>
+
                             </li>
                         )) || <p>No degrees found.</p>}
                     </ul>
@@ -109,5 +143,20 @@ const StudentUniversityInformationBody = ({ studentId }) => {
         </div>
     );
 };
+
+//Styles
+const tableHeaderStyle = {
+    border: "1px solid black",
+    padding: "8px",
+    backgroundColor: "#f0f0f0",
+    textAlign: "left"
+  };
+  
+  
+  const tableCellStyle = {
+    border: "1px solid black",
+    padding: "8px"
+  };
+  
 
 export default StudentUniversityInformationBody;

@@ -18,6 +18,8 @@ module.exports = app => {
     //Get the course of a degree
     router.get("/courses/degree/:uniCode/:degreeId",courses.findDegreeCourses);
 
+    router.get("/courses/degree/teachers/:uniCode/:degreeId",courses.findTeachersInDegreeCourses);
+
     router.get("/courses/remaining/:uniCode/:degreeId/:studentId", courses.findRemainingCoursesForStudent);
     
     // Get a certain course by its uniCode, degreeId and courseId

@@ -86,6 +86,26 @@ exports.findDegreeCourses = async (req, res) => {
     }
 };
 
+
+exports.findTeachersInDegreeCourses = async (req, res) => {
+    try {
+        const { uniCode, degreeId } = req.params;
+        const course = await db.any(`
+            SELECT DISTINCT t.teacherId, t.name AS teacherName, c.*
+            FROM course c
+            JOIN teacher t ON t.teacherId = c.teacherId
+            WHERE c.uniCode = $1 AND c.degreeId = $2`, [uniCode, degreeId]);
+
+        if (!course) {
+            return res.status(404).json({ message: "Course not found" });
+        }
+
+        res.status(200).json(course);
+    } catch (err) {
+        res.status(500).json({ message: err.message || "Some error occurred" });
+    }
+};
+
 // Get one course by code
 exports.findOne = async (req, res) => {
     try {
@@ -110,38 +130,20 @@ exports.findRemainingCoursesForStudent = async (req, res) => {
     try {
         const { uniCode, degreeId, studentId } = req.params;
         const course = await db.any(`
-        WITH 
-        student_transcripts AS (
-            -- Get all courses the student has taken in the same degree
-            SELECT uniCode, degreeId, courseId
-            FROM transcript
-            WHERE studentId = $3
-        ),
-        external_transcripts AS (
-            -- Get all transcripts for the student but in different universities/degrees
-            SELECT uniCode, degreeId, courseId
-            FROM transcript
-            WHERE studentId = $3
-            AND (uniCode, degreeId) NOT IN (SELECT uniCode, degreeId FROM student_transcripts)
-        ),
-        validated_courses AS (
-            -- Find all courses validated based on previous external transcripts
-            SELECT v.uniCodeSrc AS uniCode, v.degreeIdSrc AS degreeId, v.courseIdSrc AS courseId
-            FROM validation v
-            JOIN external_transcripts et ON v.uniCodeDst = et.uniCode 
-                                          AND v.degreeIdDst = et.degreeId 
-                                          AND v.courseIdDst = et.courseId
-        )
         SELECT *
-        FROM course
-        WHERE uniCode = $1 
-        AND degreeId = $2
-        AND (uniCode, degreeId, courseId) NOT IN (
-            SELECT uniCode, degreeId, courseId FROM student_transcripts
-        )
-        AND (uniCode, degreeId, courseId) NOT IN (
-            SELECT uniCode, degreeId, courseId FROM validated_courses
-        );
+        FROM course c
+        WHERE c.uniCode = $1
+          AND c.degreeId = $2
+          AND NOT EXISTS (
+            SELECT 1
+            FROM transcript t
+            WHERE t.studentId = $3
+              AND (
+                (t.uniCode = c.uniCode AND t.degreeId = c.degreeId AND t.courseId = c.courseId)
+                OR
+                (t.uniCodeSrc = c.uniCode AND t.degreeIdSrc = c.degreeId AND t.courseIdSrc = c.courseId)
+              )
+          )        
         `, [uniCode, degreeId, studentId]);
 
         if (!course) {
