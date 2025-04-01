@@ -88,7 +88,7 @@ const StudentProfileBody = ({ studentId }) => {
           <div>
             <div style={styles.profilePicture}>🧑</div>
             <p style={styles.field}><strong>NAME:</strong> &nbsp; {students1.name}</p>
-            <p style={styles.field}><strong>DOB:</strong> &nbsp; {students1.dob}</p>
+            <p style={styles.field}><strong>DOB:</strong> &nbsp; {new Date(students1.dob).toLocaleDateString()}</p>
             <p style={styles.field}><strong>HASH (ID + PASSWORD):</strong> &nbsp; {students1.hash}</p>
             {students2.map((student, index) => (
               <div key={index}>
