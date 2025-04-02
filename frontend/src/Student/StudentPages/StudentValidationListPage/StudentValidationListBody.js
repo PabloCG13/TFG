@@ -453,10 +453,17 @@ useEffect(() => {
   const handleSearchRelatedValidations = (selCourse, selDegree) => {
   console.log("Selected course:", selCourse);
   console.log("Selected degree:", selDegree);
-  console.log("Selected course DS:", selectedCourse);
-  console.log("Selected degree DS:", selectedDegree);
+  
   	//TODO handle the API call to fetch the related validations between the selected course (origin)and the selected degree (destination)
   //TODO currently selectedCourse and selectedDegree stored as strings instead of objects, should probably change for easier use (how?)
+  fetch(`http://localhost:5000/api/validations/provisional/related/${selCourse.unicode}/${selCourse.degreeid}/${selCourse.courseid}/${selDegree.unicode}/${selDegree.degreeid}`)
+      .then((response) => response.json())
+      .then((data) => {
+      	console.log("Related validations", data);
+        setRelatedValidations(data);
+      })
+      .catch((error) => console.error(`Error fetching related validations for ${selCourse.courseid}`, error));
+  
   
   };
   const handleRequestValidation = (validation) => {
@@ -468,10 +475,10 @@ useEffect(() => {
     //setShowUniversityTable(false);
     //setShowSelectedDegreeTable(true);
 
-    fetch(`http://localhost:5000/api/universities/${uni}/degrees`)
+    fetch(`http://localhost:5000/api/universities/${uni.unicode}/degrees`)
       .then((response) => response.json())
       .then((data) => {
-      	console.log("Fetched data", data);
+      	console.log("Degrees in uni", data);
         setDegreesInUni(data);
       })
       .catch((error) => console.error(`Error fetching degrees for ${uni.unicode}`, error));
@@ -631,8 +638,12 @@ useEffect(() => {
     <div style={{ marginBottom: "20px" }}>
       <label><strong>Select a Course:</strong></label>
       <select
-        value={selectedCourse}
-        onChange={(e) => setSelectedCourse(e.target.value)}
+        value={selectedCourse ? selectedCourse.courseid : ""}
+        onChange={(e) => {const selected = courses.find(course => course.courseid === e.target.value);
+        console.log("Courses available", courses);
+        console.log("selected course", selected);
+        setSelectedCourse(selected || null);
+        }}
         style={{ marginLeft: "10px", padding: "5px" }}
       >
         <option value="">-- Choose a course --</option>
@@ -640,7 +651,7 @@ useEffect(() => {
         courses.map((course) => (
           <option
             key={`${course.unicode}-${course.degreeid}-${course.courseid}`}
-            value={`${course.unicode},${course.degreeid},${course.courseid}`}
+            value={course.courseid}
           >
             {course.name} ({course.courseid})
           </option>
@@ -654,15 +665,15 @@ useEffect(() => {
      <div style={{ marginBottom: "20px" }}>
       <label><strong>Select a Destination University:</strong></label>
       <select
-        value={selectedUniversity}
+        value={selectedUniversity ? selectedUniversity.unicode : ""}
         onChange={(e) => {
-          setSelectedDegree(""); // reset degree when uni changes
-          handleUniversityClick(e.target.value);
+          const selected = Object.values(universitiesRelated).find(uni => uni.unicode === e.target.value);
+          handleUniversityClick(selected);
         }}
         style={{ marginLeft: "10px", padding: "5px" }}
       >
         <option value="">-- Choose a university --</option>
-        {Object.values(universities).map((uni) => (
+        {Object.values(universitiesRelated).map((uni) => (
           <option key={uni.unicode} value={uni.unicode}>
             {uni.name}
           </option>
@@ -677,8 +688,10 @@ useEffect(() => {
                       {/* Dropdown for role selection */}
               <select
               onChange={(e) => {
-                const newDegreeId = e.target.value;
-                setSelectedDegree(newDegreeId);
+                const selected = degreesInUni.find(degree => degree.degreeid === e.target.value);
+                console.log("selected degree", selected);
+                console.log("Available degrees", degreesInUni);
+                setSelectedDegree(selected || null);
               }}
 
               >
@@ -686,7 +699,7 @@ useEffect(() => {
                 {degreesInUni.length > 1 ? (
                   <option value="" hidden>Select Degree</option> 
                   ) : (
-                  <option value={selectedDegree} hidden>Select Degree</option> 
+                  <option value={selectedDegree ? selectedDegree.degreeid : ""} hidden>Select Degree</option> 
                 )}
 
                 {degreesInUni.map((degree) => (
