@@ -87,7 +87,7 @@ exports.findAllProvisionalValidationsForDegreeinUni = async (req, res) => {
 };
 
 // Get all validations that belong to a certain university and degree that have not been approved/rejected
-exports.findRelatedValidationsForCourseinUni = async (req, res) => {
+exports.findRelatedValidationsForCourseinUni = async (req, res) => { //composed TODO remove the union part, create new inverse validation
     try {
         const { uniCode, degreeId, courseId, uniCodeDst, degreeIdDst } = req.params;
 

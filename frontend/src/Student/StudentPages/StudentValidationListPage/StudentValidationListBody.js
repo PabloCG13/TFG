@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom'; // Import Link to redirect
 
 const StudentValidationListBody = ({ studentId }) => {
   const [validations, setValidations] = useState([]);
+  const [activeTab, setActiveTab] = useState("ACTIVE VALIDATIONS");
   const [filteredValidations, setFilteredValidations] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [validityPeriod, setValidityPeriod] = useState('');
@@ -13,9 +14,20 @@ const StudentValidationListBody = ({ studentId }) => {
   const [universities, setUniversities] = useState({});
   const [studentTranscript, setStudentTranscript] = useState([]);
   const [studentValidates, setStudentValidates] = useState([]);
+  const [degreesInUni, setDegreesInUni] = useState([]);
   const [studentInfo, setStudentInfo] = useState('');
+  const [selectedCourse, setSelectedCourse] = useState(null);
+  const [courses, setCourses] = useState({});
+  const [relatedValidations, setRelatedValidations] = useState([]);
+  const [availableDestinations, setAvailableDestinations] = useState(null);
+  const [selectedUniversity, setSelectedUniversity] = useState(null);
+  const [selectedDegree, setSelectedDegree] = useState(null);
+  const [hasSearched, setHasSearched] = useState(false); //TODO not the best way to do this since it wont be responsive when multiple fails in a row
+  
+  const [universitiesRelated, setUniversitiesRelated] = useState({});
   const [message, setMessage] = useState(null); // State for error messages
   const location = useLocation();
+  const [refreshKey, setRefreshKey] = useState(0);
   const { participantAddress } = location.state || {};
 
   useEffect(() => {
@@ -46,8 +58,23 @@ const StudentValidationListBody = ({ studentId }) => {
   useEffect(()=>{//Get the coordinator of the student
     fetch(`http://localhost:5000/api/studies/${studentId}`)
     .then((response) => response.json())
-    .then((data) => setStudentInfo(data))
+    .then((data) =>  {
+    setStudentInfo(data);
+    const uniqueUniCodes = [...new Set(data.map(study => study.unicode))];
+
+        if (uniqueUniCodes.length > 0) {
+          fetch(`http://localhost:5000/api/universities/exclude`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ uniCodes: uniqueUniCodes })
+          })
+            .then(response => response.json())
+            .then(universities => setUniversitiesRelated(universities))
+            .catch(error => console.error("Error fetching excluded universities:", error));
+        }
+      })
     .catch((error) => console.error("Error fetching student's data:", error));
+    
   }, [studentId]);
 
   useEffect(() => {
@@ -111,8 +138,21 @@ const StudentValidationListBody = ({ studentId }) => {
         .catch(error => console.error("Error fetching student erasmus courses in transcript:", error));
     console.log("validates ",studentValidates);
     console.log("transcript ",studentTranscript);
-  }, [studentId]);
+  }, [studentId, refreshKey]);
 
+
+useEffect(() => {
+    if (studentInfo.length === 0) return;
+
+    studentInfo.forEach(({ unicode, degreeid }) => {
+      fetch(`http://localhost:5000/api/courses/remaining/${unicode}/${degreeid}/${studentId}`)
+        .then((response) => response.json())
+        .then((data) => setCourses(data))
+        .catch((error) => console.error(`Error fetching courses for ${unicode}, ${degreeid}:`, error));
+    });
+    
+  console.log("Courses with preev:", courses);
+  }, [studentInfo]);
 
   const handleNotifyPetition = async (validatid) =>{
     console.log("He pulsado el boton de Notify");
@@ -336,6 +376,9 @@ const StudentValidationListBody = ({ studentId }) => {
         // Handle the response from the database (optional)
         if (dbResponse.ok) {
           const responseJson = await dbResponse.json();
+          
+
+	  //setStudentTranscript(prevTranscript => [...prevTranscript, dbResponse]);
           console.log('Course assignment response:', responseJson);
         } else {
           throw new Error('Failed to assign course');
@@ -350,7 +393,6 @@ const StudentValidationListBody = ({ studentId }) => {
 
         const transcriptHash = await dbResponseTranscript.json();
         console.log("Got this transcript: ", transcriptHash);
-
         
     
         const teacherAddress = dstCourseAddess;
@@ -395,6 +437,7 @@ const StudentValidationListBody = ({ studentId }) => {
         console.error("Error:", error.message);
         setMessage(error.message); // Display error to the user
       }
+      setRefreshKey(prev => prev +1);
   };
 
 
@@ -407,8 +450,42 @@ const StudentValidationListBody = ({ studentId }) => {
 
 
   };
+  const handleSearchRelatedValidations = (selCourse, selDegree) => {
+  console.log("Selected course:", selCourse);
+  console.log("Selected degree:", selDegree);
+  
+  	//TODO handle the API call to fetch the related validations between the selected course (origin)and the selected degree (destination)
+  //TODO currently selectedCourse and selectedDegree stored as strings instead of objects, should probably change for easier use (how?)
+  fetch(`http://localhost:5000/api/validations/provisional/related/${selCourse.unicode}/${selCourse.degreeid}/${selCourse.courseid}/${selDegree.unicode}/${selDegree.degreeid}`)
+      .then((response) => response.json())
+      .then((data) => {
+      	console.log("Related validations", data);
+        setRelatedValidations(data);
+      })
+      .catch((error) => console.error(`Error fetching related validations for ${selCourse.courseid}`, error));
+  
+  
+  };
+  const handleRequestValidation = (validation) => {
+  	//TODO handle the API calls to request a validation for the selectedCourse and the clicked validation's destinationCourse
+  };
+   const handleUniversityClick = (uni) => {
+    setSelectedUniversity(uni);
+    setSelectedDegree(null);
+    //setShowUniversityTable(false);
+    //setShowSelectedDegreeTable(true);
 
-
+    fetch(`http://localhost:5000/api/universities/${uni.unicode}/degrees`)
+      .then((response) => response.json())
+      .then((data) => {
+      	console.log("Degrees in uni", data);
+        setDegreesInUni(data);
+      })
+      .catch((error) => console.error(`Error fetching degrees for ${uni.unicode}`, error));
+      console.log("Uni clicked", uni);
+      console.log("Courses from uni clicked", degreesInUni);
+  };
+ 
   const handleProvisional = (provisional) =>{
     if (provisional === 0) return "Pending";
     if (provisional === 1) return "Definitive";
@@ -418,71 +495,90 @@ const StudentValidationListBody = ({ studentId }) => {
     if (provisional === 5) return "Rejected";
   };
   return (
-    <div style={containerStyle}>
-      <div style={mainContentStyle}>
-        <div style={tableContainer}>
-          <h2 style={tableTitle}>Courses</h2>
+  <div style={containerStyle}>
+    <div style={mainContentStyle}>
+  <nav style={navStyle}>
+          {["ACTIVE VALIDATIONS", "RELATED VALIDATIONS"].map((tab) => (
+            <button
+              key={tab}
+              style={activeTab === tab ? { ...tabStyle, ...activeTabStyle } : tabStyle}
+              onClick={() => setActiveTab(tab)}
+            >
+              {tab}
+            </button>
+          ))}
+        </nav>
+{activeTab === "ACTIVE VALIDATIONS" && (
+      <>
+      <div style={tableContainer}>
+        <h2 style={tableTitle}>Courses</h2>
+
+        <div style={filterContainer}>
+          <input
+            type="text"
+            placeholder="Search by Course ID"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+          <button onClick={() => setShowFilters(!showFilters)}>Search Options</button>
+        </div>
+
+        {showFilters && (
           <div style={filterContainer}>
             <input
-              type="text"
-              placeholder="Search by Course ID"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              type="number"
+              placeholder="Validity Period (Year)"
+              value={validityPeriod}
+              onChange={(e) => setValidityPeriod(e.target.value)}
             />
-            <button onClick={() => setShowFilters(!showFilters)}>Search Options</button>
+            <select value={universityName} onChange={(e) => setUniversityName(e.target.value)}>
+              <option value="">Select University</option>
+              {Object.values(universities).map((university) => (
+                <option key={university.unicode} value={university.name}>
+                  {university.name}
+                </option>
+              ))}
+            </select>
           </div>
-          {showFilters && (
-            <div style={filterContainer}>
-              <input
-                type="number"
-                placeholder="Validity Period (Year)"
-                value={validityPeriod}
-                onChange={(e) => setValidityPeriod(e.target.value)}
-              />
-              <select value={universityName} onChange={(e) => setUniversityName(e.target.value)}>
-                <option value="">Select University</option>
-                {Object.values(universities).map((university) => (
-                  <option key={university.unicode} value={university.name}>
-                    {university.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-          )}
-          <table style={tableStyle}>
-            <thead>
-              <tr>
-                <th style={thStyle}>Origin Course</th>
-                <th style={thStyle}>Destination Course</th>
-                <th style={thStyle}>Validity Period</th>
-                <th style={thStyle}>University Name</th>
-                <th style={thStyle}>Status</th>
-                <th style={thStyle}>Action</th>
-                {/* TODO: Add a button that only appears if it is provisional 
-                and origin course unicode and degreeId is the same */}
+        )}
 
-                {/*add a filter to only show those destination unis that have button
-                */}
-              </tr>
-            </thead>
-            <tbody>
-              {filteredValidations.map((validatid) => {
-              	const hasTakenCourse = studentTranscript.some(
-              		(course) => course.courseid === validatid.courseiddst && course.erasmus === 1);
-              	const alreadyWaitingNotification = studentValidates.some(
-              	(v) =>
-              		v.unicodesrc === validatid.unicodesrc &&
-              		v.degreeidsrc === validatid.degreeidsrc &&
-              		v.courseidsrc === validatid.courseidsrc &&
-              		v.unicodedst === validatid.unicodedst &&
-              		v.degreeiddst === validatid.degreeiddst &&
-              		v.courseiddst === validatid.courseiddst &&
-              		v.provisional !== 1);
+        <table style={tableStyle}>
+          <thead>
+            <tr>
+              <th style={thStyle}>Origin Course</th>
+              <th style={thStyle}>Destination Course</th>
+              <th style={thStyle}>Validity Period</th>
+              <th style={thStyle}>University Name</th>
+              <th style={thStyle}>Status</th>
+              <th style={thStyle}>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {filteredValidations.map((validatid) => {
+              const hasTakenCourse = studentTranscript.some(
+                (course) =>
+                  course.courseid === validatid.courseiddst && course.erasmus === 1
+              );
+              const alreadyWaitingNotification = studentValidates.some(
+                (v) =>
+                  v.unicodesrc === validatid.unicodesrc &&
+                  v.degreeidsrc === validatid.degreeidsrc &&
+                  v.courseidsrc === validatid.courseidsrc &&
+                  v.unicodedst === validatid.unicodedst &&
+                  v.degreeiddst === validatid.degreeiddst &&
+                  v.courseiddst === validatid.courseiddst &&
+                  v.provisional !== 1
+              );
               return (
-              
                 <tr key={validatid.unicode}>
-                  <td style={tdStyle}>{validatid.unicodesrc}, {validatid.degreeidsrc}, {validatid.courseidsrc}</td>
-                  <td style={tdStyle}>{validatid.unicodedst}, {validatid.degreeiddst}, {validatid.courseiddst}</td>
+                  <td style={tdStyle}>
+                    {validatid.unicodesrc}, {validatid.degreeidsrc},{" "}
+                    {validatid.courseidsrc}
+                  </td>
+                  <td style={tdStyle}>
+                    {validatid.unicodedst}, {validatid.degreeiddst},{" "}
+                    {validatid.courseiddst}
+                  </td>
                   <td style={tdStyle}>{validatid.period}</td>
                   <td style={tdStyle}>
                     {universities[validatid.unicodedst] ? (
@@ -491,43 +587,177 @@ const StudentValidationListBody = ({ studentId }) => {
                       <div>Loading...</div>
                     )}
                   </td>
-                  <td style={tdStyle}>{handleProvisional(validatid.provisional)}</td>
+                  <td style={tdStyle}>
+                    {handleProvisional(validatid.provisional)}
+                  </td>
                   <td>
-                  	{validatid.provisional !== 5 && (
-                  	  hasTakenCourse ? (
-                  	  	<span>Already taken</span>
-                  	  ) : alreadyWaitingNotification ? (
-                  	  	<span>Pending Notification</span>
-                  	  ) : validatid.provisional === 1 ? (
-				  <button style={buttonStyle} onClick={() => handleChoosePetition(validatid)}>
-				  Choose
-				  </button>
-                  	  ) : (
-				  <button style={buttonStyle} onClick={() => handleNotifyPetition(validatid)}>
-				  Notify
-				  </button>
-			  )
-			)}
-                </td>
+                    {validatid.provisional !== 5 &&
+                      (hasTakenCourse ? (
+                        <span>Already taken</span>
+                      ) : alreadyWaitingNotification ? (
+                        <span>Pending Notification</span>
+                      ) : validatid.provisional === 1 ? (
+                        <button
+                          style={buttonStyle}
+                          onClick={() => handleChoosePetition(validatid)}
+                        >
+                          Choose
+                        </button>
+                      ) : (
+                        <button
+                          style={buttonStyle}
+                          onClick={() => handleNotifyPetition(validatid)}
+                        >
+                          Notify
+                        </button>
+                      ))}
+                  </td>
                 </tr>
               );
-              })}
-            </tbody>
-          </table>
-    
-          </div>
-          {/*onClick={()=> handleValidation() */}              
-          <Link 
-          to={`/Student/StudentPages/StudentValidationListPage/StudentValidationListAskForValidationPage/StudentValidationListAskForValidation/${studentId}`}
-          state={{ participantAddress }}  // Pass participantAddress
-          style={validationListButtonStyle}
-          onMouseOver={(e) => Object.assign(e.target.style, hoverStyle)}
-          onMouseOut={(e) => Object.assign(e.target.style, validationListButtonStyle)}
-        >
-          Ask for Validation
-        </Link>
-        </div>
+            })}
+          </tbody>
+        </table>
       </div>
+
+      <Link
+        to={`/Student/StudentPages/StudentValidationListPage/StudentValidationListAskForValidationPage/StudentValidationListAskForValidation/${studentId}`}
+        state={{ participantAddress }}
+        style={validationListButtonStyle}
+        onMouseOver={(e) => Object.assign(e.target.style, hoverStyle)}
+        onMouseOut={(e) => Object.assign(e.target.style, validationListButtonStyle)}
+      >
+        Ask for Validation
+      </Link>
+      </>
+)}
+{activeTab === "RELATED VALIDATIONS" && (
+  <div style={tableContainer}>
+    <h2 style={tableTitle}>Find Related Validations</h2>
+
+    {/* Step 1: Select a course */}
+    <div style={{ marginBottom: "20px" }}>
+      <label><strong>Select a Course:</strong></label>
+      <select
+        value={selectedCourse ? selectedCourse.courseid : ""}
+        onChange={(e) => {const selected = courses.find(course => course.courseid === e.target.value);
+        console.log("Courses available", courses);
+        console.log("selected course", selected);
+        setSelectedCourse(selected || null);
+        }}
+        style={{ marginLeft: "10px", padding: "5px" }}
+      >
+        <option value="">-- Choose a course --</option>
+        {Array.isArray(courses) && courses.length > 0 ? (
+        courses.map((course) => (
+          <option
+            key={`${course.unicode}-${course.degreeid}-${course.courseid}`}
+            value={course.courseid}
+          >
+            {course.name} ({course.courseid})
+          </option>
+        ))
+        ) : (
+        <option disabled> No courses available</option>
+        )}
+      </select>
+    </div>
+
+     <div style={{ marginBottom: "20px" }}>
+      <label><strong>Select a Destination University:</strong></label>
+      <select
+        value={selectedUniversity ? selectedUniversity.unicode : ""}
+        onChange={(e) => {
+          const selected = Object.values(universitiesRelated).find(uni => uni.unicode === e.target.value);
+          handleUniversityClick(selected);
+        }}
+        style={{ marginLeft: "10px", padding: "5px" }}
+      >
+        <option value="">-- Choose a university --</option>
+        {Object.values(universitiesRelated).map((uni) => (
+          <option key={uni.unicode} value={uni.unicode}>
+            {uni.name}
+          </option>
+        ))}
+      </select>
+    </div>
+
+    {/* Step 2: Select degree based on selected university */}
+    {selectedUniversity && degreesInUni.length > 0 && ( 
+        <div style={{ marginBottom: "20px" }}>
+        <label><strong>Select a Degree:</strong></label>
+                      {/* Dropdown for role selection */}
+              <select
+              onChange={(e) => {
+                const selected = degreesInUni.find(degree => degree.degreeid === e.target.value);
+                console.log("selected degree", selected);
+                console.log("Available degrees", degreesInUni);
+                setSelectedDegree(selected || null);
+              }}
+
+              >
+                {/* If there is more than one degree, invisible Default Option is "". If not is the degreeid of the only degree on the list. */}
+                {degreesInUni.length > 1 ? (
+                  <option value="" hidden>Select Degree</option> 
+                  ) : (
+                  <option value={selectedDegree ? selectedDegree.degreeid : ""} hidden>Select Degree</option> 
+                )}
+
+                {degreesInUni.map((degree) => (
+                  <option key={degree.degreeid} value={degree.degreeid}>
+                    {degree.name}
+                  </option>
+                ))}
+              </select>
+      </div>
+    )}
+
+    {/* Step 3: Show action button if both selected */}
+    {selectedCourse && selectedDegree && (
+      <button
+        onClick={() => {
+        setHasSearched(true);
+        handleSearchRelatedValidations(selectedCourse, selectedDegree)
+        }}
+        style={buttonStyle}
+      >
+        Search Related Validations
+      </button>
+    )}
+    {/* Step 4: Display results in a table or a message if no results were found */}
+    {hasSearched && relatedValidations && (
+    	relatedValidations.length > 0 ? (
+    	<table style={{ width: "100%", marginTop: "20px", borderCollapse: "collapse" }}>
+    	 <thead>
+    	  <tr>
+    	   <th style={thStyle}>Destination Course ID</th>
+    	   <th style={thStyle}>Validity Period</th>
+    	   <th style={thStyle}>Status</th>
+    	   <th style={thStyle}>Action</th>
+    	  </tr>
+    	 </thead>
+    	 <tbody>
+    	  {relatedValidations.map((validation, index) => (
+    	   <tr key={index}>
+    	    <td style={tdStyle}>{validation.courseiddst}</td>
+    	    <td style={tdStyle}>{validation.period}</td>
+    	    <td style={tdStyle}>{validation.provisional}</td>
+    	    <td style={tdStyle}>
+    	    	<button onCLick={() => handleRequestValidation(validation)} style={buttonStyle}>Request</button>
+    	    </td>
+    	   </tr>
+    	  ))}
+    	 </tbody>
+    	</table>
+    ) : (
+    	 <p style={{ marginTop:"20px", color: "red" }}>No related validations found for this course and that destination degree.</p>
+    	)
+       )}	    
+  </div>
+)}
+
+
+    </div>
+  </div>
   );
 };
 
@@ -605,7 +835,9 @@ const buttonStyle = {
   transition: "background 0.3s ease, transform 0.2s ease",
   textDecoration: "none"
 };
-
+const navStyle = { display: "flex", justifyContent: "space-around", padding: "10px", backgroundColor: "#222" };
+const tabStyle = { color: "#fff", background: "none", border: "none", padding: "10px", cursor: "pointer" };
+const activeTabStyle = { color: "yellow", fontWeight: "bold" };
 const lockIconStyle = {
   width: '20px',
   height: '20px',

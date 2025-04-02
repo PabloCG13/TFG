@@ -382,6 +382,7 @@ const CoordinatorTeacherConfirmValidationBody = ({ teacherId }) => {
         return response.json();
       })
       .then(data => {
+        setRefreshKey(prev => prev + 1);
         console.log("Successfully updated provisional:", data);
         setFilteredValidations(prevValidations => prevValidations.map(v =>
 	      	v.unicodesrc === valid.unicodesrc &&

@@ -647,7 +647,7 @@ const addCourse = async (course) => {
                   <tr key={student.studentid}>
                   <td>{student.name || "N/A"}</td>
                   <td>{student.studentid}</td>
-                  <td>{student.dob}</td>
+                  <td>{new Date(student.dob).toLocaleDateString()}</td>
                   {/*<td>{student.degreeid}</td>*/}
                   <td>
                   <button onClick={() => handleAssignCourse(student)}> Assign Course </button>
