@@ -335,18 +335,35 @@ const UniversityHomeBody = ({ uniCode }) => {
         body: JSON.stringify({
             uniCode: uniCode, 
             degreeId: degree.degreeid, 
-            name: degree.name,
-            teacherId: degree.teacherid
+            name: degree.name
         }),
     });
 
     const dbData = await dbResponse.json();
     console.log(dbData);
     if (dbResponse.ok) {
+      const dbCoordResponse = await fetch("http://localhost:5000/api/coordinatesdegrees", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+            uniCode: uniCode, 
+            degreeId: degree.degreeid, 
+            teacherId: degree.teacherid
+          }),
+      });
+
+      const dbCoordData = await dbCoordResponse.json();
+      console.log(dbCoordData);
+      if(dbCoordResponse.ok){
         setMessage(`Degree registered successfully! ID: ${dbData.degreeid}`);
         console.log("Stored Degree:", dbData);
         setRefreshKey(prev => prev +1);
         return true;
+      } else {
+        setMessage(`Failed to create a new entry in the Database error`);
+        console.error("Database error:", dbData.error);
+        return false;
+      }
     } else {
         setMessage(`Failed to create a new entry in the Database error`);
         console.error("Database error:", dbData.error);

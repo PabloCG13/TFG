@@ -23,9 +23,17 @@ CREATE TABLE IF NOT EXISTS degree (
     uniCode VARCHAR(4) NOT NULL,
     degreeId VARCHAR(30) NOT NULL,
     name VARCHAR(50) NOT NULL,
-    teacherId VARCHAR(4) NOT NULL,
     PRIMARY KEY (uniCode, degreeId),
-    FOREIGN KEY (uniCode) REFERENCES university (uniCode) ON DELETE CASCADE,
+    FOREIGN KEY (uniCode) REFERENCES university (uniCode) ON DELETE SET NULL
+);
+
+-- Create Coordinates Degree Table
+CREATE TABLE IF NOT EXISTS coordinatesdegree (
+    teacherId VARCHAR(4) NOT NULL,
+    uniCode VARCHAR(4),
+    degreeId VARCHAR(30),
+    PRIMARY KEY (teacherId),
+    FOREIGN KEY (uniCode, degreeId) REFERENCES degree (uniCode, degreeId) ON DELETE CASCADE,
     FOREIGN KEY (teacherId) REFERENCES teacher (teacherId) ON DELETE SET NULL
 );
 
@@ -70,8 +78,6 @@ CREATE TABLE IF NOT EXISTS validation (
     FOREIGN KEY (uniCodeSrc, degreeIdSrc, courseIdSrc) REFERENCES course (uniCode, degreeId, courseId) ON DELETE CASCADE,
     FOREIGN KEY (uniCodeDst, degreeIdDst, courseIdDst) REFERENCES course (uniCode, degreeId, courseId) ON DELETE CASCADE
 );
-
-
 
 
 -- Create transcript table
@@ -138,9 +144,14 @@ SELECT 'T001', 'John Doe', TO_TIMESTAMP('01/01/2025 12:00:00', 'DD/MM/YYYY HH24:
 WHERE NOT EXISTS (SELECT 1 FROM teacher WHERE teacherId = 'T001');
 
 -- Insert degree if not exists
-INSERT INTO degree (uniCode, degreeId, name, teacherId)
-SELECT 'U001', 'CS101', 'Computer Science', 'T001'
+INSERT INTO degree (uniCode, degreeId, name)
+SELECT 'U001', 'CS101', 'Computer Science'
 WHERE NOT EXISTS (SELECT 1 FROM degree WHERE uniCode = 'U001' AND degreeId = 'CS101');
+
+ -- Insert coordinatesdegree if not exists
+INSERT INTO coordinatesdegree (teacherId, uniCode, degreeId)
+SELECT 'T001', 'U001', 'CS101'
+WHERE NOT EXISTS (SELECT 1 FROM coordinatesdegree WHERE teacherId = 'T001');
 
 -- Insert student if not exists
 INSERT INTO student (studentId, name, dob, dni, lastAccess, transcriptHash, hash)

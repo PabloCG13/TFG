@@ -81,43 +81,72 @@ exports.findUniversitiesExcluding = async (req, res) => {
 };
 
 
-// Get all teachers teaching at a given university
+// Get all teachers teaching or coordinating at a given university
 exports.getTeachers = async (req, res) => {
     try {
-        const { uniCode } = req.params;
-        const teachers = await db.any(`
-            SELECT DISTINCT t.teacherId, t.name, t.lastAccess, c.courseId, c.name as courseName
-            FROM teacher t
-            JOIN course c ON t.teacherId = c.teacherId
-            WHERE c.uniCode = $1
-            UNION
-            SELECT DISTINCT t.teacherId, t.name, t.lastAccess, d.degreeId, d.name as degreeName
-            FROM teacher t
-            JOIN degree d ON t.teacherId = d.teacherId
-            WHERE d.uniCode = $1;
-        `, [uniCode]);
-
-        res.status(200).json(teachers);
+      const { uniCode } = req.params;
+  
+  
+      const teachers = await db.any(`
+        -- Teachers who teach courses at the university
+        SELECT DISTINCT 
+          t.teacherId, 
+          t.name, 
+          t.lastAccess, 
+          c.courseId, 
+          c.name AS courseName,
+          NULL AS degreeId,
+          NULL AS degreeName
+        FROM teacher t
+        JOIN course c ON t.teacherId = c.teacherId
+        WHERE c.uniCode = $1
+  
+  
+        UNION
+  
+  
+        -- Teachers who coordinate degrees at the university
+        SELECT DISTINCT 
+          t.teacherId, 
+          t.name, 
+          t.lastAccess, 
+          NULL AS courseId, 
+          NULL AS courseName,
+          d.degreeId,
+          d.name AS degreeName
+        FROM teacher t
+        JOIN coordinatesdegree cd ON t.teacherId = cd.teacherId
+        JOIN degree d ON cd.uniCode = d.uniCode AND cd.degreeId = d.degreeId
+        WHERE cd.uniCode = $1;
+      `, [uniCode]);
+  
+  
+      res.status(200).json(teachers);
     } catch (err) {
-        res.status(500).json({ message: err.message || "Some error occurred" });
+      res.status(500).json({ message: err.message || "Some error occurred" });
     }
-};
+  };
+  
 
-// Get all degrees offered by a given university
+// Get all degrees offered by a given university, including coordinator teacherId
 exports.getDegrees = async (req, res) => {
     try {
-        const { uniCode } = req.params;
-        const degrees = await db.any(`
-            SELECT d.unicode, d.degreeId, d.name, d.teacherId
-            FROM degree d
-            WHERE d.uniCode = $1;
-        `, [uniCode]);
-
-        res.status(200).json(degrees);
+      const { uniCode } = req.params;
+  
+      const degrees = await db.any(`
+        SELECT d.uniCode, d.degreeId, d.name, cd.teacherId
+        FROM degree d
+        LEFT JOIN coordinatesdegree cd
+          ON d.uniCode = cd.uniCode AND d.degreeId = cd.degreeId
+        WHERE d.uniCode = $1;
+      `, [uniCode]);
+  
+      res.status(200).json(degrees);
     } catch (err) {
-        res.status(500).json({ message: err.message || "Some error occurred" });
+      res.status(500).json({ message: err.message || "Some error occurred" });
     }
-};
+  };
+  
 
 // Get all courses offered by a given university
 exports.getCourses = async (req, res) => {

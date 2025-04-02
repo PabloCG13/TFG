@@ -26,6 +26,7 @@ app.get("/", (req, res) => {
 require("./routes/universities.routes")(app);
 require("./routes/teachers.routes")(app);
 require("./routes/degrees.routes")(app);
+require("./routes/coordinatesdegrees.routes")(app);
 require("./routes/students.routes")(app);
 require("./routes/courses.routes")(app);
 require("./routes/validations.routes")(app);
