@@ -8,12 +8,16 @@ module.exports = app => {
     router.get("/validations/", validations.findAll);
 
     router.get("/validations/:uniCode/:degreeId", validations.findAllValidationsForDegreeinUni);
-  
+    
+    router.get("/validations/tokens/:teacherId", validations.findAllValidationsConfirmedForDegreeinUni);
+
     router.get("/validations/provisionals/:uniCode/:degreeId", validations.findAllProvisionalValidationsForDegreeinUni);
 
     router.get("/validations/provisional/notification/:uniCode/:degreeId", validations.findAllNewProvisionalValidationsForDegreeinUni);
 
-    router.get("/validations/provisional/related/:uniCode/:degreeId/:courseId/:uniCodeDst/:degreeIdDst", validations.findRelatedValidationsForCourseinUni);
+    router.get("/validations/provisional/composed/:uniCode/:degreeId/:courseId/:uniCodeDst/:degreeIdDst", validations.findComposedValidationsForCourseinUni);
+
+    router.get("/validations/provisional/inversed/:uniCode/:degreeId/:courseId/:uniCodeDst/:degreeIdDst", validations.findInverseValidationsForCourseinUni);
 
     router.get("/validations/provisional/requests/:uniCode/:degreeId/:courseId", validations.findPendingRequestsForCourse);
 

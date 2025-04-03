@@ -33,6 +33,10 @@ const UniversityHomeBody = ({ uniCode }) => {
   const [selectedCourseId, setSelectedCourseId] = useState("");
   const [selectedTeacherId, setSelectedTeacherId] = useState("");
   const [selectedTeacherRole, setSelectedTeacherRole] = useState("");
+
+  const [showTeacherModal, setShowTeacherModal] = useState(false);
+  const [teacher1, setTeacher1] = useState("");
+  const [teacher2, setTeacher2] = useState("");
   
   const [refreshKey, setRefreshKey] = useState(0);
   const [refreshKey2, setRefreshKey2] = useState(0);
@@ -75,7 +79,7 @@ const UniversityHomeBody = ({ uniCode }) => {
     if (!uniCode) return;
     fetch(`http://localhost:5000/api/universities/${uniCode}/teachers`)
     .then((response) => response.json())
-    .then((data) => setTeachers(data))
+    .then((data) =>{console.log("Teachers", data); setTeachers(data);})
     .catch((error) => console.error("Error fetching teachers:", error));
   }, [uniCode,refreshKey]);
 
@@ -632,8 +636,86 @@ const addCourse = async (course) => {
     setSelectedStudent({
       studentId: student.studentid,
       studentName: student.name,
+      degreeid: student.degreeid
     });
   };
+
+  const handleTransferValidations = async(teacher1, teacher2) => {
+    const dbResponseTeacherSrc = await fetch(`http://localhost:5000/api/addresses/participant/${teacher1.teacherid}`);
+  
+    if (!dbResponseTeacherSrc.ok) {
+        throw new Error(`Failed to fetch teacher address. Status: ${dbResponseTeacherSrc.status}`);
+    }
+
+    const dbDataSrc = await dbResponseTeacherSrc.json();
+
+    if (!dbDataSrc.addressid) {
+        setMessage("No blockchain address found for this user. Please contact support.");
+        console.error("Database error:", dbDataSrc);
+        return; // Stop execution
+    }
+
+    const teacherAddressSrc = dbDataSrc.addressid;
+    console.log("Fetched Address from DB:", teacherAddressSrc);
+
+    const dbResponseTeacherDst = await fetch(`http://localhost:5000/api/addresses/participant/${teacher2.teacherid}`);
+  
+    if (!dbResponseTeacherDst.ok) {
+        throw new Error(`Failed to fetch teacher address. Status: ${dbResponseTeacherDst.status}`);
+    }
+
+    const dbDataDst = await dbResponseTeacherDst.json();
+
+    if (!dbDataDst.addressid) {
+        setMessage("No blockchain address found for this user. Please contact support.");
+        console.error("Database error:", dbDataDst);
+        return; // Stop execution
+    }
+
+    const teacherAddressDst = dbDataDst.addressid;
+    console.log("Fetched Address from DB:", teacherAddressDst);
+
+
+    const dbResponseTokens = await fetch(`http://localhost:5000/api/validations/tokens/${teacher1.teacherid}`);
+  
+    if (!dbResponseTokens.ok) {
+        throw new Error(`Failed to fetch teacher address. Status: ${dbResponseTokens.status}`);
+    }
+
+    const dbDataTokens = await dbResponseTokens.json();
+
+    if (!dbDataTokens.addressid) {
+        setMessage("No blockchain address found for this user. Please contact support.");
+        console.error("Database error:", dbDataTokens);
+        return; // Stop execution
+    }
+
+    const tokens = dbDataTokens.addressid;
+    console.log("Fetched Address from DB:", tokens);
+    
+    try{
+      const teacherTranscriptResponse = await fetch("http://localhost:4000/transferValidation", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            degreeAddr: teacherAddressSrc,
+              uniAddress: universityAddress,
+              newDegreeAddr: teacherAddressDst,
+              id: tokens
+          }),
+      });
+  
+      if (!teacherTranscriptResponse.ok) {
+          throw new Error(`Failed to add teacher to transcript. Status: ${teacherTranscriptResponse.status}`);
+      }
+  
+      const teacherTranscriptData = await teacherTranscriptResponse.json();
+      console.log("Teacher successfully added to transcript:", teacherTranscriptData);
+    }catch (error) {
+      console.error("Error:", error.message);
+      setMessage(error.message); // Display error to the user
+    }
+  }
 
 
   return (
@@ -690,12 +772,15 @@ const addCourse = async (course) => {
                   <tr key={teacher.teacherid}>
                     <td>{teacher.name || "N/A"}</td>
                     <td>{teacher.teacherid}</td>
-                    <td>{teacher.coursename}</td>
-                    <td>{teacher.courseid}</td>
+                    <td>{teacher.coursename || teacher.degreename}</td>
+                    <td>{teacher.courseid || teacher.degreeid}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
+            <button onClick={()=> setShowTeacherModal(true)}>
+                  Transfer Validations
+            </button>
           </>
         )}
 
@@ -812,7 +897,8 @@ const addCourse = async (course) => {
               onChange={(e) => {
                 const selectedCourseId = e.target.value; 
                 const selectedCourse = courses.find(course => course.courseid === selectedCourseId); 
-
+                console.log("courses", courses);
+                console.log("Stu", selectedStudent);
                 if (selectedCourse) { 
                   setSelectedDegreeId(selectedCourse.degreeid); 
                   setSelectedCourseId(selectedCourseId);
@@ -831,7 +917,9 @@ const addCourse = async (course) => {
                   <option value={selectedCourseId} hidden>Select a Course</option> 
                 )}
 
-                {courses.map((course) => (
+                {courses
+                .filter(course => course.degreeid === selectedStudent.degreeid)
+                .map((course) => (
                   <option key={course.courseid} value={course.courseid}>
                     {course.name}
                   </option>
@@ -984,6 +1072,73 @@ const addCourse = async (course) => {
             </div>
           </div>
         )}
+
+        {showTeacherModal && (
+          <div style={modalStyle}>
+            <div style={formStyle}>
+              <h3 style={formTitleStyle}>Transfer Validations between Teachers</h3>
+
+
+              <label>Current Coordinator:</label>
+              <select
+                value={teacher1}
+                onChange={(e) => setTeacher1(e.target.value)}
+                style={inputStyle}
+              >
+                <option value="" disabled hidden>Select Current Coordinator</option>
+                {teachers.map((t) => (
+                  <option key={t.teacherid} value={t.teacherid}>
+                    {t.name}
+                  </option>
+                ))}
+              </select>
+
+
+              <label style={{ marginTop: '1rem' }}>New Coordinator:</label>
+              <select
+                value={teacher2}
+                onChange={(e) => setTeacher2(e.target.value)}
+                style={inputStyle}
+              >
+                <option value="" disabled hidden>Select New Coordinator</option>
+                {teachers.map((t) => (
+                  <option key={t.teacherid} value={t.teacherid}>
+                    {t.name}
+                  </option>
+                ))}
+              </select>
+
+
+              <div style={{ marginTop: '1rem' }}>
+
+
+              <button
+              onClick={() => {
+                // Wrap in a try/catch to handle async errors
+                handleTransferValidations(
+                  teachers.find(t => t.teacherid === teacher1),
+                  teachers.find(t => t.teacherid === teacher2)
+                ).catch((err) => {
+                  console.error("Validation transfer failed:", err);
+                });
+
+
+                // Optionally close modal
+                setShowTeacherModal(false);
+              }}
+
+
+                >
+                  Accept
+                </button>
+                <button onClick={() => setShowTeacherModal(false)} style={{ marginLeft: '1rem' }}>
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
 
         {showDegreeForm && (
           <div style={modalStyle}>

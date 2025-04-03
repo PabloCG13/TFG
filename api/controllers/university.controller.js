@@ -119,7 +119,7 @@ exports.getTeachers = async (req, res) => {
         JOIN degree d ON cd.uniCode = d.uniCode AND cd.degreeId = d.degreeId
         WHERE cd.uniCode = $1;
       `, [uniCode]);
-  
+        console.log("teachers",teachers);
   
       res.status(200).json(teachers);
     } catch (err) {

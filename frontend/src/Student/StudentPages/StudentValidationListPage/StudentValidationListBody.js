@@ -456,19 +456,19 @@ useEffect(() => {
   
   	//TODO handle the API call to fetch the related validations between the selected course (origin)and the selected degree (destination)
   //TODO currently selectedCourse and selectedDegree stored as strings instead of objects, should probably change for easier use (how?)
-  fetch(`http://localhost:5000/api/validations/provisional/related/${selCourse.unicode}/${selCourse.degreeid}/${selCourse.courseid}/${selDegree.unicode}/${selDegree.degreeid}`)
+  fetch(`http://localhost:5000/api/validations/provisional/composed/${selCourse.unicode}/${selCourse.degreeid}/${selCourse.courseid}/${selDegree.unicode}/${selDegree.degreeid}`)
       .then((response) => response.json())
       .then((data) => {
       	console.log("Related validations", data);
         setRelatedValidations(data);
       })
       .catch((error) => console.error(`Error fetching related validations for ${selCourse.courseid}`, error));
-  
-  
   };
+
   const handleRequestValidation = (validation) => {
   	//TODO handle the API calls to request a validation for the selectedCourse and the clicked validation's destinationCourse
   };
+  
    const handleUniversityClick = (uni) => {
     setSelectedUniversity(uni);
     setSelectedDegree(null);

@@ -47,6 +47,30 @@ exports.findAllValidationsForDegreeinUni = async (req, res) => {
 };
 
 
+// Get all confirmed validations that belong to a certain university and degree
+exports.findAllValidationsConfirmedForDegreeinUni = async (req, res) => {
+    try {
+        const { teacherId } = req.params;
+        const validations = await db.any(`
+        SELECT v.* FROM validation v
+        JOIN
+        coordinatesdegree cd
+        ON 
+            cd.unicode = v.uniCodeSrc 
+            AND cd.degreeid = v.degreeIdSrc
+        WHERE (cd.teacherId = $1 AND v.provisional = 1);`
+        , [teacherId]);
+
+        if (!validations) {
+            return res.status(404).json({ message: "Validation not found" });
+        }
+
+        res.status(200).json(validations);
+    } catch (err) {
+        res.status(500).json({ message: err.message || "Some error occurred" });
+    }
+};
+
 // Get all validations that belong to a certain university and degree that have not been approved/rejected
 exports.findAllProvisionalValidationsForDegreeinUni = async (req, res) => {
     try {
@@ -87,7 +111,7 @@ exports.findAllProvisionalValidationsForDegreeinUni = async (req, res) => {
 };
 
 // Get all validations that belong to a certain university and degree that have not been approved/rejected
-exports.findRelatedValidationsForCourseinUni = async (req, res) => { //composed TODO remove the union part, create new inverse validation
+exports.findComposedValidationsForCourseinUni = async (req, res) => { 
     try {
         const { uniCode, degreeId, courseId, uniCodeDst, degreeIdDst } = req.params;
 
@@ -109,24 +133,36 @@ exports.findRelatedValidationsForCourseinUni = async (req, res) => { //composed 
                 AND v1.courseIdSrc = $3
                 AND v2.uniCodeDst = $4
                 AND v2.degreeIdDst = $5
-          )
-          UNION
-          (
+          );   
+        `, [uniCode, degreeId, courseId, uniCodeDst, degreeIdDst]);
+
+
+        if (!validations) {
+            return res.status(404).json({ message: "No validations found" });
+        }
+
+
+        res.status(200).json(validations);
+    } catch (err) {
+        res.status(500).json({ message: err.message || "Some error occurred" });
+    }
+};
+
+exports.findInverseValidationsForCourseinUni = async (req, res) => { //composed TODO remove the union part, create new inverse validation
+    try {
+        const { uniCode, degreeId, courseId, uniCodeDst, degreeIdDst } = req.params;
+
+        const validations = await db.any(`
             SELECT 
-                v2.*, v1.*
+                v1.*
             FROM 
                 validation v1
-            JOIN 
-                validation v2
-                ON v1.uniCodeDst = v2.uniCodeSrc
-                AND v1.degreeIdDst = v2.degreeIdSrc
-                AND v1.courseIdDst = v2.courseIdSrc
             WHERE 
                 v1.uniCodeSrc = $4
                 AND v1.degreeIdSrc = $5
-                AND v2.courseIdDst = $3
-                AND v2.uniCodeSrc = $1
-                AND v2.degreeIdSrc = $2
+                AND v1.courseIdDst = $3
+                AND v1.uniCodeSrc = $1
+                AND v1.degreeIdSrc = $2
           );   
         `, [uniCode, degreeId, courseId, uniCodeDst, degreeIdDst]);
 
