@@ -101,6 +101,7 @@ const StudentUniversityInformationBody = ({ studentId }) => {
                             degreeId: degreeId,
                             name: degreeData.name,
                             teacherName: teacherData.name,
+                            teacherId: teacherData.teacherid,
                             courseTeachers: courseData
                         });
                     } catch (error) {
@@ -116,11 +117,12 @@ const StudentUniversityInformationBody = ({ studentId }) => {
         fetchDegrees();
     }, [degreesByUniversity]); // Only run when degree list is first set
 
-const isCourseTaken = (course) => {
-	console.log("Course parameter:", course);
-	console.log("Student's transcript:", studentTranscript);
-	return (studentTranscript.some(transcript => (transcript.unicode === course.unicode && transcript.degreeid === course.degreeid && transcript.courseid === course.courseid) || (transcript.unicodesrc === course.unicode && transcript.degreeidsrc === course.degreeid && transcript.courseidsrc === course.courseid)));
-};
+    const isCourseTaken = (course) => {
+        console.log("Course parameter:", course);
+        console.log("Student's transcript:", studentTranscript);
+        if(!Array.isArray(studentTranscript)) return false;
+        return (studentTranscript.some(transcript => (transcript.unicode === course.unicode && transcript.degreeid === course.degreeid && transcript.courseid === course.courseid) || (transcript.unicodesrc === course.unicode && transcript.degreeidsrc === course.degreeid && transcript.courseidsrc === course.courseid)));
+    };
 		
 
 
@@ -140,8 +142,8 @@ const isCourseTaken = (course) => {
                         {degreeDetailsByUniversity[uni.unicode]?.map(degree => (
                             <li key={degree.degreeid}>
 
-                                <strong>{degree.name}</strong> <br />
-                                - Coordinator: {degree.teacherName}  <br />
+                                <strong>{degree.name} ({degree.degreeId})</strong> <br />
+                                - Coordinator: {degree.teacherName} ({degree.teacherId})<br />
                                 <table style={{ borderCollapse: "collapse", width: "100%", marginTop: "10px" }}>
                                 <thead>
                                     <tr>
