@@ -60,6 +60,7 @@ const StudentValidationListBody = ({ studentId }) => {
     .then((response) => response.json())
     .then((data) =>  {
     setStudentInfo(data);
+    console.log("StudentInfo", data);
     const uniqueUniCodes = [...new Set(data.map(study => study.unicode))];
 
         if (uniqueUniCodes.length > 0) {
@@ -508,7 +509,7 @@ useEffect(() => {
             </button>
           ))}
         </nav>
-{activeTab === "ACTIVE VALIDATIONS" && (
+{activeTab === "ACTIVE VALIDATIONS" && studentInfo &&(
       <>
       <div style={tableContainer}>
         <h2 style={tableTitle}>Courses</h2>
@@ -573,7 +574,7 @@ useEffect(() => {
                 <tr key={validatid.unicode}>
                   <td style={tdStyle}>
                     {validatid.unicodesrc}, {validatid.degreeidsrc},{" "}
-                    {validatid.courseidsrc}
+                    {validatid.courseidsrc} 
                   </td>
                   <td style={tdStyle}>
                     {validatid.unicodedst}, {validatid.degreeiddst},{" "}
@@ -591,8 +592,10 @@ useEffect(() => {
                     {handleProvisional(validatid.provisional)}
                   </td>
                   <td>
-                    {validatid.provisional !== 5 &&
-                      (hasTakenCourse ? (
+                  {(validatid.provisional !== 5 &&
+                    studentInfo[0].degreeid === validatid.degreeidsrc &&
+                    studentInfo[0].unicode === validatid.unicodesrc) ? (
+                      hasTakenCourse ? (
                         <span>Already taken</span>
                       ) : alreadyWaitingNotification ? (
                         <span>Pending Notification</span>
@@ -610,8 +613,12 @@ useEffect(() => {
                         >
                           Notify
                         </button>
-                      ))}
-                  </td>
+                      )
+                  ) : (
+                    <span style={{ color: "#aaa" }}>No action available</span> // si quieres un mensaje gris, opcional
+                  )}
+                </td>
+
                 </tr>
               );
             })}

@@ -51,13 +51,15 @@ exports.findAllValidationsForDegreeinUni = async (req, res) => {
 exports.findAllValidationsConfirmedForDegreeinUni = async (req, res) => {
     try {
         const { teacherId } = req.params;
+        console.log("TID",teacherId);
         const validations = await db.any(`
-        SELECT v.* FROM validation v
+        SELECT v.* 
+        FROM validation v
         JOIN
         coordinatesdegree cd
         ON 
-            cd.unicode = v.uniCodeSrc 
-            AND cd.degreeid = v.degreeIdSrc
+            cd.uniCode = v.uniCodeSrc 
+            AND cd.degreeId = v.degreeIdSrc
         WHERE (cd.teacherId = $1 AND v.provisional = 1);`
         , [teacherId]);
 
