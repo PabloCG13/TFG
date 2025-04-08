@@ -226,7 +226,7 @@ const CoordinatorTeacherHomeHeader = ({teacherId}) => {
               Student <strong>{confirmation.studentid}</strong> has been graded by Erasmus teacher {confirmation.teacherid} on subject {confirmation.courseid}
               <Link 
                 to={`/CoordinatorTeacher/CoordinatorTeacherPages/CoordinatorTeacherConfirmMarksPage/CoordinatorTeacherConfirmMarks/${teacherId}`} 
-                state={{ confirmation }}
+                state={{ participantAddress }}
                 style={viewDetailsButtonStyle}
                                   onMouseOver={(e) => Object.assign(e.target.style, hoverStyle)}
                                   onMouseOut={(e) => Object.assign(e.target.style, buttonStyle)}

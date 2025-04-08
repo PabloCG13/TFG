@@ -94,7 +94,7 @@ const handleConfirm = async () => {
   // Actualizar la nota en el estado de students sin hacer un nuevo fetch
   
   try {
-    const prov = selectedStudent.erasmus === 0 ? 1 : 0;
+    const prov = 1;
 
 
     const dbResponseAddress = await fetch(`http://localhost:5000/api/addresses/participant/${selectedStudent.studentid}`);
@@ -134,7 +134,7 @@ const handleConfirm = async () => {
 
 
     console.log("Updated transcript:", updatedTranscript);
-
+    console.log("Participant", participantAddress);
 
     // Step 2: Modify transcript on the blockchain
     const transcriptResponse = await fetch("http://localhost:4000/modifyTranscript", {
@@ -147,7 +147,7 @@ const handleConfirm = async () => {
         type: 1,
       }),
     });
-
+   
     if (!transcriptResponse.ok) {
       throw new Error(`Failed to modify transcript. Status: ${transcriptResponse.status}`);
     }
@@ -203,13 +203,6 @@ const handleConfirm = async () => {
 
 // TODO check it works properly. The part needed is not done yet
 const handleFinalConfirm = async (selStudent) => {
-  // Actualizar la nota en el estado de students sin hacer un nuevo fetch
-  setStudents(prevStudents => prevStudents.map(student => {
-    if (student.studentid === selStudent.studentid) {
-      return { ...student, mark: selStudent.mark }; // Actualiza solo la nota del estudiante modificado
-    }
-    return student;
-  }));
 
   try {
     const dbResponse = await fetch(`http://localhost:5000/api/transcripts/${selStudent.unicode}/${selStudent.degreeid}/${selStudent.courseid}/${selStudent.studentid}/${selStudent.academicyear}`, {
@@ -243,6 +236,7 @@ const handleFinalConfirm = async (selStudent) => {
 
     const transcriptHash = await dbResponseTranscript.json();
     console.log("Got this transcript: ", transcriptHash);
+    console.log("Participant", participantAddress);
 
     // Step 2: Modify transcript on the blockchain
     const transcriptResponse = await fetch("http://localhost:4000/modifyTranscript", {
@@ -276,7 +270,13 @@ const handleFinalConfirm = async (selStudent) => {
 
     const updateData = await updateResponse.json();
     console.log(`Student ${selStudent.studentid} updated successfully with transcriptHash:`, updateData);
-
+      // Actualizar la nota en el estado de students sin hacer un nuevo fetch
+    setStudents(prevStudents => prevStudents.map(student => {
+      if (student.studentid === selStudent.studentid) {
+        return { ...student, mark: selStudent.mark, provisional: 1 }; // Actualiza solo la nota del estudiante modificado
+      }
+      return student;
+    }));
   } catch (error) {
     console.error("Error:", error);
     setMessage("There was an error updating the grade.");
@@ -422,7 +422,10 @@ const handleFinalConfirm = async (selStudent) => {
                     {student.provisional === 0 ? "🔓" : "🔒"} 
                   </span>
                 </td>
-                {(student.mark !== null && student.provisional !== 1)  ? (
+                {(student.mark === null && student.provisional !== 1) ? (
+                    <span style={{ color: "black", fontWeight: "bold" }}>Waiting for Mark</span>
+                ):((student.mark !== null && student.provisional !== 1)
+                  ?(
                   <>
                   <td>
                   <button style={buttonStyle} onClick={() => openModal(student)}>
@@ -437,7 +440,7 @@ const handleFinalConfirm = async (selStudent) => {
                   </>
                 ) : (
                   <span style={{ color: "green", fontWeight: "bold" }}>Mark Confirmed</span>
-                )}
+                ))}
                 
               </tr>
             ))}

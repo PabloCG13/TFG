@@ -19,6 +19,7 @@ contract tfg {
     mapping(address => string) public universityToHash;
     mapping(address => Transcript) public studentToRecord;
     address private _owner;
+    int public isInitialized = 0;
 
     constructor() {
         _owner = msg.sender;
@@ -278,7 +279,10 @@ contract tfg {
     }
 
     function createValidation() public onlyOwner {
+        require(isInitialized == 0, "Already Initialized");
+    
         validations = new MiNFT(msg.sender);
+        isInitialized = 1;
     }
 
     function setValidation(address tk) public onlyOwner {

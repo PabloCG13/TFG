@@ -48,21 +48,44 @@ exports.findAllValidationsForDegreeinUni = async (req, res) => {
 
 
 // Get all confirmed validations that belong to a certain university and degree
-exports.findAllValidationsConfirmedForDegreeinUni = async (req, res) => {
+// exports.findAllValidationsConfirmedForDegreeinUni = async (req, res) => {
+//     try {
+//         const { teacherId } = req.params;
+//         console.log("TID",teacherId);
+//         const validations = await db.any(`
+//         SELECT v.* 
+//         FROM validation v
+//         JOIN
+//         coordinatesdegree cd
+//         ON 
+//             cd.uniCode = v.uniCodeSrc 
+//             AND cd.degreeId = v.degreeIdSrc
+//         WHERE (cd.teacherId = $1 AND v.provisional = 1);`
+//         , [teacherId]);
+//         console.log("alid",validations);
+//         if (!validations) {
+//             return res.status(404).json({ message: "Validation not found" });
+//         }
+
+//         res.status(200).json(validations);
+//     } catch (err) {
+//         res.status(500).json({ message: err.message || "Some error occurred" });
+//     }
+// };
+
+// Get all validations that belong to a certain university and degree that have not been approved
+exports.findConfirmedValidationsForDegreeinUni = async (req, res) => {
     try {
         const { teacherId } = req.params;
         console.log("TID",teacherId);
         const validations = await db.any(`
-        SELECT v.* 
-        FROM validation v
-        JOIN
-        coordinatesdegree cd
-        ON 
-            cd.uniCode = v.uniCodeSrc 
-            AND cd.degreeId = v.degreeIdSrc
-        WHERE (cd.teacherId = $1 AND v.provisional = 1);`
+        SELECT v.* FROM validation v JOIN coordinatesdegree cd ON
+        v.uniCodeSrc = cd.uniCode AND v.degreeIdSrc = cd.degreeId
+        WHERE (teacherId = $1 AND provisional = 1)
+               ;`
+          //OR
+          //(uniCodeDst = $1 AND degreeIdDst = $2 AND provisional = 1)     
         , [teacherId]);
-
         if (!validations) {
             return res.status(404).json({ message: "Validation not found" });
         }
@@ -227,6 +250,8 @@ exports.findAllNewProvisionalValidationsForDegreeinUni = async (req, res) => {
         res.status(500).json({ message: err.message || "Some error occurred" });
     }
 };
+
+
 
 
 // Get all validations that belong to a certain course that have been asked to a certain teacher

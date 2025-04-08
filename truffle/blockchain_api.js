@@ -21,7 +21,7 @@ const { Web3 } = require("web3");
 
 // Set up Web3 connection
 const web3 = new Web3("http://ganache:8545"); // Change if necessary
-const contractAddress = "0x5b1869D9A4C187F2EAa108f3062412ecf0526b24";
+const contractAddress = "0xe78A0F7E598Cc8b0Bb87894B0F60dD2a88d6a8Ab";
 const contract = new web3.eth.Contract(contractJson.abi, contractAddress);
 
 const app = express();
@@ -236,16 +236,26 @@ async function initializeBlockchain() {
         const owner = accounts[0];
         console.log("Using blockchain account:", owner);
 
-        const tx = await contract.methods.createValidation().send({ 
-            from: owner, 
-            gas: 6721975 
-        });
+        const initialized = await contract.methods.isInitialized().call();
+        console.log("Ini",initialized.toString());
+        if (initialized.toString() === "1") {
+            console.log("Blockchain contract already initialized. Skipping initialization.");
+            return;
+        }else{
+            const tx = await contract.methods.createValidation().send({ 
+                from: owner, 
+                gas: 6721975 
+            });
+    
+            console.log("Successfully initialized validation:", tx.transactionHash);
+        }
 
-        console.log("Successfully initialized validation:", tx.transactionHash);
+        
     } catch (error) {
         console.error("Error initializing blockchain:", error);
     }
 }
+
 
 // Call this function when the server starts
 initializeBlockchain().then(() => {
