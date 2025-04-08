@@ -29,6 +29,8 @@ const StudentValidationListBody = ({ studentId }) => {
   const location = useLocation();
   const [refreshKey, setRefreshKey] = useState(0);
   const { participantAddress } = location.state || {};
+  const [requestedRows, setRequestedRows] = useState({});
+  const [searchType, setSearchType] = useState(""); //Composed or Inverse
 
   useEffect(() => {
     if (!studentId) return;
@@ -451,23 +453,79 @@ useEffect(() => {
 
 
   };
-  const handleSearchRelatedValidations = (selCourse, selDegree) => {
+  const handleSearchComposedValidations = (selCourse, selDegree) => {
   console.log("Selected course:", selCourse);
   console.log("Selected degree:", selDegree);
-  
-  	//TODO handle the API call to fetch the related validations between the selected course (origin)and the selected degree (destination)
-  //TODO currently selectedCourse and selectedDegree stored as strings instead of objects, should probably change for easier use (how?)
+  setRelatedValidations([]);
   fetch(`http://localhost:5000/api/validations/provisional/composed/${selCourse.unicode}/${selCourse.degreeid}/${selCourse.courseid}/${selDegree.unicode}/${selDegree.degreeid}`)
       .then((response) => response.json())
       .then((data) => {
-      	console.log("Related validations", data);
+      	console.log("Composed validations", data);
         setRelatedValidations(data);
       })
       .catch((error) => console.error(`Error fetching related validations for ${selCourse.courseid}`, error));
   };
 
-  const handleRequestValidation = (validation) => {
-  	//TODO handle the API calls to request a validation for the selectedCourse and the clicked validation's destinationCourse
+  const handleSearchInverseValidations = (selCourse, selDegree) => {
+  console.log("Selected course:", selCourse);
+  console.log("Selected degree:", selDegree);
+  setRelatedValidations([]);
+  
+  fetch(`http://localhost:5000/api/validations/provisional/inversed/${selCourse.unicode}/${selCourse.degreeid}/${selCourse.courseid}/${selDegree.unicode}/${selDegree.degreeid}`)
+      .then((response) => response.json())
+      .then((data) => {
+      	console.log("Inverse validations", data);
+        setRelatedValidations(data);
+      })
+      .catch((error) => console.error(`Error fetching related validations for ${selCourse.courseid}`, error));
+  };
+
+  const handleRequestValidationComposed = async (validation) => { 	//TODO Make the button responsive
+    try {
+      const dbResponseValidation = await fetch(`http://localhost:5000/api/validations`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          uniCodeSrc: selectedCourse.unicode,
+          degreeIdSrc: selectedCourse.degreeid,
+          courseIdSrc: selectedCourse.courseid,
+          uniCodeDst: validation.unicodedst,
+          degreeIdDst: validation.degreeiddst,
+          courseIdDst: validation.courseiddst,
+          token: "q",
+          provisional: 0,
+        }),
+      });
+      console.log("Making a new validation with validation: ", validation);
+      console.log("And course: ", selectedCourse);
+      if (!dbResponseValidation.ok) {
+        throw new Error(`Failed to add validation entry to DB. Status: ${dbResponseValidation.status}`);
+      }
+
+      const dbResponseValidates = await fetch(`http://localhost:5000/api/validates`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          uniCodeSrc: selectedCourse.unicode,
+          degreeIdSrc: selectedCourse.degreeid,
+          courseIdSrc: selectedCourse.courseid,
+          uniCodeDst: validation.unicodedst,
+          degreeIdDst: validation.degreeiddst,
+          courseIdDst: validation.courseiddst,
+          studentId: studentId,
+          provisional: 0
+        }),
+      });
+
+      if (!dbResponseValidates.ok) {
+        throw new Error(`Failed to add validation entry to DB. Status: ${dbResponseValidates.status}`);
+      }
+
+      return true;
+    } catch (error) {
+      console.error("Error adding validation:", error);
+      return false;
+    }
   };
   
    const handleUniversityClick = (uni) => {
@@ -720,19 +778,38 @@ useEffect(() => {
 
     {/* Step 3: Show action button if both selected */}
     {selectedCourse && selectedDegree && (
+     <div style ={{ display: "flex", gap: "100px", marginBottom: "10px" }}>
       <button
         onClick={() => {
+        setSearchType("composed");
         setHasSearched(true);
-        handleSearchRelatedValidations(selectedCourse, selectedDegree)
+        handleSearchComposedValidations(selectedCourse, selectedDegree)
         }}
         style={buttonStyle}
       >
-        Search Related Validations
+        Search Composed Validations
       </button>
+      <button
+        onClick={() => {
+        setSearchType("inverse");
+        setHasSearched(true);
+        handleSearchInverseValidations(selectedCourse, selectedDegree)
+        }}
+        style={buttonStyle}
+      >
+        Search Inverse Validations
+      </button>
+     </div>
     )}
     {/* Step 4: Display results in a table or a message if no results were found */}
     {hasSearched && relatedValidations && (
     	relatedValidations.length > 0 ? (
+    	<>
+    	{searchType === "composed" ? (
+    		<h3 style={{ marginTop: "20px" }}>Composed Validations</h3>
+    	) : searchType === "inverse" ? (
+    		<h3 style={{ marginTop: "20px" }}>Inverse Validations</h3>
+    	) : null}
     	<table style={{ width: "100%", marginTop: "20px", borderCollapse: "collapse" }}>
     	 <thead>
     	  <tr>
@@ -749,12 +826,22 @@ useEffect(() => {
     	    <td style={tdStyle}>{validation.period}</td>
     	    <td style={tdStyle}>{validation.provisional}</td>
     	    <td style={tdStyle}>
-    	    	<button onCLick={() => handleRequestValidation(validation)} style={buttonStyle}>Request</button>
+    	    	{requestedRows[validation.courseiddst] ? (
+    	    		<span>Requested</span>
+    	    	) : (
+    	    		<button onClick={() => { handleRequestValidationComposed(validation);
+    	    		setRequestedRows(prev => ({
+    	    			...prev,
+    	    			[validation.courseiddst]: true
+    	    		}));
+    	    		}} style={buttonStyle}>Request</button>
+    	    		)}
     	    </td>
     	   </tr>
     	  ))}
     	 </tbody>
     	</table>
+    	</>
     ) : (
     	 <p style={{ marginTop:"20px", color: "red" }}>No related validations found for this course and that destination degree.</p>
     	)

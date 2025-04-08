@@ -135,6 +135,18 @@ exports.findComposedValidationsForCourseinUni = async (req, res) => {
                 AND v1.courseIdSrc = $3
                 AND v2.uniCodeDst = $4
                 AND v2.degreeIdDst = $5
+                AND NOT EXISTS (
+            		SELECT 1
+            		FROM validation direct
+            		WHERE
+            		direct.unicodeSrc = $1
+            		AND direct.degreeIdSrc = $2
+            		AND direct.courseIdSrc = $3
+            		AND direct.uniCodeDst = v1.uniCodeDst
+            		AND direct.degreeIdDst = v1.degreeIdDst
+            		AND direct.courseIdDst = v1.courseIdDst
+            	)
+            		
           );   
         `, [uniCode, degreeId, courseId, uniCodeDst, degreeIdDst]);
 
@@ -150,11 +162,12 @@ exports.findComposedValidationsForCourseinUni = async (req, res) => {
     }
 };
 
-exports.findInverseValidationsForCourseinUni = async (req, res) => { //composed TODO remove the union part, create new inverse validation
+exports.findInverseValidationsForCourseinUni = async (req, res) => { 
     try {
         const { uniCode, degreeId, courseId, uniCodeDst, degreeIdDst } = req.params;
-
+	console.log("params: ", req.params);
         const validations = await db.any(`
+        (
             SELECT 
                 v1.*
             FROM 
@@ -163,8 +176,20 @@ exports.findInverseValidationsForCourseinUni = async (req, res) => { //composed 
                 v1.uniCodeSrc = $4
                 AND v1.degreeIdSrc = $5
                 AND v1.courseIdDst = $3
-                AND v1.uniCodeSrc = $1
-                AND v1.degreeIdSrc = $2
+                AND v1.uniCodeDst = $1
+                AND v1.degreeIdDst = $2
+                AND NOT EXISTS (
+            		SELECT 1
+            		FROM validation direct
+            		WHERE
+            		direct.unicodeSrc = $1
+            		AND direct.degreeIdSrc = $2
+            		AND direct.courseIdSrc = $3
+            		AND direct.uniCodeDst = v1.uniCodeDst
+            		AND direct.degreeIdDst = v1.degreeIdDst
+            		AND direct.courseIdDst = v1.courseIdDst
+            	)
+            		
           );   
         `, [uniCode, degreeId, courseId, uniCodeDst, degreeIdDst]);
 
