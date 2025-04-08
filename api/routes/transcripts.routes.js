@@ -12,6 +12,8 @@ module.exports = app => {
     router.get("/transcripts/notification/:studentId", transcripts.findNotificationStudentMark);
 
     router.get("/transcripts/erasmus/:uniCode/:degreeId", transcripts.findErasmusStudents);
+
+    router.get("/transcripts/erasmusNotConf/:uniCode/:degreeId", transcripts.findErasmusNotConfirmedStudents);
     
     router.get("/transcripts/validation/:uniCode/:degreeId/:courseId/:studentId",transcripts.findValidatedCourse);
     

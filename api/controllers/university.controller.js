@@ -88,36 +88,57 @@ exports.getTeachers = async (req, res) => {
   
   
       const teachers = await db.any(`
-        -- Teachers who teach courses at the university
+      -- All teachers teaching or coordinating at the university
         SELECT DISTINCT 
-          t.teacherId, 
-          t.name, 
-          t.lastAccess, 
-          c.courseId, 
-          c.name AS courseName,
-          NULL AS degreeId,
-          NULL AS degreeName
+        t.teacherId, 
+        t.name, 
+        t.lastAccess, 
+        c.courseId, 
+        c.name AS courseName,
+        NULL AS degreeId,
+        NULL AS degreeName
         FROM teacher t
         JOIN course c ON t.teacherId = c.teacherId
         WHERE c.uniCode = $1
-  
-  
+
+
         UNION
-  
-  
-        -- Teachers who coordinate degrees at the university
+
+
         SELECT DISTINCT 
-          t.teacherId, 
-          t.name, 
-          t.lastAccess, 
-          NULL AS courseId, 
-          NULL AS courseName,
-          d.degreeId,
-          d.name AS degreeName
+        t.teacherId, 
+        t.name, 
+        t.lastAccess, 
+        NULL AS courseId, 
+        NULL AS courseName,
+        d.degreeId,
+        d.name AS degreeName
         FROM teacher t
         JOIN coordinatesdegree cd ON t.teacherId = cd.teacherId
         JOIN degree d ON cd.uniCode = d.uniCode AND cd.degreeId = d.degreeId
-        WHERE cd.uniCode = $1;
+        WHERE cd.uniCode = $1
+
+
+        UNION
+
+
+        -- Teachers at the university that do not teach or coordinate
+        SELECT 
+        t.teacherId,
+        t.name,
+        t.lastAccess,
+        NULL AS courseId,
+        NULL AS courseName,
+        NULL AS degreeId,
+        NULL AS degreeName
+        FROM teacher t
+        WHERE t.uniCode = $1
+        AND t.teacherId NOT IN (
+            SELECT teacherId FROM course WHERE uniCode = $1
+            UNION
+            SELECT teacherId FROM coordinatesdegree WHERE uniCode = $1
+        );
+
       `, [uniCode]);
         console.log("teachers",teachers);
   

@@ -107,15 +107,27 @@ const StudentHomeHeader = ({studentId}) => {
      .catch(error => console.error("Error updating lastAccess:", error));
   };
 
-  const handleValidationClick = (valid) => {
-    console.log("data", valid);
-    const dbResponseValidates = fetch(`http://localhost:5000/api/validates/${valid.unicodesrc}/${valid.degreeidsrc}/${valid.courseidsrc}/${valid.unicodedst}/${valid.degreeiddst}/${valid.courseiddst}/${valid.studentid}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ provisional: valid.newprovisional}), // Añadir hash al body
-    });
-
-    console.log("Repsonse:", dbResponseValidates);
+  const handleValidationClick = async (validations) => {
+    console.log("data", validations);
+  
+    try {
+      const responses = await Promise.all(
+        validations.map(valid =>
+          fetch(`http://localhost:5000/api/validates/${valid.unicodesrc}/${valid.degreeidsrc}/${valid.courseidsrc}/${valid.unicodedst}/${valid.degreeiddst}/${valid.courseiddst}/${valid.studentid}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ provisional: valid.newprovisional }),
+          })
+          .then(res => res.json()) // optional: parse response as JSON
+          .then(data => ({ success: true, data }))
+          .catch(error => ({ success: false, error }))
+        )
+      );
+  
+      console.log("All responses:", responses);
+    } catch (error) {
+      console.error("Unexpected error during validations:", error);
+    }
   };
 
   return (
@@ -187,7 +199,7 @@ const StudentHomeHeader = ({studentId}) => {
                 to={`/Student/StudentPages/StudentTranscriptPage/StudentTranscript/${studentId}`}
                 state={{ participantAddress }}
                 style={viewDetailsButtonStyle}
-                
+                onClick={() => handleBackCourse()}
                 onMouseOver={(e) => Object.assign(e.target.style, hoverStyle)}
                 onMouseOut={(e) => Object.assign(e.target.style, buttonStyle)}
               >
@@ -204,7 +216,7 @@ const StudentHomeHeader = ({studentId}) => {
                 to={`/Student/StudentPages/StudentValidationListPage/StudentValidationList/${studentId}`}
                 state={{ participantAddress }}
                 style={viewDetailsButtonStyle}
-                onClick={() => handleValidationClick(val)}
+                onClick={() => handleValidationClick(validations)}
                 onMouseOver={(e) => Object.assign(e.target.style, hoverStyle)}
                 onMouseOut={(e) => Object.assign(e.target.style, buttonStyle)}
               >

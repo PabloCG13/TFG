@@ -15,7 +15,9 @@ CREATE TABLE IF NOT EXISTS teacher (
     teacherId VARCHAR(4) PRIMARY KEY,
     name VARCHAR(50) NOT NULL,
     lastAccess TIMESTAMP,
-    hash VARCHAR(66) NOT NULL
+    hash VARCHAR(66) NOT NULL,
+    uniCode VARCHAR(4) NOT NULL,
+    FOREIGN KEY (uniCode) REFERENCES university (uniCode) ON DELETE SET NULL
 );
 
 -- Create degree table
@@ -30,8 +32,8 @@ CREATE TABLE IF NOT EXISTS degree (
 -- Create Coordinates Degree Table
 CREATE TABLE IF NOT EXISTS coordinatesdegree (
     teacherId VARCHAR(4) NOT NULL,
-    uniCode VARCHAR(4),
-    degreeId VARCHAR(30),
+    uniCode VARCHAR(4) NOT NULL,
+    degreeId VARCHAR(30) NOT NULL,
     PRIMARY KEY (teacherId),
     FOREIGN KEY (uniCode, degreeId) REFERENCES degree (uniCode, degreeId) ON DELETE CASCADE,
     FOREIGN KEY (teacherId) REFERENCES teacher (teacherId) ON DELETE SET NULL
@@ -139,8 +141,8 @@ SELECT 'U001', 'Complutense', 'Spain', 'hash12345'
 WHERE NOT EXISTS (SELECT 1 FROM university WHERE uniCode = 'U001');
 
 -- Insert teacher if not exists
-INSERT INTO teacher (teacherId, name, lastAccess, hash)
-SELECT 'T001', 'John Doe', TO_TIMESTAMP('01/01/2025 12:00:00', 'DD/MM/YYYY HH24:MI:SS'), 'hash67890'
+INSERT INTO teacher (teacherId, name, lastAccess, hash, uniCode)
+SELECT 'T001', 'John Doe', TO_TIMESTAMP('01/01/2025 12:00:00', 'DD/MM/YYYY HH24:MI:SS'), 'hash67890', 'U001'
 WHERE NOT EXISTS (SELECT 1 FROM teacher WHERE teacherId = 'T001');
 
 -- Insert degree if not exists

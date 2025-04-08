@@ -697,11 +697,11 @@ useEffect(() => {
 )}
 {activeTab === "RELATED VALIDATIONS" && (
   <div style={tableContainer}>
-    <h2 style={tableTitle}>Find Related Validations</h2>
+    <h2 style={tableTitle}>Find Related Validations for {studentId} </h2>
 
     {/* Step 1: Select a course */}
     <div style={{ marginBottom: "20px" }}>
-      <label><strong>Select a Course:</strong></label>
+      <label><strong>Select an Origin Course:</strong></label>
       <select
         value={selectedCourse ? selectedCourse.courseid : ""}
         onChange={(e) => {const selected = courses.find(course => course.courseid === e.target.value);

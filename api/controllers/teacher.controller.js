@@ -3,12 +3,12 @@ const db = require("../config/db.js"); // Import pg-promise instance
 // Create teacher
 exports.create = async (req, res) => { //TODO test if it works, then check if putting lastAccess and not putting any value on the req works (auto null?)
     try {
-        const { teacherId, name, hash } = req.body;
+        const { teacherId, name, hash, uniCode } = req.body;
         const query = `
-            INSERT INTO teacher (teacherId, name, hash)
-            VALUES ($1, $2, $3) RETURNING *;
+            INSERT INTO teacher (teacherId, name, hash, uniCode)
+            VALUES ($1, $2, $3, $4) RETURNING *;
         `;
-        const teacher = await db.one(query, [teacherId, name, hash]);
+        const teacher = await db.one(query, [teacherId, name, hash, uniCode]);
         res.status(201).json(teacher);
     } catch (err) {
         res.status(500).json({ error: err.message });

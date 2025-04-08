@@ -276,7 +276,7 @@ const UniversityHomeBody = ({ uniCode }) => {
     password = teacher.password;
     role = teacher.role === "Degree Coordinator" ? 3 : 2; // Determine role based on selection
     namedb = `${teacher.name} ${teacher.surname}`;
-    body = JSON.stringify({ teacherId: user, name: namedb });
+    body = JSON.stringify({ teacherId: user, name: namedb, uniCode: uniCode });
   
     try {
       // Check if the teacher already exists
@@ -695,7 +695,7 @@ const addCourse = async (course) => {
 
     const tokens = dbDataTokens.map(item=>item.token);
     console.log("Fetched tokens from DB:", tokens);
-    return;
+    
     try{
       const teacherTranscriptResponse = await fetch("http://localhost:4000/transferValidation", {
           method: "POST",
@@ -719,7 +719,7 @@ const addCourse = async (course) => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
             uniCode: uniCode, 
-            degreeId: teacher2.degreeid, 
+            degreeId: teacher1.degreeid, 
             teacherId: teacher2.teacherid
           }),
       });
@@ -727,10 +727,26 @@ const addCourse = async (course) => {
       const dbCoordData = await dbCoordResponse.json();
       console.log(dbCoordData);
       if(dbCoordResponse.ok){
-        setMessage(`Degree registered successfully! ID: ${dbCoordData.degreeid}`);
-        console.log("Stored Degree:", dbCoordData);
-        setRefreshKey(prev => prev +1);
-        return true;
+
+        const dbDeleteResponse = await fetch(`http://localhost:5000/api/coordinatesdegrees/${teacher1.teacherid}`, {
+          method: "DELETE",
+      });
+      
+      const dbDeleteData = await dbDeleteResponse.json();
+      
+      if (dbDeleteResponse.ok) {
+          setMessage(`Coordinator with ID ${teacher2.teacherid} deleted successfully!`);
+          console.log("Deleted:", dbDeleteData);
+          setMessage(`Degree registered successfully! ID: ${dbCoordData.degreeid}`);
+          console.log("Stored Degree:", dbCoordData);
+          handleBlockchain(teacher2.teacherid,uniCode,teacher1.degreeid);
+          setRefreshKey(prev => prev +1);
+          return true;
+      } else {
+          setMessage(`Failed to delete coordinator. Reason: ${dbDeleteData.message}`);
+          console.error("Delete error:", dbDeleteData.message);
+          return false;
+      }
       } else {
         setMessage(`Failed to create a new entry in the Database error`);
         console.error("Database error:", dbCoordData.error);
@@ -741,6 +757,100 @@ const addCourse = async (course) => {
       setMessage(error.message); // Display error to the user
     }
   }
+
+
+  const handleBlockchain = async (teacherDst, unicodesrc, degreeidsrc) => {
+    // Get the address of the teacher of the DstCourse
+    const dbResponse = await fetch(`http://localhost:5000/api/addresses/participant/${teacherDst}`);
+    const dbData = await dbResponse.json();
+  
+    if (!dbResponse.ok || !dbData.addressid) {
+      setMessage("No blockchain address found for this user. Please contact support.");
+      console.error("Database error:", dbData);
+      return;
+    }
+  
+    const courseDstAddress = dbData.addressid;
+    console.log("Fetched Address from DB:", courseDstAddress);
+  
+    // Get validation entries
+    const dbStudentsResponse = await fetch(`http://localhost:5000/api/transcripts/erasmusNotConf/${unicodesrc}/${degreeidsrc}`);
+    const dbDataStudents = await dbStudentsResponse.json();
+  
+    if (!dbStudentsResponse.ok) {
+      console.error("Database error:", dbDataStudents); // <-- FIXED: was dbData
+      return;
+    }
+  
+    const studentAddresses = [];
+  
+    for (const student of dbDataStudents) {
+      try {
+        const res = await fetch(`http://localhost:5000/api/addresses/participant/${student.studentid}`);
+        const data = await res.json();
+  
+        if (res.ok && data.addressid) {
+          studentAddresses.push({
+            studentid: student.studentid,
+            address: data.addressid
+          });
+  
+          // Get list of allowed teachers
+          const teachersResponse = await fetch("http://localhost:4000/getTeachersAllowed", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              address: data.addressid
+            }),
+          });
+  
+          if (!teachersResponse.ok) {
+            console.error(`Failed to fetch teachers for student ${student.studentid}. Status: ${teachersResponse.status}`);
+            continue;
+          }
+  
+          const teachersData = await teachersResponse.json();
+  
+          if (!Array.isArray(teachersData.result)) {
+            console.error(`Malformed teachers data for student ${student.studentid}`, teachersData);
+            continue;
+          }
+          //Check if DegreeCoord is already allowed to modify the transcript of this student
+          const teacherAlreadyAllowed = teachersData.result.includes(courseDstAddress);
+          console.log("teacher addresses for", student.studentid, "are", teachersData.result);
+          console.log("Is teacher already allowed?", teacherAlreadyAllowed);
+          //If not add him
+          if (!teacherAlreadyAllowed) {
+            try {
+              const validationResponse = await fetch("http://localhost:4000/addTeacherToTranscript", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  addressTeacher: courseDstAddress,
+                  addressUniversity: universityAddress,
+                  addressStudent: data.addressid
+                }),
+              });
+  
+              if (!validationResponse.ok) {
+                const errorText = await validationResponse.text();
+                console.error(`Failed to add validation for student ${student.studentid}. Status: ${validationResponse.status}`, errorText);
+              } else {
+                console.log(`Validation successfully added for student ${student.studentid}`);
+              }
+            } catch (error) {
+              console.error(`Network or server error while adding validation for student ${student.studentid}:`, error);
+            }
+          }
+        } else {
+          console.warn(`No address found for student ${student.studentid}`);
+        }
+      } catch (err) {
+        console.error(`Error fetching address for student ${student.studentid}:`, err);
+      }
+    }
+  }
+
 
 
   return (
