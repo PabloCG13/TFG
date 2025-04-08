@@ -641,6 +641,7 @@ const addCourse = async (course) => {
   };
 
   const handleTransferValidations = async(teacher1, teacher2) => {
+    console.log("teachers", teacher1, teacher2);
     const dbResponseTeacherSrc = await fetch(`http://localhost:5000/api/addresses/participant/${teacher1.teacherid}`);
   
     if (!dbResponseTeacherSrc.ok) {
@@ -684,15 +685,17 @@ const addCourse = async (course) => {
 
     const dbDataTokens = await dbResponseTokens.json();
 
-    if (!dbDataTokens.addressid) {
+    if (!dbDataTokens) {
         setMessage("No blockchain address found for this user. Please contact support.");
         console.error("Database error:", dbDataTokens);
         return; // Stop execution
     }
 
-    const tokens = dbDataTokens.addressid;
-    console.log("Fetched Address from DB:", tokens);
-    
+    console.log("DBCALL", dbDataTokens);
+
+    const tokens = dbDataTokens.map(item=>item.token);
+    console.log("Fetched tokens from DB:", tokens);
+    return;
     try{
       const teacherTranscriptResponse = await fetch("http://localhost:4000/transferValidation", {
           method: "POST",
@@ -711,6 +714,28 @@ const addCourse = async (course) => {
   
       const teacherTranscriptData = await teacherTranscriptResponse.json();
       console.log("Teacher successfully added to transcript:", teacherTranscriptData);
+      const dbCoordResponse = await fetch("http://localhost:5000/api/coordinatesdegrees", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+            uniCode: uniCode, 
+            degreeId: teacher2.degreeid, 
+            teacherId: teacher2.teacherid
+          }),
+      });
+
+      const dbCoordData = await dbCoordResponse.json();
+      console.log(dbCoordData);
+      if(dbCoordResponse.ok){
+        setMessage(`Degree registered successfully! ID: ${dbCoordData.degreeid}`);
+        console.log("Stored Degree:", dbCoordData);
+        setRefreshKey(prev => prev +1);
+        return true;
+      } else {
+        setMessage(`Failed to create a new entry in the Database error`);
+        console.error("Database error:", dbCoordData.error);
+        return false;
+      }
     }catch (error) {
       console.error("Error:", error.message);
       setMessage(error.message); // Display error to the user
