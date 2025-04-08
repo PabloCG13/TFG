@@ -676,7 +676,7 @@ const addCourse = async (course) => {
     console.log("Fetched Address from DB:", teacherAddressDst);
 
 
-    const dbResponseTokens = await fetch(`http://localhost:5000/api/validations/tokens/${teacher1.teacherid}`);
+    const dbResponseTokens = await fetch(`http://localhost:5000/api/validations/conf/tok/${teacher1.teacherid}`);
   
     if (!dbResponseTokens.ok) {
         throw new Error(`Failed to fetch teacher address. Status: ${dbResponseTokens.status}`);

@@ -9,7 +9,9 @@ module.exports = app => {
 
     router.get("/validations/:uniCode/:degreeId", validations.findAllValidationsForDegreeinUni);
     
-    router.get("/validations/tokens/:teacherId", validations.findAllValidationsConfirmedForDegreeinUni);
+    //router.get("/validations/token/:teacherId", validations.findAllValidationsConfirmedForDegreeinUni);
+
+    router.get("/validations/conf/tok/:teacherId", validations.findConfirmedValidationsForDegreeinUni);
 
     router.get("/validations/provisionals/:uniCode/:degreeId", validations.findAllProvisionalValidationsForDegreeinUni);
 
