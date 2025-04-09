@@ -165,9 +165,9 @@ exports.findComposedValidationsForCourseinUni = async (req, res) => {
             		direct.unicodeSrc = $1
             		AND direct.degreeIdSrc = $2
             		AND direct.courseIdSrc = $3
-            		AND direct.uniCodeDst = v1.uniCodeDst
-            		AND direct.degreeIdDst = v1.degreeIdDst
-            		AND direct.courseIdDst = v1.courseIdDst
+            		AND direct.uniCodeDst = v2.uniCodeDst
+            		AND direct.degreeIdDst = v2.degreeIdDst
+            		AND direct.courseIdDst = v2.courseIdDst
             	)
             		
           );   
@@ -188,7 +188,6 @@ exports.findComposedValidationsForCourseinUni = async (req, res) => {
 exports.findInverseValidationsForCourseinUni = async (req, res) => { 
     try {
         const { uniCode, degreeId, courseId, uniCodeDst, degreeIdDst } = req.params;
-	console.log("params: ", req.params);
         const validations = await db.any(`
         (
             SELECT 

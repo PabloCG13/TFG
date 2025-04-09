@@ -153,8 +153,6 @@ useEffect(() => {
         .then((data) => setCourses(data))
         .catch((error) => console.error(`Error fetching courses for ${unicode}, ${degreeid}:`, error));
     });
-    
-  console.log("Courses with preev:", courses);
   }, [studentInfo]);
 
   const handleNotifyPetition = async (validatid) =>{
@@ -480,7 +478,7 @@ useEffect(() => {
       .catch((error) => console.error(`Error fetching related validations for ${selCourse.courseid}`, error));
   };
 
-  const handleRequestValidationComposed = async (validation) => { 	//TODO Make the button responsive
+  const handleRequestValidationComposed = async (validation) => {
     try {
       const dbResponseValidation = await fetch(`http://localhost:5000/api/validations`, {
         method: "POST",
@@ -496,7 +494,7 @@ useEffect(() => {
           provisional: 0,
         }),
       });
-      console.log("Making a new validation with validation: ", validation);
+      console.log("Making a new validation with COMPOSED validation: ", validation);
       console.log("And course: ", selectedCourse);
       if (!dbResponseValidation.ok) {
         throw new Error(`Failed to add validation entry to DB. Status: ${dbResponseValidation.status}`);
@@ -512,6 +510,54 @@ useEffect(() => {
           uniCodeDst: validation.unicodedst,
           degreeIdDst: validation.degreeiddst,
           courseIdDst: validation.courseiddst,
+          studentId: studentId,
+          provisional: 0
+        }),
+      });
+
+      if (!dbResponseValidates.ok) {
+        throw new Error(`Failed to add validation entry to DB. Status: ${dbResponseValidates.status}`);
+      }
+
+      return true;
+    } catch (error) {
+      console.error("Error adding validation:", error);
+      return false;
+    }
+  };
+  
+  const handleRequestValidationInverse = async (validation) => {
+    try {
+      const dbResponseValidation = await fetch(`http://localhost:5000/api/validations`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          uniCodeSrc: selectedCourse.unicode,
+          degreeIdSrc: selectedCourse.degreeid,
+          courseIdSrc: selectedCourse.courseid,
+          uniCodeDst: validation.unicodesrc,
+          degreeIdDst: validation.degreeidsrc,
+          courseIdDst: validation.courseidsrc,
+          token: "q",
+          provisional: 0,
+        }),
+      });
+      console.log("Making a new validation with INVERSE validation: ", validation);
+      console.log("And course: ", selectedCourse);
+      if (!dbResponseValidation.ok) {
+        throw new Error(`Failed to add validation entry to DB. Status: ${dbResponseValidation.status}`);
+      }
+
+      const dbResponseValidates = await fetch(`http://localhost:5000/api/validates`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          uniCodeSrc: selectedCourse.unicode,
+          degreeIdSrc: selectedCourse.degreeid,
+          courseIdSrc: selectedCourse.courseid,
+          uniCodeDst: validation.unicodesrc,
+          degreeIdDst: validation.degreeidsrc,
+          courseIdDst: validation.courseidsrc,
           studentId: studentId,
           provisional: 0
         }),
@@ -822,14 +868,23 @@ useEffect(() => {
     	 <tbody>
     	  {relatedValidations.map((validation, index) => (
     	   <tr key={index}>
-    	    <td style={tdStyle}>{validation.courseiddst}</td>
+    	    <td style={tdStyle}>{searchType === "inverse" ? validation.courseidsrc : validation.courseiddst}</td>
     	    <td style={tdStyle}>{validation.period}</td>
-    	    <td style={tdStyle}>{validation.provisional}</td>
+    	    <td style={tdStyle}>
+       	    	{validation.provisional === 1 && ( <span style={{ color: "green" }}>Definitive validation</span>)}
+       	    	{[0,2,3,4].includes(validation.provisional) && ( <span style={{ color: "orange" }}>Pending validation</span>)}
+       	    	{validation.provisional === 5 && ( <span style={{ color: "red" }}>WARNING! Rejected validation</span>)}
+       	    </td>
     	    <td style={tdStyle}>
     	    	{requestedRows[validation.courseiddst] ? (
     	    		<span>Requested</span>
     	    	) : (
-    	    		<button onClick={() => { handleRequestValidationComposed(validation);
+    	    		<button onClick={() => { 
+    	    		if (searchType === "composed") {    	    		
+    			 handleRequestValidationComposed(validation);
+    			} else if (searchType === "inverse") {
+    			 handleRequestValidationInverse(validation);
+    			}    			
     	    		setRequestedRows(prev => ({
     	    			...prev,
     	    			[validation.courseiddst]: true
