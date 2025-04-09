@@ -27,7 +27,7 @@ services:
     image: trufflesuite/ganache
     ports:
      - 8545:8545
-    command: -d --db ganache_data --accounts 100 --defaultBalanceEther 500
+    command: -d --networkId 5777 --db ganache_data --accounts 100 --defaultBalanceEther 500
     volumes:
      - ./ganache_data:/root/.ganache
   

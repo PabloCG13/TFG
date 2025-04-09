@@ -112,7 +112,7 @@ const handleConfirm = async () => {
 
     let transcriptHash = await dbResponseTranscript.json();
     console.log("Got this transcript before modification:", transcriptHash);
-
+    const currentTimestamp = new Date().toISOString();
 
     // Find the specific entry that matches selectedStudent
     let updatedTranscript = transcriptHash.map(entry => {
@@ -126,8 +126,9 @@ const handleConfirm = async () => {
             return {
                 ...entry,
                 provisional: prov,  // Update provisional field
-                mark: selectedStudent.mark  // Update mark field
-            };
+                mark: parseInt(selectedStudent.mark,10),  // Update mark field
+                lastaccess: currentTimestamp
+              };
         }
         return entry;
     });
@@ -155,8 +156,6 @@ const handleConfirm = async () => {
     const transcriptData = await transcriptResponse.json();
     const transcriptHashModified = transcriptData.hash;
     console.log("Transcript modified successfully:", transcriptHashModified);
-
-    const currentTimestamp = new Date().toISOString();
     
     const dbResponse = await fetch(`http://localhost:5000/api/transcripts/${selectedStudent.unicode}/${selectedStudent.degreeid}/${selectedStudent.courseid}/${selectedStudent.studentid}/${selectedStudent.academicyear}`, {
       method: "PUT",
@@ -207,21 +206,23 @@ const handleConfirm = async () => {
 const handleFinalConfirm = async (selStudent) => {
 
   try {
-    const dbResponse = await fetch(`http://localhost:5000/api/transcripts/${selStudent.unicode}/${selStudent.degreeid}/${selStudent.courseid}/${selStudent.studentid}/${selStudent.academicyear}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        provisional: 1, // Assuming provisional is still part of the request
-      }),
-    });
+    //const currentTimestamp = new Date().toISOString();
+    // const dbResponse = await fetch(`http://localhost:5000/api/transcripts/${selStudent.unicode}/${selStudent.degreeid}/${selStudent.courseid}/${selStudent.studentid}/${selStudent.academicyear}`, {
+    //   method: "PUT",
+    //   headers: { "Content-Type": "application/json" },
+    //   body: JSON.stringify({
+    //     provisional: 1, // Assuming provisional is still part of the request
+    //     lastAccess: currentTimestamp
+    //   }),
+    // });
 
-    // Handle the response from the database 
-    if (dbResponse.ok) {
-      const responseJson = await dbResponse.json();
-      console.log('New mark updated response:', responseJson);
-    } else {
-      throw new Error('Failed to update mark');
-    }
+    // // Handle the response from the database 
+    // if (dbResponse.ok) {
+    //   const responseJson = await dbResponse.json();
+    //   console.log('New mark updated response:', responseJson);
+    // } else {
+    //   throw new Error('Failed to update mark');
+    // }
 
     const dbResponseAddress = await fetch(`http://localhost:5000/api/addresses/participant/${selStudent.studentid}`);
     if (!dbResponseAddress.ok) {
@@ -236,8 +237,30 @@ const handleFinalConfirm = async (selStudent) => {
       throw new Error(`Failed to fetch transcript. Status: ${dbResponseTranscript.status}`);
     }
 
-    const transcriptHash = await dbResponseTranscript.json();
-    console.log("Got this transcript: ", transcriptHash);
+    let transcriptHash = await dbResponseTranscript.json();
+    console.log("Got this transcript before modification:", transcriptHash);
+    const currentTimestamp = new Date().toISOString();
+
+    // Find the specific entry that matches selectedStudent
+    let updatedTranscript = transcriptHash.map(entry => {
+        if (
+            entry.unicode === selStudent.unicode &&
+            entry.degreeid === selStudent.degreeid &&
+            entry.courseid === selStudent.courseid &&
+            entry.studentid === selStudent.studentid &&
+            entry.academicyear === selStudent.academicyear
+        ) {
+            return {
+                ...entry,
+                provisional: 1,  // Update provisional field
+                lastaccess: currentTimestamp
+              };
+        }
+        return entry;
+    });
+
+
+    console.log("Updated transcript:", updatedTranscript);
     console.log("Participant", participantAddress);
 
     // Step 2: Modify transcript on the blockchain
@@ -245,7 +268,7 @@ const handleFinalConfirm = async (selStudent) => {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        file: transcriptHash,
+        file: updatedTranscript,
         addressStudent: dbData.addressid,
         address: participantAddress,
         type: 1,
@@ -263,7 +286,7 @@ const handleFinalConfirm = async (selStudent) => {
     const updateResponse = await fetch(`http://localhost:5000/api/students/${selStudent.studentid}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ transcriptHash: transcriptHashModified }),
+      body: JSON.stringify({ transcriptHash: transcriptHashModified, lastAccess:currentTimestamp }),
     });
 
     if (!updateResponse.ok) {

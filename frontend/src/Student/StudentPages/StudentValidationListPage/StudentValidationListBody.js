@@ -32,6 +32,12 @@ const StudentValidationListBody = ({ studentId }) => {
   const [requestedRows, setRequestedRows] = useState({});
   const [searchType, setSearchType] = useState(""); //Composed or Inverse
 
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedValidation, setSelectedValidation] = useState(null);
+  const [selectedYear, setSelectedYear] = useState("");
+  const currentYear = new Date().getFullYear();
+
+
   useEffect(() => {
     if (!studentId) return;
 
@@ -154,6 +160,25 @@ useEffect(() => {
         .catch((error) => console.error(`Error fetching courses for ${unicode}, ${degreeid}:`, error));
     });
   }, [studentInfo]);
+
+  const openModalForValidation = (valid) => {
+    setSelectedValidation(valid);
+    setSelectedYear(""); // reset the dropdown
+    setIsModalOpen(true);
+  };
+
+  const handleConfirmValidation = () => {
+    if (selectedYear && selectedValidation) {
+      handleChoosePetition({ ...selectedValidation, period:selectedYear });
+      setIsModalOpen(false);
+      setSelectedValidation(null);
+    }
+  };
+  
+  // Close modal
+  const closeModal = () => {
+    setIsModalOpen(false);
+  };
 
   const handleNotifyPetition = async (validatid) =>{
     console.log("He pulsado el boton de Notify");
@@ -706,7 +731,7 @@ useEffect(() => {
                       ) : validatid.provisional === 1 ? (
                         <button
                           style={buttonStyle}
-                          onClick={() => handleChoosePetition(validatid)}
+                          onClick={() => openModalForValidation(validatid)}
                         >
                           Choose
                         </button>
@@ -904,6 +929,33 @@ useEffect(() => {
   </div>
 )}
 
+{isModalOpen && selectedValidation && (
+  <div style={modalOverlayStyle} onClick={closeModal}>
+    <div style={modalStyle} onClick={(e) => e.stopPropagation()}>
+      <h2>Select Validity Year</h2>
+      <label>Year:</label>
+      <select
+        value={selectedYear}
+        onChange={(e) => setSelectedYear(e.target.value)}
+      >
+        <option value="">Select Year</option>
+        {(() => {
+          const years = [];
+          const maxYear = parseInt(selectedValidation.period.split("-")[1]);
+          for (let year = currentYear; year <= maxYear; year++) {
+            years.push(
+              <option key={year} value={year}>
+                {year}
+              </option>
+            );
+          }
+          return years;
+        })()}
+      </select>
+      <button style={buttonStyle} onClick={handleConfirmValidation}>Confirm</button>
+    </div>
+  </div>
+)}
 
     </div>
   </div>
@@ -996,6 +1048,27 @@ const lockIconStyle = {
 /* Hover */
 const hoverStyle = {
   backgroundColor: "#0056b3", // Changes the background color to a darker blue when the user hover 
+};
+
+const modalOverlayStyle = {
+  position: "fixed",
+  top: 0,
+  left: 0,
+  width: "100%",
+  height: "100%",
+  backgroundColor: "rgba(0, 0, 0, 0.5)",
+  display: "flex",
+  justifyContent: "center",
+  alignItems: "center",
+  zIndex: 1000,
+};
+
+const modalStyle = {
+  backgroundColor: "white",
+  padding: "20px",
+  borderRadius: "8px",
+  textAlign: "center",
+  width: "400px",
 };
 
 export default StudentValidationListBody;
