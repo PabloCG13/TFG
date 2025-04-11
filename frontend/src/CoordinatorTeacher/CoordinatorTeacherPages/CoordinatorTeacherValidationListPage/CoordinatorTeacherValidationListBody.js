@@ -266,7 +266,9 @@ const CoordinatorTeacherValidationListBody = ({ teacherId }) => {
                   </span>
                   </td>
 
-                   {valid.provisional === 1 && (
+                   {valid.provisional === 1 && 
+                   degrees.degreeid === valid.degreeidsrc &&
+                   degrees.unicode === valid.unicodesrc && (
                      <>
                      <td>
                      <button style={buttonStyle} onClick={() => openModal(valid)}>

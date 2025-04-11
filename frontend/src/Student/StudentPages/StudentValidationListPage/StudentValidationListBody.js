@@ -19,7 +19,6 @@ const StudentValidationListBody = ({ studentId }) => {
   const [selectedCourse, setSelectedCourse] = useState(null);
   const [courses, setCourses] = useState({});
   const [relatedValidations, setRelatedValidations] = useState([]);
-  const [availableDestinations, setAvailableDestinations] = useState(null);
   const [selectedUniversity, setSelectedUniversity] = useState(null);
   const [selectedDegree, setSelectedDegree] = useState(null);
   const [hasSearched, setHasSearched] = useState(false); //TODO not the best way to do this since it wont be responsive when multiple fails in a row
@@ -1036,13 +1035,24 @@ const buttonStyle = {
   transition: "background 0.3s ease, transform 0.2s ease",
   textDecoration: "none"
 };
-const navStyle = { display: "flex", justifyContent: "space-around", padding: "10px", backgroundColor: "#222" };
-const tabStyle = { color: "#fff", background: "none", border: "none", padding: "10px", cursor: "pointer" };
-const activeTabStyle = { color: "yellow", fontWeight: "bold" };
-const lockIconStyle = {
-  width: '20px',
-  height: '20px',
-  verticalAlign: 'middle', // Para alinear el ícono con el checkbox
+const navStyle = { 
+  display: "flex", 
+  justifyContent: "space-around", 
+  padding: "10px", 
+  backgroundColor: "#222" 
+};
+
+const tabStyle = { 
+  color: "#fff", 
+  background: "none", 
+  border: "none", 
+  padding: "10px", 
+  cursor: "pointer" 
+};
+
+const activeTabStyle = { 
+  color: "yellow", 
+  fontWeight: "bold" 
 };
 
 /* Hover */

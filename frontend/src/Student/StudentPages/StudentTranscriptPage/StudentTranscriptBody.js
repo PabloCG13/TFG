@@ -4,7 +4,6 @@ import { useLocation } from 'react-router-dom';
 const StudentTranscriptBody= ({studentId}) => {
   
   const [studentCourse, setStudentCourses] = useState([]);
-  const [message, setMessage] = useState(null); // State for error messages
   const location = useLocation();
   const { participantAddress } = location.state || {}; // Extract participantAddress
 

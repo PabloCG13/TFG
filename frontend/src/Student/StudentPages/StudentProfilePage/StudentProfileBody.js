@@ -89,6 +89,7 @@ const StudentProfileBody = ({ studentId }) => {
             <div style={styles.profilePicture}>🧑</div>
             <p style={styles.field}><strong>NAME:</strong> &nbsp; {students1.name}</p>
             <p style={styles.field}><strong>DOB:</strong> &nbsp; {new Date(students1.dob).toLocaleDateString()}</p>
+            <p style={styles.field}><strong>DNI:</strong> &nbsp; {students1.dni}</p>
             <p style={styles.field}><strong>HASH (ID + PASSWORD):</strong> &nbsp; {students1.hash}</p>
             {students2.map((student, index) => (
               <div key={index}>
@@ -126,21 +127,25 @@ const styles = {
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
-    height: '100vh',
+    paddingTop: '100px',
+    paddingBottom: '100px',
   },
   profileBox: {
     border: '3px solid black',
     padding: '20px',
     borderRadius: '5px',
     width: '900px',
-    height:'300px',
     backgroundColor: '#fff',
     fontFamily: 'monospace',
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '15px',
   },
   content: {
     display: 'flex',
     justifyContent: 'space-between',
-    alignItems: 'center',
+    alignItems: 'flex-start',
+    gap: '30px',
   },
   field: {
     marginBottom:'30px',

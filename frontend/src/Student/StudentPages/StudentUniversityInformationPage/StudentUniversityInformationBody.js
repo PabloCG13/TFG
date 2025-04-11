@@ -1,13 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
 
 const StudentUniversityInformationBody = ({ studentId }) => {
     const [universities, setUniversities] = useState([]);
     const [degreesByUniversity, setDegreesByUniversity] = useState({});
     const [studentTranscript, setStudentTranscript] = useState({});
     const [degreeDetailsByUniversity, setDegreeDetailsByUniversity] = useState({});
-    const [courseDetailsByDegree, setCourseDetailsByDegree] = useState({});
-    const location = useLocation();
+
 
     useEffect(() => {
         if (!studentId) return;
@@ -123,9 +121,6 @@ const StudentUniversityInformationBody = ({ studentId }) => {
         if(!Array.isArray(studentTranscript)) return false;
         return (studentTranscript.some(transcript => (transcript.unicode === course.unicode && transcript.degreeid === course.degreeid && transcript.courseid === course.courseid) || (transcript.unicodesrc === course.unicode && transcript.degreeidsrc === course.degreeid && transcript.courseidsrc === course.courseid)));
     };
-		
-
-
 
     return (
         <div>
