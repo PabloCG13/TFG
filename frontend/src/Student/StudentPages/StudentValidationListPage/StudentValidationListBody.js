@@ -754,15 +754,17 @@ useEffect(() => {
         </table>
       </div>
 
-      <Link
-        to={`/Student/StudentPages/StudentValidationListPage/StudentValidationListAskForValidationPage/StudentValidationListAskForValidation/${studentId}`}
-        state={{ participantAddress }}
-        style={validationListButtonStyle}
-        onMouseOver={(e) => Object.assign(e.target.style, hoverStyle)}
-        onMouseOut={(e) => Object.assign(e.target.style, validationListButtonStyle)}
-      >
-        Ask for Validation
-      </Link>
+      <div style={{ display: 'flex', justifyContent: 'center', marginTop: '20px' }}>
+        <Link
+          to={`/Student/StudentPages/StudentValidationListPage/StudentValidationListAskForValidationPage/StudentValidationListAskForValidation/${studentId}`}
+          state={{ participantAddress }}
+          style={validationListButtonStyle}
+          onMouseOver={(e) => Object.assign(e.target.style, hoverStyle)}
+          onMouseOut={(e) => Object.assign(e.target.style, validationListButtonStyle)}
+        >
+          Ask for Validation
+        </Link>
+      </div>
       </>
 )}
 {activeTab === "RELATED VALIDATIONS" && (
@@ -969,7 +971,7 @@ const containerStyle = {
 
 const mainContentStyle = {
   flex: 1,
-  marginLeft: '20px',
+  marginLeft: '0px',
 };
 
 const tableContainer = {
@@ -1011,26 +1013,27 @@ const filterContainer = {
    
 /* Validation List Button */
 const validationListButtonStyle = {
-  padding: "12px 24px",
-  fontSize: "30px",
+  padding: "10px 20px",
+  fontSize: "16px",
   border: "none",
   backgroundColor: "#007bff",
   color: "white", 
-  borderRadius: "8px",
+  borderRadius: "4px",
   cursor: "pointer",
   transition: "background 0.3s ease, transform 0.2s ease",
-  textDecoration: "none"
-
+  textDecoration: "none",
+  display: "inline-block",
+  margin: "0 auto"
 };
 
 /* Transcript Button */
 const buttonStyle = {
-  padding: "12px 24px",
-  fontSize: "30px",
+  padding: "8px 16px",
+  fontSize: "14px",
   border: "none",
   backgroundColor: "#007bff",
   color: "white", 
-  borderRadius: "8px",
+  borderRadius: "4px",
   cursor: "pointer",
   transition: "background 0.3s ease, transform 0.2s ease",
   textDecoration: "none"

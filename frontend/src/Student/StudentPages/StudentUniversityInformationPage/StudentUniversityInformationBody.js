@@ -123,70 +123,99 @@ const StudentUniversityInformationBody = ({ studentId }) => {
     };
 
     return (
-        <div>
-            <h2>Student's Universities and Degrees</h2>
+        <div style={containerStyle}>
+            <div style={mainContentStyle}>
+                <div style={tableContainer}>
+                    <h2 style={tableTitle}>Student's Universities and Degrees</h2>
            
-            {universities.map((uni) => (
-                <div key={uni.unicode} style={{ marginBottom: "20px", border: "1px solid black", padding: "10px" }}>
-                    <h3>{uni.name}</h3>
-                    <p><strong>ID:</strong> {uni.unicode}</p>
-                    <p><strong>Location:</strong> {uni.location}</p>
+                    {universities.map((uni) => (
+                        <div key={uni.unicode} style={{ marginBottom: "20px", border: "1px solid black", padding: "10px" }}>
+                            <h3>{uni.name}</h3>
+                            <p><strong>ID:</strong> {uni.unicode}</p>
+                            <p><strong>Location:</strong> {uni.location}</p>
 
-                    <h4>Degrees</h4>
-                    <ul>
-                        {degreeDetailsByUniversity[uni.unicode]?.map(degree => (
-                            <li key={degree.degreeid}>
-
-                                <strong>{degree.name} ({degree.degreeId})</strong> <br />
-                                - Coordinator: {degree.teacherName} ({degree.teacherId})<br />
-                                <table style={{ borderCollapse: "collapse", width: "100%", marginTop: "10px" }}>
-                                <thead>
-                                    <tr>
-                                    <th style={tableHeaderStyle}>Teacher ID</th>
-                                    <th style={tableHeaderStyle}>Name</th>
-                                    <th style={tableHeaderStyle}>Course Name</th>
-                                    <th style={tableHeaderStyle}>Period</th>
-                                    <th style={tableHeaderStyle}>Credits</th>
-                                    <th style={tableHeaderStyle}>Taken</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {degree.courseTeachers.map((teacher, i) => (
-                                    <tr key={i}>
-                                        <td style={tableCellStyle}>{teacher.teacherid}</td>
-                                        <td style={tableCellStyle}>{teacher.teachername}</td>
-                                        <td style={tableCellStyle}>{teacher.name} <strong>({teacher.courseid})</strong></td>
-                                        <td style={tableCellStyle}>{teacher.period}</td>
-                                        <td style={tableCellStyle}>{teacher.credits}</td>
-                                        <td style={tableCellStyle}>{isCourseTaken(teacher) ? "✅" : "❌"}</td>
-                          
-                                    </tr>
-                                    ))}
-                                </tbody>
-                                </table>
-
-                            </li>
-                        )) || <p>No degrees found.</p>}
-                    </ul>
+                            <h4>Degrees</h4>
+                            <ul>
+                                {degreeDetailsByUniversity[uni.unicode]?.map(degree => (
+                                    <li key={degree.degreeid}>
+                                        <strong>{degree.name} ({degree.degreeId})</strong> <br />
+                                        - Coordinator: {degree.teacherName} ({degree.teacherId})<br />
+                                        <table style={tableStyle}>
+                                            <thead>
+                                                <tr>
+                                                    <th style={thStyle}>Teacher ID</th>
+                                                    <th style={thStyle}>Name</th>
+                                                    <th style={thStyle}>Course Name</th>
+                                                    <th style={thStyle}>Period</th>
+                                                    <th style={thStyle}>Credits</th>
+                                                    <th style={thStyle}>Taken</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {degree.courseTeachers.map((teacher, i) => (
+                                                    <tr key={i}>
+                                                        <td style={tdStyle}>{teacher.teacherid}</td>
+                                                        <td style={tdStyle}>{teacher.teachername}</td>
+                                                        <td style={tdStyle}>{teacher.name} <strong>({teacher.courseid})</strong></td>
+                                                        <td style={tdStyle}>{teacher.period}</td>
+                                                        <td style={tdStyle}>{teacher.credits}</td>
+                                                        <td style={tdStyle}>{isCourseTaken(teacher) ? "✅" : "❌"}</td>
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </table>
+                                    </li>
+                                )) || <p>No degrees found.</p>}
+                            </ul>
+                        </div>
+                    ))}
                 </div>
-            ))}
+            </div>
         </div>
     );
 };
 
-//Styles
-const tableHeaderStyle = {
-    border: "1px solid black",
-    padding: "8px",
-    backgroundColor: "#f0f0f0",
-    textAlign: "left"
-  };
-  
-  
-  const tableCellStyle = {
-    border: "1px solid black",
-    padding: "8px"
-  };
-  
+// Styles
+const containerStyle = {
+  display: 'flex',
+  height: '100vh',
+  backgroundColor: '#f4f4f4',
+};
+
+const mainContentStyle = {
+  flex: 1,
+  marginLeft: '0px',
+};
+
+const tableContainer = {
+  background: '#fff',
+  padding: '20px',
+  boxShadow: '0px 0px 10px rgba(0, 0, 0, 0.1)',
+};
+
+const tableTitle = {
+  fontSize: '18px',
+  fontWeight: 'bold',
+  marginBottom: '10px',
+};
+
+const tableStyle = {
+  width: '100%',
+  borderCollapse: 'collapse',
+  textAlign: 'center',
+};
+
+const thStyle = {
+  padding: '10px',
+  backgroundColor: '#f4f4f4',
+  fontWeight: 'bold',
+  borderBottom: '2px solid #ccc',
+};
+
+const tdStyle = {
+  padding: '10px',
+  borderBottom: '1px solid #eee',
+  textAlign: 'center',
+};
 
 export default StudentUniversityInformationBody;

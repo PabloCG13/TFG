@@ -20,20 +20,11 @@ const StudentValidationListAskForValidationBody = ({ studentId }) => {
   const [showSelectedCoursesTable, setShowSelectedCoursesTable] = useState(false);
   const [showLeftComparison, setShowLeftComparison] = useState(false);
   const [showRightComparison, setShowRightComparison] = useState(false);
-  const [previousState, setPreviousState] = useState({
-    left: {
-      showTable: true,
-      selectedCourse: null
-    },
-    right: {
-      showUniversityTable: true,
-      showSelectedDegreeTable: false,
-      showSelectedCoursesTable: false,
-      selectedUniversity: null,
-      selectedDegree: null,
-      selectedDstCourse: null
-    }
-  });
+
+  // Reset message when component mounts or studentId changes
+  useEffect(() => {
+    setModalMessage("");
+  }, [studentId]);
 
   // Fetch studies
   useEffect(() => {
@@ -98,6 +89,7 @@ const StudentValidationListAskForValidationBody = ({ studentId }) => {
     setSelectedCourse(course);
     setShowTable(false);
     setShowLeftComparison(true);
+    setModalMessage(""); // Reset message when selecting a new course
   };
 
   const handleUniversityClick = (uni) => {
@@ -141,18 +133,21 @@ const StudentValidationListAskForValidationBody = ({ studentId }) => {
     setShowLeftComparison(false);
     setShowTable(true);
     setSelectedCourse(null);
+    setModalMessage(""); // Reset message when selecting other course
   };
 
   const handleDstCourseClick = (course) => {
     setSelectedDstCourse(course);
     setShowSelectedCoursesTable(false);
     setShowRightComparison(true);
+    setModalMessage(""); // Reset message when selecting a new destination course
   };
 
   const handleSelectOtherDestinationCourse = () => {
     setShowRightComparison(false);
     setShowSelectedCoursesTable(true);
     setSelectedDstCourse(null);
+    setModalMessage(""); // Reset message when selecting other destination course
   };
 
   const handleBackUniversity = () => {
@@ -230,6 +225,7 @@ const StudentValidationListAskForValidationBody = ({ studentId }) => {
 
   return (
     <div style={containerStyle}>
+      {/* Main content with fixed height and scroll */}
       <div style={mainContentStyle}>
         {/* Left Section - Courses */}
         <div style={leftSectionStyle}>
@@ -454,35 +450,50 @@ const StudentValidationListAskForValidationBody = ({ studentId }) => {
         </div>
       </div>
 
-      {/* Accept Button Container */}
-      {(selectedCourse && selectedDstCourse) && (
-        <div style={acceptButtonContainerStyle}>
-          {modalMessage && <p style={messageStyle}>{modalMessage}</p>}
-          <button 
-            onClick={handlePetition} 
-            style={acceptButtonStyle}
-          >
-            Accept
-          </button>
-        </div>
-      )}
+      {/* Fixed Accept Button Container at the bottom */}
+      <div style={fixedFooterStyle}>
+        {(selectedCourse && selectedDstCourse) && (
+          <div style={acceptButtonContainerStyle}>
+            {modalMessage && <p style={messageStyle}>{modalMessage}</p>}
+            <button 
+              onClick={handlePetition} 
+              style={acceptButtonStyle}
+            >
+              Accept
+            </button>
+          </div>
+        )}
+      </div>
     </div>
   );
 };
 
-// Styles
+// Styles (remain the same as in your original code)
 const containerStyle = {
   display: 'flex',
   flexDirection: 'column',
   height: '100vh',
   backgroundColor: '#f4f4f4',
   overflow: 'hidden',
+  position: 'relative',
 };
 
 const mainContentStyle = {
   display: 'flex',
   flex: 1,
-  overflow: 'hidden',
+  overflow: 'auto',
+  paddingBottom: '80px', // Space for the fixed footer
+};
+
+const fixedFooterStyle = {
+  position: 'fixed',
+  bottom: 0,
+  left: 0,
+  right: 0,
+  backgroundColor: '#fff',
+  padding: '10px',
+  boxShadow: '0 -2px 5px rgba(0,0,0,0.1)',
+  zIndex: 100,
 };
 
 const leftSectionStyle = {
@@ -572,6 +583,7 @@ const universityTableHeaderStyle = {
   textAlign: 'left',
   fontWeight: 'bold',
 };
+
 const universityTableCellStyle = {
   padding: '10px',
   borderBottom: '1px solid #ddd',
@@ -612,10 +624,7 @@ const selectOtherButtonStyle = {
 };
 
 const acceptButtonContainerStyle = {
-  padding: '10px',
   textAlign: 'center',
-  backgroundColor: '#fff',
-  marginBottom: '50px' 
 };
 
 const acceptButtonStyle = {

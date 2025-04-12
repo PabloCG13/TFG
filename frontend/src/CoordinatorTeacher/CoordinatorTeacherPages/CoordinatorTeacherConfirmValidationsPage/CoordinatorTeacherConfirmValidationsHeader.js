@@ -1,11 +1,24 @@
-import React from 'react';
+import React, { useState } from 'react';
 import perfil from '../../../Logo/perfil.png'; // Import the image from Logo folder
 import { Link } from 'react-router-dom'; // Import Link to redirect
 import { useLocation } from 'react-router-dom';
 
-const CoordinatorTeacherConfirmValidationHeader = ({teacherId}) => {
+const CoordinatorTeacherValidationListHeader = ({teacherId}) => {
     const location = useLocation();
     const { participantAddress } = location.state || {}; // Extract participantAddress
+    // State to control modal visibility
+    const [isModalOpen, setIsModalOpen] = useState(false);
+
+    // Function to open modal
+    const openModal = () => {
+      setIsModalOpen(true);
+    };
+  
+    // Function to close modal
+    const closeModal = () => {
+      setIsModalOpen(false);
+    };
+
   return (
     <header style={headerStyle}>
       <div style={containerStyle}>
@@ -20,7 +33,7 @@ const CoordinatorTeacherConfirmValidationHeader = ({teacherId}) => {
 
         {/* Title */}
         <div style={titleStyle}>
-          <h1>Confirm Validations</h1>
+        <h1>Confirm Validations</h1>
         </div>
 
         <Link
@@ -32,6 +45,16 @@ const CoordinatorTeacherConfirmValidationHeader = ({teacherId}) => {
         >
         Back
         </Link>
+        {/* Notifications Icon */}
+          <div style={notificationStyle} className="notifications">
+            <button 
+              style={starButtonStyle} 
+              aria-label="Notifications"
+              onClick={openModal} // Open modal on click.
+            >
+            <span className="star">★</span>
+            </button>
+          </div>
       </div>
     </header>
   );
@@ -64,12 +87,6 @@ const imageStyle = {
   height: '80px',
 };
 
-/* Title */ 
-const titleStyle = {
-  flex: 1, 
-  textAlign: 'center', 
-};
-
 /* Back button styles */
 const backButtonStyle = {
   textDecoration: 'none', /* Remove underline */
@@ -88,4 +105,25 @@ const hoverStyle = {
   backgroundColor: "#0056b3", // Changes the background color to a darker blue when the user hover 
 };
 
-export default CoordinatorTeacherConfirmValidationHeader;
+const notificationStyle = {
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  cursor: 'pointer',
+};
+
+const starButtonStyle = {
+  background: 'transparent',
+  border: 'none',
+  color: 'white',
+  fontSize: '30px',
+  cursor: 'pointer',
+};
+
+/* Title */ 
+const titleStyle = {
+  flex: 1, 
+  textAlign: 'center', 
+};
+
+export default CoordinatorTeacherValidationListHeader;

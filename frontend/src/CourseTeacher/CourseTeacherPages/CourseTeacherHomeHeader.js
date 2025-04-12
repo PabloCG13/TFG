@@ -203,113 +203,119 @@ const CourseTeacherHomeHeader = ({ teacherId }) => {
 
       {selectedValidation && (
         <div style={modalOverlayStyle} onClick={() => setSelectedValidation(null)}>
-          <div style={validationModalStyle} onClick={(e) => e.stopPropagation()}>
-            <h2>Validation Details</h2>
-            
-            <div style={comparisonTablesContainer}>
-              <div style={comparisonTableWrapper}>
-                <h3 style={comparisonTableTitle}>My Course</h3>
-                <table border="1" style={universityTableStyle}>
-                  <thead>
-                    <tr>
-                      <th style={universityTableHeaderStyle}>Attribute</th>
-                      <th style={universityTableHeaderStyle}>Value</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <td style={universityTableCellStyle}>University</td>
-                      <td style={universityTableCellStyle}>{srcCourse.unicode}</td>
-                    </tr>
-                    <tr>
-                      <td style={universityTableCellStyle}>Degree</td>
-                      <td style={universityTableCellStyle}>{srcCourse.degreeid}</td>
-                    </tr>
-                    <tr>
-                      <td style={universityTableCellStyle}>Course ID</td>
-                      <td style={universityTableCellStyle}>{srcCourse.courseid}</td>
-                    </tr>
-                    <tr>
-                      <td style={universityTableCellStyle}>Period</td>
-                      <td style={universityTableCellStyle}>{srcCourse.period}</td>
-                    </tr>
-                    <tr>
-                      <td style={universityTableCellStyle}>Credits</td>
-                      <td style={universityTableCellStyle}>{srcCourse.credits}</td>
-                    </tr>
-                  </tbody>
-                </table>
-                
-                <h4 style={syllabusTitleStyle}>Syllabus:</h4>
-                {srcCourse.syllabus_pdf ? (
-                  <embed
-                    src={`data:application/pdf;base64,${srcCourse.syllabus_pdf}`}
-                    style={pdfEmbedStyle}
-                    type="application/pdf"
-                  />
-                ) : (
-                  <p>No Syllabus attached</p>
-                )}
-              </div>
+          <div style={validationModalContainerStyle}>
+            <div style={validationModalContentStyle}>
+              <h2>Validation Details</h2>
+              
+              <div style={comparisonTablesContainer}>
+                <div style={comparisonTableWrapper}>
+                  <h3 style={comparisonTableTitle}>My Course</h3>
+                  <table border="1" style={universityTableStyle}>
+                    <thead>
+                      <tr>
+                        <th style={universityTableHeaderStyle}>Attribute</th>
+                        <th style={universityTableHeaderStyle}>Value</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td style={universityTableCellStyle}>University</td>
+                        <td style={universityTableCellStyle}>{srcCourse.unicode}</td>
+                      </tr>
+                      <tr>
+                        <td style={universityTableCellStyle}>Degree</td>
+                        <td style={universityTableCellStyle}>{srcCourse.degreeid}</td>
+                      </tr>
+                      <tr>
+                        <td style={universityTableCellStyle}>Course ID</td>
+                        <td style={universityTableCellStyle}>{srcCourse.courseid}</td>
+                      </tr>
+                      <tr>
+                        <td style={universityTableCellStyle}>Period</td>
+                        <td style={universityTableCellStyle}>{srcCourse.period}</td>
+                      </tr>
+                      <tr>
+                        <td style={universityTableCellStyle}>Credits</td>
+                        <td style={universityTableCellStyle}>{srcCourse.credits}</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                  
+                  <h4 style={syllabusTitleStyle}>Syllabus:</h4>
+                  {srcCourse.syllabus_pdf ? (
+                    <embed
+                      src={`data:application/pdf;base64,${srcCourse.syllabus_pdf}`}
+                      style={pdfEmbedStyle}
+                      type="application/pdf"
+                    />
+                  ) : (
+                    <p>No Syllabus attached</p>
+                  )}
+                </div>
 
-              <div style={comparisonTableWrapper}>
-                <h3 style={comparisonTableTitle}>Destination Course</h3>
-                <table border="1" style={universityTableStyle}>
-                  <thead>
-                    <tr>
-                      <th style={universityTableHeaderStyle}>Attribute</th>
-                      <th style={universityTableHeaderStyle}>Value</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <td style={universityTableCellStyle}>University</td>
-                      <td style={universityTableCellStyle}>{dstCourse.unicode}</td>
-                    </tr>
-                    <tr>
-                      <td style={universityTableCellStyle}>Degree</td>
-                      <td style={universityTableCellStyle}>{dstCourse.degreeid}</td>
-                    </tr>
-                    <tr>
-                      <td style={universityTableCellStyle}>Course ID</td>
-                      <td style={universityTableCellStyle}>{dstCourse.courseid}</td>
-                    </tr>
-                    <tr>
-                      <td style={universityTableCellStyle}>Period</td>
-                      <td style={universityTableCellStyle}>{dstCourse.period}</td>
-                    </tr>
-                    <tr>
-                      <td style={universityTableCellStyle}>Credits</td>
-                      <td style={universityTableCellStyle}>{dstCourse.credits}</td>
-                    </tr>
-                  </tbody>
-                </table>
-                
-                <h4 style={syllabusTitleStyle}>Syllabus:</h4>
-                {dstCourse.syllabus_pdf ? (
-                  <embed
-                    src={`data:application/pdf;base64,${dstCourse.syllabus_pdf}`}
-                    style={pdfEmbedStyle}
-                    type="application/pdf"
-                  />
-                ) : (
-                  <p>No Syllabus attached</p>
-                )}
+                <div style={comparisonTableWrapper}>
+                  <h3 style={comparisonTableTitle}>Destination Course</h3>
+                  <table border="1" style={universityTableStyle}>
+                    <thead>
+                      <tr>
+                        <th style={universityTableHeaderStyle}>Attribute</th>
+                        <th style={universityTableHeaderStyle}>Value</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td style={universityTableCellStyle}>University</td>
+                        <td style={universityTableCellStyle}>{dstCourse.unicode}</td>
+                      </tr>
+                      <tr>
+                        <td style={universityTableCellStyle}>Degree</td>
+                        <td style={universityTableCellStyle}>{dstCourse.degreeid}</td>
+                      </tr>
+                      <tr>
+                        <td style={universityTableCellStyle}>Course ID</td>
+                        <td style={universityTableCellStyle}>{dstCourse.courseid}</td>
+                      </tr>
+                      <tr>
+                        <td style={universityTableCellStyle}>Period</td>
+                        <td style={universityTableCellStyle}>{dstCourse.period}</td>
+                      </tr>
+                      <tr>
+                        <td style={universityTableCellStyle}>Credits</td>
+                        <td style={universityTableCellStyle}>{dstCourse.credits}</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                  
+                  <h4 style={syllabusTitleStyle}>Syllabus:</h4>
+                  {dstCourse.syllabus_pdf ? (
+                    <embed
+                      src={`data:application/pdf;base64,${dstCourse.syllabus_pdf}`}
+                      style={pdfEmbedStyle}
+                      type="application/pdf"
+                    />
+                  ) : (
+                    <p>No Syllabus attached</p>
+                  )}
+                </div>
               </div>
             </div>
 
-            <div style={buttonContainerStyle}>
-              <button onClick={() => handlePetition(3, selectedValidation)} style={acceptButtonStyle}>
-                Accept
-              </button>
-              <button onClick={() => handlePetition(4, selectedValidation)} style={rejectButtonStyle}>
-                Reject
-              </button>
+            {/* Fixed action buttons container */}
+            <div style={fixedFooterStyle}>
+              <div style={actionButtonsContainer}>
+                <div style={decisionButtonsContainer}>
+                  <button onClick={() => handlePetition(3, selectedValidation)} style={acceptButtonStyle}>
+                    Accept
+                  </button>
+                  <button onClick={() => handlePetition(4, selectedValidation)} style={rejectButtonStyle}>
+                    Reject
+                  </button>
+                </div>
+                <button onClick={() => setSelectedValidation(null)} style={closeButtonStyle}>
+                  Close
+                </button>
+              </div>
             </div>
-
-            <button onClick={() => setSelectedValidation(null)} style={closeButtonStyle}>
-              Close
-            </button>
           </div>
         </div>
       )}
@@ -415,24 +421,59 @@ const modalStyle = {
   overflowY: 'auto',
 };
 
-const validationModalStyle = {
+const validationModalContainerStyle = {
+  display: 'flex',
+  flexDirection: 'column',
   backgroundColor: 'white',
-  padding: '20px',
   borderRadius: '8px',
-  textAlign: 'center',
   width: '90%',
   maxWidth: '1200px',
   maxHeight: '90vh',
+  position: 'relative',
+};
+
+const validationModalContentStyle = {
+  padding: '20px',
   overflowY: 'auto',
+  flex: 1,
+  marginBottom: '120px', // Increased space for fixed buttons
+};
+
+const fixedFooterStyle = {
+  position: 'absolute',
+  bottom: 0,
+  left: 0,
+  right: 0,
+  backgroundColor: '#fff',
+  padding: '15px',
+  boxShadow: '0 -2px 5px rgba(0,0,0,0.1)',
+  borderBottomLeftRadius: '8px',
+  borderBottomRightRadius: '8px',
+  display: 'flex',
+  justifyContent: 'center',
+};
+
+const actionButtonsContainer = {
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'center',
+  gap: '10px',
+};
+
+const decisionButtonsContainer = {
+  display: 'flex',
+  gap: '15px',
 };
 
 const closeButtonStyle = {
   backgroundColor: '#f44336',
   color: 'white',
   border: 'none',
-  padding: '10px',
-  marginTop: '20px',
+  padding: '10px 20px',
+  borderRadius: '5px',
   cursor: 'pointer',
+  width: '50%',
+  maxWidth: '100px',
 };
 
 const hoverStyle = {
@@ -514,18 +555,15 @@ const pdfEmbedStyle = {
   border: '1px solid #ddd',
 };
 
-const buttonContainerStyle = {
-  display: 'flex',
-  justifyContent: 'center',
-  gap: '20px',
-};
-
 const acceptButtonStyle = {
   backgroundColor: 'green',
   color: 'white',
   padding: '10px 20px',
   border: 'none',
+  borderRadius: '5px',
   cursor: 'pointer',
+  width: '100%',
+  maxWidth: '150px',
 };
 
 const rejectButtonStyle = {
@@ -533,7 +571,10 @@ const rejectButtonStyle = {
   color: 'white',
   padding: '10px 20px',
   border: 'none',
+  borderRadius: '5px',
   cursor: 'pointer',
+  width: '100%',
+  maxWidth: '150px',
 };
 
 export default CourseTeacherHomeHeader;

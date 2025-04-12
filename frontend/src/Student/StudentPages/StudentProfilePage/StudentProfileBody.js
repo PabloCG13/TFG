@@ -127,7 +127,7 @@ const styles = {
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
-    paddingTop: '100px',
+    paddingTop: '10px',
     paddingBottom: '100px',
   },
   profileBox: {

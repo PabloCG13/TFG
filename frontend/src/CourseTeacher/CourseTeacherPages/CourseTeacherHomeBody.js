@@ -459,7 +459,7 @@ const buttonStyle = {
 
 const mainContentStyle = {
   flex: 1,
-  marginLeft: "20px",
+  marginLeft: "0px",
 };
 
 const tableContainer = {
