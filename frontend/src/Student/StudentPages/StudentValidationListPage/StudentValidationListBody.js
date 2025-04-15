@@ -965,6 +965,7 @@ useEffect(() => {
 
 const containerStyle = {
   display: 'flex',
+  flexDirection: "column",
   height: '100vh',
   backgroundColor: '#f4f4f4',
 };

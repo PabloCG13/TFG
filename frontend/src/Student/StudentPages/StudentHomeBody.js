@@ -59,8 +59,14 @@ const containerStyle = {
   alignItems: "center",
   height: "100vh", // Full screen height
   gap: "40px", // Space between buttons
-    lexWrap: "wrap", // Prevents overflow on small screens
-};
+  flexWrap: "wrap", // Prevents overflow on small screens
+  overflow: "hidden", // Prevent scrolling
+  position: "fixed", // Fix the container in place
+  width: "100%", // Take full width
+  top: 0, // Align to top
+  left: 0, // Align to left
+ };
+ 
    
 /* Transcript Button */
 const transcriptButtonStyle = {

@@ -87,11 +87,11 @@ const StudentLogin = () => {
           />
         </div>
 
-        {/* Sign In Link */}
+        {/* Sign In Link 
         <div style={linkContainerStyle}>
           <Link to="/Student/StudentSignIn" style={linkStyle}>Sign In</Link>
         </div>
-
+        */}
         {/* Submit button */}
         <button type="submit" style={submitButtonStyle}>Submit</button>
       </form>

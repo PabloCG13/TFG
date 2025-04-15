@@ -468,7 +468,7 @@ const StudentValidationListAskForValidationBody = ({ studentId }) => {
   );
 };
 
-// Styles (remain the same as in your original code)
+// Styles 
 const containerStyle = {
   display: 'flex',
   flexDirection: 'column',
