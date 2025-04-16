@@ -3,10 +3,9 @@ const contractJson = require("./build/contracts/tfg.json");
 const { Web3 } = require("web3");
 const fs = require("fs");
 
-
 // Set up Web3 connection
-const web3 = new Web3("http://ganache:8545"); // Change if necessary
-const contractAddress = "0x5b1869D9A4C187F2EAa108f3062412ecf0526b24";
+const web3 = new Web3("http://ganache:8545");
+const contractAddress = "0xCfEB869F69431e42cdB54A4F4f105C19C080A601";
 const contract = new web3.eth.Contract(contractJson.abi, contractAddress);
 
 
@@ -16,10 +15,11 @@ async function generateSHA256HashMessage(jsonData) {
    	jsonString = jsonData.map(obj=>JSON.stringify(obj, Object.keys(obj).sort())).join("");
    else 
    	jsonString = JSON.stringify(jsonData, Object.keys(jsonData).sort());
-   const hash = crypto.createHash("sha256").update(jsonString).digest("hex");
+   
+    console.log("String",jsonString);
+    const hash = crypto.createHash("sha256").update(jsonString).digest("hex");
    return "0x" + hash;
 }
-
 
 async function modifyTranscript(file, addressStudent, address, type) {
    const studentAddress = addressStudent;
@@ -41,46 +41,44 @@ async function modifyTranscript(file, addressStudent, address, type) {
 
    if (type === 1) {
       try {
+        console.log("I am here");
 	       const hash = await generateSHA256HashMessage(jsonData);
 	       console.log("Transcript HASH:", hash);
 
-
 	       const tx = await contract.methods.updateMark(hash, studentAddress).send({
-		   from: modifierAddress,
-		   gas: 6721975
+            from: modifierAddress,
+            gas: 6721975
 	       });
-
 
 	       console.log("Successful transaction:", tx.transactionHash);
 	       const storedHash = await contract.methods.getTranscriptHash(studentAddress).call();
+           console.log("Stored Hash:", storedHash);
    	       return storedHash;
-   } catch (error) {
-       console.error("Error:", error);
-   }
+        } catch (error) {
+            console.error("Error:", error);
+        }
    }
    else {
       try {
 	       const hash = await generateSHA256HashMessage(jsonData);
 	       console.log("Transcript HASH:", hash);
 
-
 	       const tx = await contract.methods.updateTranscript(hash, studentAddress).send({
-		   from: modifierAddress,
-		   gas: 6721975
+            from: modifierAddress,
+            gas: 6721975
 	       });
-
 
 	       console.log("Successful transaction:", tx.transactionHash);
 	       const storedHash = await contract.methods.getTranscriptHash(studentAddress).call();
 	       return storedHash;
-   } catch (error) {
-       console.error("Error:", error);
-   }
+        } catch (error) {
+            console.error("Error:", error);
+        }
    }
 
 }
 
-
+// Export the function to be used in another file
 module.exports = { modifyTranscript };
 
 

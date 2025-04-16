@@ -6,6 +6,7 @@ contract tfg {
     struct Transcript {
         address[] teachers;
         mapping(address => bool) teacherExists;
+        mapping(address => uint) idToTeacher;
         string hash;
     }
 
@@ -53,15 +54,7 @@ contract tfg {
         );
         _;
     }
-    /*
-    modifier participantIsCourseCoord(address participant) {
-        require(
-            personToHash[participant].role == 2,
-            "Participant is not a course Coordinator"
-        );
-        _;
-    }
-*/
+
     modifier participantIsDegreeCoord(address participant) {
         require(
             personToHash[participant].role == 3,
@@ -145,36 +138,6 @@ contract tfg {
         return sha256(abi.encodePacked(user, passwd));
     }
 
-    /*   function stringToBytes32(string memory s) public pure returns (bytes32) {
-        require(bytes(s).length == 66, "Invalid input length"); // "0x" + 64 hex chars
-
-        bytes memory b = bytes(s);
-        bytes32 result;
-
-        for (uint i = 0; i < 32; i++) {
-            result |=
-                bytes32(
-                    uint256(hexCharToByte(b[2 + i * 2])) *
-                        16 +
-                        uint256(hexCharToByte(b[3 + i * 2]))
-                ) >>
-                (i * 8);
-        }
-        return result;
-    }
-
-    function hexCharToByte(bytes1 c) private pure returns (uint8) {
-        if (c >= "0" && c <= "9") {
-            return uint8(c) - 48;
-        } else if (c >= "a" && c <= "f") {
-            return uint8(c) - 87;
-        } else if (c >= "A" && c <= "F") {
-            return uint8(c) - 55;
-        } else {
-            revert("Invalid hex character");
-        }
-    }
-*/
     function bytes32ToString(
         bytes32 _bytes32
     ) public pure returns (string memory) {
@@ -189,16 +152,13 @@ contract tfg {
         return string(abi.encodePacked("0x", s));
     }
 
-    /*  function test() public view returns (bytes32) {
-        return stringToBytes32(personToHash[msg.sender].hash);
-    }
-*/
     function compareStrings(
         string memory a,
         string memory b
     ) private pure returns (bool) {
         return keccak256(abi.encodePacked(a)) == keccak256(abi.encodePacked(b));
     }
+
     function consultParticipant(
         string memory user,
         string memory passwd,
@@ -217,14 +177,7 @@ contract tfg {
         bytes32 generatedHash = sha256(abi.encodePacked(user, passwd));
         string memory storedHash = bytes32ToString(generatedHash);
 
-        return compareStrings(storedHash, universityToHash[msg.sender]); // Convertir string a bytes32
-
-        /* return
-            keccak256(abi.encodePacked(universityToHash[msg.sender])) ==
-            generatedHash;
-
-        keccak256(abi.encodePacked(personToHash[msg.sender])) ==
-            keccak256(abi.encodePacked(user, passwd, "random_salt_value"));*/
+        return compareStrings(storedHash, universityToHash[msg.sender]); 
     }
 
     function addTeacherToTranscript(
@@ -235,8 +188,29 @@ contract tfg {
             !studentToRecord[student].teacherExists[profesor],
             "Teacher already added"
         );
-        studentToRecord[student].teachers.push(profesor);
+
         studentToRecord[student].teacherExists[profesor] = true;
+        studentToRecord[student].idToTeacher[profesor] = studentToRecord[student].teachers.length;
+        studentToRecord[student].teachers.push(profesor); 
+    }
+
+    function revokeTeacherFromTranscript(
+        address student,
+        address profesor
+    ) public universityExists(msg.sender) participantIsTeacher(profesor) doesTeacherHaveAccess(student,profesor) {
+        studentToRecord[student].teacherExists[profesor] = false;
+        uint index = studentToRecord[student].idToTeacher[profesor];
+        uint lastIndex = studentToRecord[student].teachers.length -1;
+
+        if(index != lastIndex){
+            address lastTeacher = studentToRecord[student].teachers[lastIndex];
+            studentToRecord[student].teachers[index] = lastTeacher;
+
+            studentToRecord[student].idToTeacher[lastTeacher] = index;
+        }
+
+        studentToRecord[student].teachers.pop();
+        delete studentToRecord[student].idToTeacher[profesor];
     }
 
     function getAllowedTeachers(
@@ -258,7 +232,7 @@ contract tfg {
     }
 
     function updateTranscript(
-        string memory hash,
+        string memory hash, 
         address participant
     ) public universityExists(msg.sender) participantIsStudent(participant) {
         studentToRecord[participant].hash = hash;

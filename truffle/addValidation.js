@@ -13,7 +13,7 @@ async function addValidation(address, srcCour, dstCour, _month, _year) {
     const dstCourse = dstCour;
     const month = _month;
     const year = _year;
-    const teacherAddress = address;// await findFirstUnusedAccount();
+    const teacherAddress = address;
 
     try {
         const accounts = await web3.eth.getAccounts();
@@ -21,7 +21,7 @@ async function addValidation(address, srcCour, dstCour, _month, _year) {
         console.log("owner", owner);
         const receipt = await contract.methods.addValidation(teacherAddress, srcCourse, dstCourse, month, year).send({ 
             from: owner, 
-            gas: 6721975  // Aumentar el límite de gas 
+            gas: 6721975  
         });
         console.log("returned hash:", receipt);
         const event = receipt.events.ValidationAdded;

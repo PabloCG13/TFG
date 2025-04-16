@@ -739,7 +739,7 @@ const addCourse = async (course) => {
           console.log("Deleted:", dbDeleteData);
           setMessage(`Degree registered successfully! ID: ${dbCoordData.degreeid}`);
           console.log("Stored Degree:", dbCoordData);
-          handleBlockchain(teacher2.teacherid,uniCode,teacher1.degreeid);
+          handleBlockchain(teacher2.teacherid,uniCode,teacher1.degreeid, teacher1.teacherid);
           setRefreshKey(prev => prev +1);
           return true;
       } else {
@@ -759,9 +759,9 @@ const addCourse = async (course) => {
   }
 
 
-  const handleBlockchain = async (teacherDst, unicodesrc, degreeidsrc) => {
+  const handleBlockchain = async (teacherNew, unicodesrc, degreeidsrc, teacherOld) => {
     // Get the address of the teacher of the DstCourse
-    const dbResponse = await fetch(`http://localhost:5000/api/addresses/participant/${teacherDst}`);
+    const dbResponse = await fetch(`http://localhost:5000/api/addresses/participant/${teacherNew}`);
     const dbData = await dbResponse.json();
   
     if (!dbResponse.ok || !dbData.addressid) {
@@ -772,13 +772,25 @@ const addCourse = async (course) => {
   
     const courseDstAddress = dbData.addressid;
     console.log("Fetched Address from DB:", courseDstAddress);
+
+    const dbResponseOld = await fetch(`http://localhost:5000/api/addresses/participant/${teacherOld}`);
+    const dbDataOld = await dbResponseOld.json();
+  
+    if (!dbResponseOld.ok || !dbDataOld.addressid) {
+      setMessage("No blockchain address found for this user. Please contact support.");
+      console.error("Database error:", dbDataOld);
+      return;
+    }
+  
+    const courseOldAddress = dbDataOld.addressid;
+    console.log("Fetched Address from DB:", courseOldAddress);
   
     // Get validation entries
     const dbStudentsResponse = await fetch(`http://localhost:5000/api/transcripts/erasmusNotConf/${unicodesrc}/${degreeidsrc}`);
     const dbDataStudents = await dbStudentsResponse.json();
   
     if (!dbStudentsResponse.ok) {
-      console.error("Database error:", dbDataStudents); // <-- FIXED: was dbData
+      console.error("Database error:", dbDataStudents); 
       return;
     }
   
@@ -819,6 +831,21 @@ const addCourse = async (course) => {
           const teacherAlreadyAllowed = teachersData.result.includes(courseDstAddress);
           console.log("teacher addresses for", student.studentid, "are", teachersData.result);
           console.log("Is teacher already allowed?", teacherAlreadyAllowed);
+          const validationChangeResponse = await fetch("http://localhost:4000/revokeTeacherFromTranscript", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              addressTeacher: courseOldAddress,
+              addressUniversity: universityAddress,
+              addressStudent: data.addressid
+            }),
+          });
+
+          if (!validationChangeResponse.ok) {
+            const errorText = await validationChangeResponse.text();
+            console.error(`Failed to revoke access for teacher for student ${student.studentid} Transcript. Status: ${validationChangeResponse.status}`, errorText);
+          } 
+          
           //If not add him
           if (!teacherAlreadyAllowed) {
             try {
@@ -834,9 +861,10 @@ const addCourse = async (course) => {
   
               if (!validationResponse.ok) {
                 const errorText = await validationResponse.text();
-                console.error(`Failed to add validation for student ${student.studentid}. Status: ${validationResponse.status}`, errorText);
+                console.error(`Failed to give access for teacher for student ${student.studentid} Transcript Status: ${validationResponse.status}`, errorText);
               } else {
-                console.log(`Validation successfully added for student ${student.studentid}`);
+
+                console.log(`Teachers address successfully added for student ${student.studentid}`);
               }
             } catch (error) {
               console.error(`Network or server error while adding validation for student ${student.studentid}:`, error);
@@ -1181,7 +1209,6 @@ const addCourse = async (course) => {
                 setNewCourse({ ...newCourse, degreeid: newDegreeId });
               }}
               style={inputStyle}  
-
               >
                 {/* If there is more than one degree, invisible Default Option is "". If not is the degreeid of the only degree on the list. */}
                 {degrees.length > 1 ? (
@@ -1213,7 +1240,6 @@ const addCourse = async (course) => {
             <div style={formStyle}>
               <h3 style={formTitleStyle}>Transfer Validations between Teachers</h3>
 
-
               <label>Current Coordinator:</label>
               <select
                 value={teacher1}
@@ -1227,8 +1253,6 @@ const addCourse = async (course) => {
                   </option>
                 ))}
               </select>
-
-
               <label style={{ marginTop: '1rem' }}>New Coordinator:</label>
               <select
                 value={teacher2}
@@ -1243,9 +1267,7 @@ const addCourse = async (course) => {
                 ))}
               </select>
 
-
               <div style={{ marginTop: '1rem' }}>
-
 
               <button
               onClick={() => {
@@ -1261,8 +1283,6 @@ const addCourse = async (course) => {
                 // Optionally close modal
                 setShowTeacherModal(false);
               }}
-
-
                 >
                   Accept
                 </button>
@@ -1273,7 +1293,6 @@ const addCourse = async (course) => {
             </div>
           </div>
         )}
-
 
         {showDegreeForm && (
           <div style={modalStyle}>

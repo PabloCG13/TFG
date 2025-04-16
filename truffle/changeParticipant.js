@@ -3,9 +3,10 @@ const contractJson = require("./build/contracts/tfg.json");
 const { Web3 } = require("web3");
 
 // Set up Web3 connection
-const web3 = new Web3("http://ganache:8545"); // Change if necessary
-const contractAddress = "0x67B5656d60a809915323Bf2C40A8bEF15A152e3e";
+const web3 = new Web3("http://ganache:8545"); 
+const contractAddress = "0xCfEB869F69431e42cdB54A4F4f105C19C080A601";
 const contract = new web3.eth.Contract(contractJson.abi, contractAddress);
+
 
 async function generateSHA256HashMessage(user, passwd) {
     const combinedString = user + passwd;
@@ -13,26 +14,10 @@ async function generateSHA256HashMessage(user, passwd) {
     return "0x" + hash;
 }
 
-async function findFirstUnusedAccount() {
-    const accounts = await web3.eth.getAccounts();
-
-    for (const account of accounts) {
-        const transactionCount = await web3.eth.getTransactionCount(account);
-
-        if (transactionCount === 0) {
-            console.log(`First unused account found: ${account}`);
-            return account;
-        }
-    }
-
-    console.log("No unused accounts found.");
-    return null;
-}
-
 async function changeParticipant(address, user, passwd) {
     const participantName = user;
     const participantPass = passwd;
-    const participantAddress = address;// await findFirstUnusedAccount();
+    const participantAddress = address;
 
     if (!participantAddress) {
         console.error("No available address found.");
@@ -40,13 +25,11 @@ async function changeParticipant(address, user, passwd) {
     }
 
     const participantHash = await generateSHA256HashMessage(participantName, participantPass);
-    //console.log("First Student HASH:", participantHash);
 
     try {
-       
         const tx = await contract.methods.changeParticipant(participantHash).send({ 
             from: participantAddress, 
-            gas: 6721975  // Aumentar el límite de gas 
+            gas: 6721975  
         });
         
         console.log("Successful transaction:", tx.transactionHash);

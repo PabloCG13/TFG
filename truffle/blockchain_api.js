@@ -1,17 +1,17 @@
 const express = require("express");
 const cors = require("cors");
-const { addUniversity } = require("./addUniversity"); // Keep addUniversity.js in backend
+const { addUniversity } = require("./addUniversity"); 
 const { addParticipant } = require("./addParticipant");
 const { changeParticipant } = require("./changeParticipant");
 const { consult } = require("./consult");
 const { askForTranscript } = require("./askForTranscript");
-const { addTeacherToTranscript } = require("./addTeacherToTranscript") 
+const { addTeacherToTranscript } = require("./addTeacherToTranscript");
+const { getTeachersAllowed } = require("./getTeachersAllowed");
+const { revokeTeacherFromTranscript } = require("./revokeTeacherFromTranscript"); 
 const { modifyTranscript } = require("./modifyTranscript");
 const { addValidation } = require("./addValidation");
 const { updateValidation } = require("./updateValidation");
 const { transferValidation } = require("./transferValidation");
-const { getTeachersAllowed } = require("./getTeachersAllowed");
-
 
 
 
@@ -20,15 +20,16 @@ const contractJson = require("./build/contracts/tfg.json");
 const { Web3 } = require("web3");
 
 // Set up Web3 connection
-const web3 = new Web3("http://ganache:8545"); // Change if necessary
-const contractAddress = "0xe78A0F7E598Cc8b0Bb87894B0F60dD2a88d6a8Ab";
+const web3 = new Web3("http://ganache:8545");
+const contractAddress = "0xCfEB869F69431e42cdB54A4F4f105C19C080A601";
 const contract = new web3.eth.Contract(contractJson.abi, contractAddress);
 
 const app = express();
 app.use(express.json());
-//app.use(cors()); // Allow requests from React frontend
 app.use(cors({ origin: "http://localhost:3000" })); // Allow only frontend requests
 
+
+// Creates a new universisty
 app.post("/addUniversity", async (req, res) => {
     try {
         const { address, username, password } = req.body;
@@ -50,6 +51,7 @@ app.post("/addUniversity", async (req, res) => {
     }
 });
 
+// Creates a new participant
 app.post("/addParticipant", async (req, res) => {
     try {
         const { address, uni, user, passwd, role } = req.body;
@@ -71,6 +73,7 @@ app.post("/addParticipant", async (req, res) => {
     }
 });
 
+// Modifies the user and password of the given participant
 app.post("/changeParticipant", async (req, res) => {
     try {
         const { address, user, passwd} = req.body;
@@ -92,6 +95,7 @@ app.post("/changeParticipant", async (req, res) => {
     }
 });
 
+// Given an user and a password checks if it is same as the stored in the contract
 app.post("/consult", async (req, res) => {
     try {
         const { address, user, passwd, role, type } = req.body;
@@ -111,6 +115,7 @@ app.post("/consult", async (req, res) => {
     }
 });
 
+// Get the list of teachers that are allowed to modify the student's Transcrips
 app.post("/getTeachersAllowed", async (req, res) => {
     try {
         const { address } = req.body;
@@ -130,6 +135,7 @@ app.post("/getTeachersAllowed", async (req, res) => {
     }
 });
 
+// Returns the hash of the given student's Transcripts as well as if it was the same as the content in file
 app.post("/askForTranscript", async (req, res) => {
     try {
         const { file, addressStudent } = req.body;
@@ -152,6 +158,7 @@ app.post("/askForTranscript", async (req, res) => {
     }
 });
 
+// Grant access to a student's Transcript for a teacher
 app.post("/addTeacherToTranscript", async (req, res) => {
     try {
         const { addressTeacher, addressUniversity, addressStudent } = req.body;
@@ -167,6 +174,23 @@ app.post("/addTeacherToTranscript", async (req, res) => {
     }
 });
 
+// Remove the access of a given teacher to the student's Transcript
+app.post("/revokeTeacherFromTranscript", async (req, res) => {
+    try {
+        const { addressTeacher, addressUniversity, addressStudent } = req.body;
+
+        if(!addressTeacher || !addressUniversity || !addressStudent ) {
+            return res.status(400).json({ error: "Missing required fields" });
+        }
+
+        const result = await revokeTeacherFromTranscript(addressTeacher, addressUniversity, addressStudent);
+        res.status(200).json({ success: true, result });
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// Update the mark of a given student's Transcript
 app.post("/modifyTranscript", async (req, res) => {
     try {
         const { file, addressStudent, address, type } = req.body;
@@ -182,6 +206,7 @@ app.post("/modifyTranscript", async (req, res) => {
     }
 });
 
+// Create a new validation with the information of the body
 app.post("/addValidation", async (req, res) => {
     try {
         const { address, srcCour, dstCour, _month, _year } = req.body;
@@ -198,11 +223,11 @@ app.post("/addValidation", async (req, res) => {
     }
 });
 
-
+// Modify the expiration date in the given tokenId
 app.post("/updateValidation", async (req, res) => {
     try {
         const { address, tokenId, _month, _year } = req.body;
-        console.log("params", req.body);
+        
         if(!address || !tokenId || !_month || !_year) {
             return res.status(400).json({ error: "Missing required fields" });
         }
@@ -214,6 +239,7 @@ app.post("/updateValidation", async (req, res) => {
     }
 });
 
+// Transfer ownership of a list of tokens from one address to another
 app.post("/transferValidation", async (req, res) => {
     try {
         const { uniAddress, degreeAddr, newDegreeAddr, id } = req.body;

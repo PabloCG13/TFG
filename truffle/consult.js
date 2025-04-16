@@ -3,8 +3,8 @@ const contractJson = require("./build/contracts/tfg.json");
 const { Web3 } = require("web3");
 
 // Set up Web3 connection
-const web3 = new Web3("http://ganache:8545"); // Change if necessary
-const contractAddress = "0x5b1869D9A4C187F2EAa108f3062412ecf0526b24";
+const web3 = new Web3("http://ganache:8545"); 
+const contractAddress = "0xCfEB869F69431e42cdB54A4F4f105C19C080A601";
 const contract = new web3.eth.Contract(contractJson.abi, contractAddress);
 
 

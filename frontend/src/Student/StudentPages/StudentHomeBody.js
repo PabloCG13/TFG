@@ -59,14 +59,8 @@ const containerStyle = {
   alignItems: "center",
   height: "100vh", // Full screen height
   gap: "40px", // Space between buttons
-  flexWrap: "wrap", // Prevents overflow on small screens
-  overflow: "hidden", // Prevent scrolling
-  position: "fixed", // Fix the container in place
-  width: "100%", // Take full width
-  top: 0, // Align to top
-  left: 0, // Align to left
- };
- 
+    lexWrap: "wrap", // Prevents overflow on small screens
+};
    
 /* Transcript Button */
 const transcriptButtonStyle = {
@@ -94,6 +88,7 @@ const validationListButtonStyle = {
   textDecoration: "none"
 };
 
+
 /* University Information Button */
 const universityInformationButtonStyle = {
   padding: "12px 24px",
@@ -120,9 +115,11 @@ const profileButtonStyle = {
   textDecoration: "none"
 };
 
+
 /* Hover */
 const hoverStyle = {
   backgroundColor: "#0056b3", // Changes the background color to a darker blue when the user hover 
 };
+
 
 export default StudentHomeBody;
