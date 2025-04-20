@@ -19,6 +19,8 @@ module.exports = app => {
     
     router.get("/transcripts/erasmusTranscript/:studentId", transcripts.findErasmusCoursesForAStudent);
     
+    router.get("/transcripts/erasmusCredits/:studentId", transcripts.findErasmusCoursesCreditsForAStudent);
+
     router.get("/transcripts/notification/erasmus/:uniCode/:degreeId", transcripts.findErasmusStudentsWithPendingGrades);
 
     router.get("/transcripts/students-in-course/:uniCode/:degreeId/:courseId",transcripts.findStudentsInCourse);

@@ -31,6 +31,8 @@ const StudentValidationListBody = ({ studentId }) => {
   const [requestedRows, setRequestedRows] = useState({});
   const [searchType, setSearchType] = useState(""); //Composed or Inverse
 
+  const [erasmusCredits, setErasmusCredits] = useState([]);
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedValidation, setSelectedValidation] = useState(null);
   const [selectedYear, setSelectedYear] = useState("");
@@ -159,6 +161,22 @@ useEffect(() => {
         .catch((error) => console.error(`Error fetching courses for ${unicode}, ${degreeid}:`, error));
     });
   }, [studentInfo]);
+
+  useEffect(() =>{
+    fetch(`http://localhost:5000/api/transcripts/erasmusCredits/${studentId}`)
+    .then((response) => response.json())
+    .then((data) => {
+      console.log("credits ",data);
+      setErasmusCredits(data);
+    })
+    .catch((error) => console.error("Error fetching credits:", error));
+  },[studentId]);
+
+  const totalErasmusCredits = erasmusCredits.reduce(
+    (sum, entry) => sum + entry.total_credits,
+    0
+  );
+  
 
   const openModalForValidation = (valid) => {
     setSelectedValidation(valid);
@@ -698,6 +716,9 @@ useEffect(() => {
                   v.courseiddst === validatid.courseiddst &&
                   v.provisional !== 1
               );
+              const canChoose = 
+              validatid.provisional === 1 && 
+              (erasmusCredits === 0 || totalErasmusCredits < 60);
               return (
                 <tr key={validatid.unicode}>
                   <td style={tdStyle}>
@@ -727,7 +748,7 @@ useEffect(() => {
                         <span>Already taken</span>
                       ) : alreadyWaitingNotification ? (
                         <span>Pending Notification</span>
-                      ) : validatid.provisional === 1 ? (
+                      ) : canChoose ? (
                         <button
                           style={buttonStyle}
                           onClick={() => openModalForValidation(validatid)}

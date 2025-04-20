@@ -185,6 +185,39 @@ exports.findErasmusCoursesForAStudent = async (req,res) => {
 	}
 }
 
+
+exports.findErasmusCoursesCreditsForAStudent = async (req, res) => {
+    try {
+      const { studentId } = req.params;
+      const rows = await db.any(`
+        SELECT
+          t.uniCode            AS abroad_university,
+          t.degreeId           AS abroad_degree,
+          t.academicYear       AS abroad_year,
+          SUM(c.credits)       AS total_credits
+        FROM transcript t JOIN studies s ON
+         t.studentId = s.studentId
+        JOIN course c ON
+         c.uniCode  = t.uniCodeSrc
+         AND c.degreeId = t.degreeIdSrc
+         AND c.courseId = t.courseIdSrc
+        WHERE t.studentId = $1
+        AND t.degreeId <> s.degreeId  
+        AND t.uniCode <> s.uniCode  
+        AND t.erasmus = 1
+        GROUP BY
+          t.uniCode, t.degreeId, t.academicYear
+        ORDER BY
+          t.academicYear
+      `, [studentId]);
+  
+      res.status(200).json(rows);
+    } catch (err) {
+      res.status(500).json({ message: err.message || "Some error occurred" });
+    }
+};
+  
+
 // Get one transcript by code
 exports.findOne = async (req, res) => {
     try {
