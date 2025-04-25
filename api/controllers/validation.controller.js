@@ -136,53 +136,56 @@ exports.findAllProvisionalValidationsForDegreeinUni = async (req, res) => {
 };
 
 // Get all validations that belong to a certain university and degree that have not been approved/rejected
-exports.findComposedValidationsForCourseinUni = async (req, res) => { 
-    try {
-        const { uniCode, degreeId, courseId, uniCodeDst, degreeIdDst } = req.params;
+exports.findComposedValidationsForCourseinUni = async (req, res) => {
+  try {
+    const { uniCode, degreeId, courseId, uniCodeDst, degreeIdDst } = req.params;
 
+    const validations = await db.any(`
+      (
+        SELECT 
+          v1.courseIdSrc AS courseIdSrc,
+          v1.courseIdDst AS courseIdMid,
+          v2.courseIdDst AS courseIdDst,
+          v2.period AS period,
+          v2.provisional AS provisional,
+          v2.uniCodeDst AS uniCodeDst,
+          v2.degreeIdDst AS degreeIdDst,
+          v2.courseIdDst AS courseIdDst
+        FROM 
+          validation v1
+        JOIN 
+          validation v2
+          ON v1.uniCodeDst = v2.uniCodeSrc
+          AND v1.degreeIdDst = v2.degreeIdSrc
+          AND v1.courseIdDst = v2.courseIdSrc
+        WHERE 
+          v1.uniCodeSrc = $1
+          AND v1.degreeIdSrc = $2
+          AND v1.courseIdSrc = $3
+          AND v2.uniCodeDst = $4
+          AND v2.degreeIdDst = $5
+          AND NOT EXISTS (
+            SELECT 1
+            FROM validation direct
+            WHERE
+              direct.uniCodeSrc = $1
+              AND direct.degreeIdSrc = $2
+              AND direct.courseIdSrc = $3
+              AND direct.uniCodeDst = v2.uniCodeDst
+              AND direct.degreeIdDst = v2.degreeIdDst
+              AND direct.courseIdDst = v2.courseIdDst
+          )
+      );
+    `, [uniCode, degreeId, courseId, uniCodeDst, degreeIdDst]);
 
-        const validations = await db.any(`
-        (
-            SELECT 
-                v1.*, v2.*
-            FROM 
-                validation v1
-            JOIN 
-                validation v2
-                ON v1.uniCodeDst = v2.uniCodeSrc
-                AND v1.degreeIdDst = v2.degreeIdSrc
-                AND v1.courseIdDst = v2.courseIdSrc
-            WHERE 
-                v1.uniCodeSrc = $1
-                AND v1.degreeIdSrc = $2
-                AND v1.courseIdSrc = $3
-                AND v2.uniCodeDst = $4
-                AND v2.degreeIdDst = $5
-                AND NOT EXISTS (
-            		SELECT 1
-            		FROM validation direct
-            		WHERE
-            		direct.unicodeSrc = $1
-            		AND direct.degreeIdSrc = $2
-            		AND direct.courseIdSrc = $3
-            		AND direct.uniCodeDst = v2.uniCodeDst
-            		AND direct.degreeIdDst = v2.degreeIdDst
-            		AND direct.courseIdDst = v2.courseIdDst
-            	)
-            		
-          );   
-        `, [uniCode, degreeId, courseId, uniCodeDst, degreeIdDst]);
-
-
-        if (!validations) {
-            return res.status(404).json({ message: "No validations found" });
-        }
-
-
-        res.status(200).json(validations);
-    } catch (err) {
-        res.status(500).json({ message: err.message || "Some error occurred" });
+    if (!validations || validations.length === 0) {
+      return res.status(404).json({ message: "No composed validations found" });
     }
+
+    res.status(200).json(validations);
+  } catch (err) {
+    res.status(500).json({ message: err.message || "Some error occurred" });
+  }
 };
 
 exports.findInverseValidationsForCourseinUni = async (req, res) => { 
@@ -207,9 +210,9 @@ exports.findInverseValidationsForCourseinUni = async (req, res) => {
             		direct.unicodeSrc = $1
             		AND direct.degreeIdSrc = $2
             		AND direct.courseIdSrc = $3
-            		AND direct.uniCodeDst = v1.uniCodeDst
-            		AND direct.degreeIdDst = v1.degreeIdDst
-            		AND direct.courseIdDst = v1.courseIdDst
+            		AND direct.uniCodeDst = v1.uniCodeSrc
+            		AND direct.degreeIdDst = v1.degreeIdSrc
+            		AND direct.courseIdDst = v1.courseIdSrc
             	)
             		
           );   

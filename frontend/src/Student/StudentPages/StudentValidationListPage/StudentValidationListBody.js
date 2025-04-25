@@ -763,7 +763,7 @@ useEffect(() => {
                           Notify
                         </button>
                       ):(
-                        <span style={{ color: "#aaa" }}>Not your Erasmus University</span> 
+                       <span style={{ color: "#aaa" }}>Not your Erasmus University</span>
                       )
                   ) : (
                     <span style={{ color: "#aaa" }}>No action available</span> // si quieres un mensaje gris, opcional
@@ -912,6 +912,7 @@ useEffect(() => {
     	   <th style={thStyle}>Validity Period</th>
     	   <th style={thStyle}>Status</th>
     	   <th style={thStyle}>Action</th>
+    	   <th style={thStyle}>Path</th>
     	  </tr>
     	 </thead>
     	 <tbody>
@@ -941,6 +942,13 @@ useEffect(() => {
     	    		}} style={buttonStyle}>Request</button>
     	    		)}
     	    </td>
+		<td style={{ ...tdStyle, verticalAlign: "middle", padding: "8px" }}>
+		  {searchType === "composed" ? (
+		    <span>{`${validation.courseidsrc} ➝ ${validation.courseidmid} ➝ ${validation.courseiddst}`}</span>
+		 ) : (
+		    <span>{`${validation.courseidsrc} ➝ ${validation.courseiddst}`}</span>		 
+		 )}
+		</td>
     	   </tr>
     	  ))}
     	 </tbody>
