@@ -170,7 +170,7 @@ useEffect(() => {
       setErasmusCredits(data);
     })
     .catch((error) => console.error("Error fetching credits:", error));
-  },[studentId]);
+  },[studentId,refreshKey]);
 
   const totalErasmusCredits = erasmusCredits.reduce(
     (sum, entry) => sum + entry.total_credits,
@@ -718,7 +718,7 @@ useEffect(() => {
               );
               const canChoose = 
               validatid.provisional === 1 && 
-              (erasmusCredits === 0 || totalErasmusCredits < 60);
+              (erasmusCredits.length === 0 || (totalErasmusCredits < 60 && validatid.unicodedst === erasmusCredits[0].abroad_university && validatid.degreeiddst === erasmusCredits[0].abroad_degree));
               return (
                 <tr key={validatid.unicode}>
                   <td style={tdStyle}>
@@ -755,13 +755,15 @@ useEffect(() => {
                         >
                           Choose
                         </button>
-                      ) : (
+                      ) : validatid.provisional !== 1 ? (
                         <button
                           style={buttonStyle}
                           onClick={() => handleNotifyPetition(validatid)}
                         >
                           Notify
                         </button>
+                      ):(
+                        <span style={{ color: "#aaa" }}>Not your Erasmus University</span> 
                       )
                   ) : (
                     <span style={{ color: "#aaa" }}>No action available</span> // si quieres un mensaje gris, opcional
