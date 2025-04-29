@@ -65,7 +65,7 @@ const CourseTeacherHomeBody = ({teacherId}) => {
       
 }, [teacherId]);
   	
-  //};
+  //;
   const years = useMemo(() => {
   	return [...new Set(students.map(student => student.academicyear))];
   }, [students]);
@@ -324,20 +324,20 @@ const handleConfirm = async () => {
         <table style={tableStyle}>
           <thead>
             <tr>
-              <th>ID</th>
-              <th>Degree</th>
-              <th>Grade</th>
-              <th>Provisional</th>
-              <th>Action</th>
+              <th style={thStyle}>ID</th>
+              <th style={thStyle}>Degree</th>
+              <th style={thStyle}>Grade</th>
+              <th style={thStyle}>Provisional</th>
+              <th style={thStyle}>Action</th>
             </tr>
           </thead>
           <tbody>
             {filteredStudents.map((student, index) => (
               <tr key={index}>
-                <td>{student.studentid}</td>
-                <td>{student.degreeid}</td>
-                <td>{convertMark(student.mark)}</td>
-                <td>
+                <td style={tdStyle}>{student.studentid}</td>
+                <td style={tdStyle}>{student.degreeid}</td>
+                <td style={tdStyle}>{convertMark(student.mark)}</td>
+                <td style={tdStyle}>
                   <span style={lockIconStyle}>
                     {student.provisional === 0 ? "🔓" : "🔒"} 
                   </span>
@@ -347,7 +347,7 @@ const handleConfirm = async () => {
                       <span style={{ color: "green", fontWeight: "bold" }}>Mark Confirmed</span>
                     ) : (
                   <>
-                  <td>
+                  <td style={tdStyle}>
                   <button style={buttonStyle} onClick={() => openModal(student)}>
                   Modify
                   </button>
@@ -477,6 +477,19 @@ const tableTitle = {
 const tableStyle = {
   width: "100%",
   borderCollapse: "collapse",
+  textAlign: "center",
+};
+
+const thStyle = {
+  padding: "10px",
+  backgroundColor: "#f4f4f4",
+  fontWeight: "bold",
+  borderBottom: "2px solid #ccc",
+};
+
+const tdStyle = {
+  padding: "10px",
+  borderBottom: "1px solid #eee",
   textAlign: "center",
 };
 

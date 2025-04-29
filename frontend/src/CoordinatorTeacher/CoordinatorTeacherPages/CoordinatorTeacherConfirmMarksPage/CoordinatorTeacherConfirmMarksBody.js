@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useMemo } from "react";
 import { useLocation } from 'react-router-dom';
 
@@ -428,21 +427,21 @@ const handleFinalConfirm = async (selStudent) => {
         <table style={tableStyle}>
           <thead>
             <tr>
-              <th>ID</th>
-              <th>Degree</th>
-              <th>Course</th>
-              <th>Grade</th>
-              <th>Provisional</th>
+              <th style={thStyle}>ID</th>
+              <th style={thStyle}>Degree</th>
+              <th style={thStyle}>Course</th>
+              <th style={thStyle}>Grade</th>
+              <th style={thStyle}>Provisional</th>
             </tr>
           </thead>
           <tbody>
             {filteredStudents.map((student, index) => (
               <tr key={index}>
-                <td>{student.studentid}</td>
-                <td>{student.degreeid}</td>
-                <td>{student.courseid}</td>
-                <td>{convertMark(student.mark)}</td>
-                <td>
+                <td style={tdStyle}>{student.studentid}</td>
+                <td style={tdStyle}>{student.degreeid}</td>
+                <td style={tdStyle}>{student.courseid}</td>
+                <td style={tdStyle}>{convertMark(student.mark)}</td>
+                <td style={tdStyle}>
                   <span style={lockIconStyle}>
                     {student.provisional === 0 ? "🔓" : "🔒"} 
                   </span>
@@ -589,6 +588,19 @@ const tableTitle = {
 const tableStyle = {
   width: "100%",
   borderCollapse: "collapse",
+  textAlign: "center",
+};
+
+const thStyle = {
+  padding: "10px",
+  backgroundColor: "#f4f4f4",
+  fontWeight: "bold",
+  borderBottom: "2px solid #ccc",
+};
+
+const tdStyle = {
+  padding: "10px",
+  borderBottom: "1px solid #eee",
   textAlign: "center",
 };
 

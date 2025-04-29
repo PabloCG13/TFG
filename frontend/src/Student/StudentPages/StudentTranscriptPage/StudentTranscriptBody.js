@@ -69,28 +69,28 @@ const StudentTranscriptBody= ({studentId}) => {
           <table style={tableStyle}>
           <thead>
             <tr>
-              <th>Degree ID</th>
-              <th>Course ID</th>
-              <th>Mark</th>
-              <th>Provisional</th>
-              <th>Academic Year</th>
-              <th>Erasmus</th>
+              <th style={thStyle}>Degree ID</th>
+              <th style={thStyle}>Course ID</th>
+              <th style={thStyle}>Mark</th>
+              <th style={thStyle}>Provisional</th>
+              <th style={thStyle}>Academic Year</th>
+              <th style={thStyle}>Erasmus</th>
             </tr>
           </thead>
           <tbody>
           {studentCourse.map((course) => (
             <React.Fragment key={course.courseid}>
               <tr>
-                <td>{course.degreeid}</td>
-                <td>{course.courseid}</td>
-                <td>{course.mark}</td>
-                <td>
+                <td style={tdStyle}>{course.degreeid}</td>
+                <td style={tdStyle}>{course.courseid}</td>
+                <td style={tdStyle}>{course.mark}</td>
+                <td style={tdStyle}>
                   <span style={lockIconStyle}>
                     {course.provisional === 0 ? "🔓" : "🔒"} 
                   </span>
                 </td>
-                <td>{course.academicyear}</td>
-                <td>{course.erasmus}</td>
+                <td style={tdStyle}>{course.academicyear}</td>
+                <td style={tdStyle}>{course.erasmus}</td>
               </tr>
               {course.erasmus === 1 && (
                 <tr>
@@ -152,6 +152,19 @@ const tableTitle = {
 const tableStyle = {
   width: "100%",
   borderCollapse: "collapse",
+  textAlign: "center",
+};
+
+const thStyle = {
+  padding: "10px",
+  backgroundColor: "#f4f4f4",
+  fontWeight: "bold",
+  borderBottom: "2px solid #ccc",
+};
+
+const tdStyle = {
+  padding: "10px",
+  borderBottom: "1px solid #eee",
   textAlign: "center",
 };
 
