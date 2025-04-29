@@ -428,7 +428,7 @@ const profileTitle = {
 const inputStyle = {
   width: "100%",
   padding: "10px",
-  margin: "10px 0",
+  margin: "10px -10px",
   borderRadius: "5px",
   border: "1px solid #bdc3c7",
   fontSize: "16px",
@@ -498,7 +498,7 @@ const modalStyle = {
   padding: "20px",
   borderRadius: "8px",
   textAlign: "center",
-  width: "400px",
+  width: "250px",
 };
 
 const confirmButtonStyle = {

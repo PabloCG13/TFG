@@ -202,7 +202,7 @@ const modalStyle = {
   padding: "20px",
   borderRadius: "8px",
   textAlign: "center",
-  width: "400px",
+  width: "600px",
 };
 
 const closeButtonStyle = {
