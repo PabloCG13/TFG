@@ -90,7 +90,7 @@ const StudentTranscriptBody= ({studentId}) => {
                   </span>
                 </td>
                 <td style={tdStyle}>{course.academicyear}</td>
-                <td style={tdStyle}>{course.erasmus}</td>
+                <td style={tdStyle}>{course.erasmus ? "✅" : "❌"}</td>
               </tr>
               {course.erasmus === 1 && (
                 <tr>

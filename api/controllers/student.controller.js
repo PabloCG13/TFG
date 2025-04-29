@@ -1,7 +1,7 @@
 const db = require("../config/db.js"); // Import pg-promise instance
 
 // Create student
-exports.create = async (req, res) => { //TODO lastAccess shouldnt be inserted; check if the values $4 syntax is correct 
+exports.create = async (req, res) => { 
     try {
         const { studentId, name, dob, dni, transcriptHash, hash } = req.body;
         const query = `

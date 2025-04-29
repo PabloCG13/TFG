@@ -4,10 +4,8 @@ import { Link, useNavigate } from 'react-router-dom'; // Import useNavigate for 
 const UniversityLogin = () => {
   const [user, setUser] = useState('');
   const [passwd, setPasswd] = useState('');
-  const [message, setMessage] = useState(null); // State for error messages
-  const navigate = useNavigate(); // Navigation hook
-
-  // const universityAddress = "0xBC2cf859f671B78BA42EBB65Deb31Cc7fEc07019"; // Fixed address
+  const [message, setMessage] = useState(null); 
+  const navigate = useNavigate(); 
 
   // Function to handle login
   const handleSubmit = async (e) => {

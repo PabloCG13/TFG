@@ -86,8 +86,6 @@ const CoordinatorTeacherConfirmMarksBody = ({teacherId}) => {
     //setStudents({...selectedStudent, mark: event.target.value });
   };
 
-
-  // TODO check if the api call fails if the frontend grade changes
   // Function to confirm the new grade
 const handleConfirm = async () => {
   // Actualizar la nota en el estado de students sin hacer un nuevo fetch
@@ -201,28 +199,9 @@ const handleConfirm = async () => {
   closeModal();
 };
 
-// TODO check it works properly. The part needed is not done yet
 const handleFinalConfirm = async (selStudent) => {
 
   try {
-    //const currentTimestamp = new Date().toISOString();
-    // const dbResponse = await fetch(`http://localhost:5000/api/transcripts/${selStudent.unicode}/${selStudent.degreeid}/${selStudent.courseid}/${selStudent.studentid}/${selStudent.academicyear}`, {
-    //   method: "PUT",
-    //   headers: { "Content-Type": "application/json" },
-    //   body: JSON.stringify({
-    //     provisional: 1, // Assuming provisional is still part of the request
-    //     lastAccess: currentTimestamp
-    //   }),
-    // });
-
-    // // Handle the response from the database 
-    // if (dbResponse.ok) {
-    //   const responseJson = await dbResponse.json();
-    //   console.log('New mark updated response:', responseJson);
-    // } else {
-    //   throw new Error('Failed to update mark');
-    // }
-
     const dbResponseAddress = await fetch(`http://localhost:5000/api/addresses/participant/${selStudent.studentid}`);
     if (!dbResponseAddress.ok) {
       throw new Error(`Failed to fetch student address. Status: ${dbResponseAddress.status}`);
@@ -432,6 +411,8 @@ const handleFinalConfirm = async (selStudent) => {
               <th style={thStyle}>Course</th>
               <th style={thStyle}>Grade</th>
               <th style={thStyle}>Provisional</th>
+              <th style={thStyle}>Action</th>
+              <th style={thStyle}></th>
             </tr>
           </thead>
           <tbody>
@@ -451,19 +432,18 @@ const handleFinalConfirm = async (selStudent) => {
                 ):((student.mark !== null && student.provisional !== 1)
                   ?(
                   <>
-                  <td>
-                  <button style={buttonStyle} onClick={() => openModal(student)}>
+                
+                <td>
+                <button style={buttonStyle} onClick={() => openModal(student)}>
                   Modify
                   </button>
-                </td>
-                <td>
-                  {/*TODO fix so it works*/}
+                  
                   <button style={buttonStyle} onClick={() => handleFinalConfirm(student)}>
                   Confirm
                   </button></td>
                   </>
                 ) : (
-                  <span style={{ color: "green", fontWeight: "bold" }}>Mark Confirmed</span>
+                  <span style={{ color: "green", fontWeight: "bold", display: "inline-block", padding: "10px 0"  }}>Mark Confirmed</span>
                 ))}
                 
               </tr>
@@ -566,6 +546,7 @@ const buttonStyle = {
   borderRadius: "5px",
   cursor: "pointer",
   marginTop: "10px",
+  marginRight: "10px",
 };
 
 const mainContentStyle = {

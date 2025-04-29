@@ -21,7 +21,7 @@ const StudentValidationListBody = ({ studentId }) => {
   const [relatedValidations, setRelatedValidations] = useState([]);
   const [selectedUniversity, setSelectedUniversity] = useState(null);
   const [selectedDegree, setSelectedDegree] = useState(null);
-  const [hasSearched, setHasSearched] = useState(false); //TODO not the best way to do this since it wont be responsive when multiple fails in a row
+  const [hasSearched, setHasSearched] = useState(false); 
   
   const [universitiesRelated, setUniversitiesRelated] = useState({});
   const [message, setMessage] = useState(null); // State for error messages
@@ -488,7 +488,7 @@ useEffect(() => {
     console.log("He pulsado el boton de Choose");
     console.log("Validation selected:",validatid);
 	
-   //TODO añadir validation al transcript. Se asume que el usuario sabe lo que hace. Hay que añadir a la estructura de studentTranscript también para que desaparezca el boton de choose. Además, hay que poner un academic year.
+
    handleBlockchain(validatid,validatid.period, validatid.unicodesrc, validatid.degreeidsrc, validatid.courseidsrc, validatid.unicodedst, validatid.degreeiddst, validatid.courseiddst);
 
 

@@ -85,12 +85,7 @@ const CourseTeacherLogin = () => {
             style={inputStyle}
           />
         </div>
-
-        {/* Sign In Link 
-        <div style={linkContainerStyle}>
-          <Link to="/CourseTeacher/CoordinatorTeacherSignIn" style={linkStyle}>Sign In</Link>
-        </div>
-        */}
+        
         {/* Submit button */}
         <button type="submit" style={submitButtonStyle}>Submit</button>
       </form>

@@ -1,7 +1,7 @@
 const db = require("../config/db.js"); // Import pg-promise instance
 
 // Create teacher
-exports.create = async (req, res) => { //TODO test if it works, then check if putting lastAccess and not putting any value on the req works (auto null?)
+exports.create = async (req, res) => { 
     try {
         const { teacherId, name, hash, uniCode } = req.body;
         const query = `

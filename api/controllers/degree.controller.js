@@ -89,7 +89,7 @@ exports.update = async (req, res) => {
         	index++;
         }
         
-        values.push(uniCode, degreeId); //TODO check syntax
+        values.push(uniCode, degreeId); 
         
         const query = `
             UPDATE degree

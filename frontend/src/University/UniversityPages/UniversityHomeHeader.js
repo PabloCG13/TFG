@@ -48,7 +48,7 @@ const UniversityHomeHeader = () => {
             <button 
               style={starButtonStyle} 
               aria-label="Notifications"
-              onClick={openModal} // Open modal on click.
+              onClick={openModal} 
             >
             <span className="star">★</span>
             </button>
@@ -115,20 +115,18 @@ const starButtonStyle = {
   cursor: 'pointer',
 };
 
-/* Back button styles */
 const backButtonStyle = {
-  textDecoration: 'none', /* Remove underline */
-  backgroundColor: '#ff4c4c', /* Red background */
-  color: 'white', /* White text */
-  padding: '10px 20px', /* Padding */
-  borderRadius: '5px', /* Rounded corners */
+  textDecoration: 'none', 
+  backgroundColor: '#ff4c4c', 
+  color: 'white', 
+  padding: '10px 20px', 
+  borderRadius: '5px', 
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
-  transition: 'background-color 0.3s', /* Smooth transition for hover effect */
+  transition: 'background-color 0.3s', 
 };
 
-// Modal Styles
 const modalOverlayStyle = {
   position: 'fixed',
   top: 0,
@@ -139,7 +137,7 @@ const modalOverlayStyle = {
   display: 'flex',
   justifyContent: 'center',
   alignItems: 'center',
-  zIndex: 1000, // Ensures that modal is above other elements.
+  zIndex: 1000, 
 };
 
 const modalStyle = {
@@ -147,7 +145,7 @@ const modalStyle = {
   padding: '20px',
   borderRadius: '8px',
   textAlign: 'center',
-  width: '600px', // Adjust modal style
+  width: '600px', 
 };
 
 const closeButtonStyle = {
@@ -161,7 +159,7 @@ const closeButtonStyle = {
 
 /* Hover */
 const hoverStyle = {
-  backgroundColor: "#0056b3", // Changes the background color to a darker blue when the user hover 
+  backgroundColor: "#0056b3",  
 };
 
 export default UniversityHomeHeader;

@@ -12,52 +12,7 @@ const CoordinatorTeacherHomeHeader = ({teacherId}) => {
   const [erasmusGradeConfirmations, setErasmusGradeConfirmations] = useState([]);
   
   const [isModalOpen, setIsModalOpen] = useState(false);
-/*
-  const fetchValidations = () => {
-    let degreeInfo = null; // To store the unicode and degreeid
-  
-  
-    fetch(`http://localhost:5000/api/degrees/${teacherId}`)
-      .then(response => {
-        if (!response.ok) {
-          throw new Error(`Failed to fetch degree. Status: ${response.status}`);
-        }
-        return response.json();
-      })
-      .then(data => {
-        if (!data.degreeid || !data.unicode) {
-          throw new Error("degreeid or unicode is missing in API response");
-        }
-  
-  
-        degreeInfo = data; // Store it for reuse
-        console.log("Extracted degree ID:", data.degreeid, data.unicode);
-        return fetch(`http://localhost:5000/api/validations/provisional/answers/${data.unicode}/${data.degreeid}`);
-      })
-      .then(response => {
-        if (!response.ok) {
-          throw new Error(`Failed to fetch students. Status: ${response.status}`);
-        }
-        return response.json();
-      })
-      .then(validData => {
-        setValidations(validData);
-        console.log("Updated validations:", validData);
-        return fetch(`http://localhost:5000/api/validations/provisional/notification/${degreeInfo.unicode}/${degreeInfo.degreeid}`);
-      })
-      .then(response => {
-        if (!response.ok) {
-          throw new Error(`Failed to fetch notification validations. Status: ${response.status}`);
-        }
-        return response.json();
-      })
-      .then(newValidData => {
-        setNewValidations(newValidData);
-        console.log("Updated new validations:", newValidData);
-      })
-      .catch(error => console.error("Error:", error));
-  };  
-*/
+
   const fetchValidations = () => {
   let degreeInfo = null; // To store the unicode and degreeid
 
@@ -344,7 +299,7 @@ const modalStyle = {
   padding: '20px',
   borderRadius: '8px',
   textAlign: 'center',
-  width: '600px', // Adjust modal style
+  width: '650px', // Adjust modal style
 };
 
 const closeButtonStyle = {

@@ -88,7 +88,6 @@ const CourseTeacherHomeBody = ({teacherId}) => {
     //setStudents({...selectedStudent, mark: event.target.value });
   };
   
-  // TODO check if the api call fails if the frontend grade changes
   // Function to confirm the new grade
 const handleConfirm = async () => {
   // Actualizar la nota en el estado de students sin hacer un nuevo fetch
@@ -344,7 +343,7 @@ const handleConfirm = async () => {
                 </td>
 
                 {student.mark !== null ? (
-                      <span style={{ color: "green", fontWeight: "bold" }}>Mark Confirmed</span>
+                      <span style={{ color: "green", fontWeight: "bold",display: "inline-block", padding: "10px 0" }}>Mark Confirmed</span>
                     ) : (
                   <>
                   <td style={tdStyle}>

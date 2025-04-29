@@ -90,7 +90,7 @@ exports.update = async (req, res) => {
         	index++;
         }
         
-        values.push(studentId, uniCode, degreeId); //TODO check syntax
+        values.push(studentId, uniCode, degreeId); 
         
         const query = `
             UPDATE studies

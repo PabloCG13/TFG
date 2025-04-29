@@ -8,7 +8,7 @@ const UniversitySignIn = () => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [country, setCountry] = useState("");
   const [city, setCity] = useState("");
-  const [message, setMessage] = useState(""); // State to display messages
+  const [message, setMessage] = useState("");
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -26,9 +26,6 @@ const UniversitySignIn = () => {
     console.log("País:", country);
     console.log("Ciudad:", city);
     console.log("Contraseña:", password);
-
-
-    // const universityAddress = "0x709F7Ae06Fe93be48FbB90FFDDd69e2746FA8506"; // Fixed address
 
     try { 
       const addressResponse = await fetch(`http://localhost:5000/api/addresses/any-participant/null-participant`); 

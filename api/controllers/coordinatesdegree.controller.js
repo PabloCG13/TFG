@@ -60,7 +60,7 @@ exports.update = async (req, res) => {
         	index++;
         }
         
-        values.push(teacherId); //TODO check syntax
+        values.push(teacherId); 
         
         const query = `
             UPDATE coordinatesdegree

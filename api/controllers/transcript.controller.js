@@ -145,7 +145,7 @@ exports.findErasmusNotConfirmedStudents = async (req,res) => {
 }
 
 
-exports.findErasmusStudentsWithPendingGrades = async (req,res) => {//TODO in the query: provisional = 0 or 1?
+exports.findErasmusStudentsWithPendingGrades = async (req,res) => {
 	try{
     	const { uniCode, degreeId } = req.params; 
     	const transcripts = await db.any(`

@@ -41,7 +41,7 @@ const UniversityHomeBody = ({ uniCode }) => {
   const [refreshKey, setRefreshKey] = useState(0);
   const [refreshKey2, setRefreshKey2] = useState(0);
 
-  const [erasmus, setErasmus] = useState(false); // Estado para Erasmus
+  const [erasmus, setErasmus] = useState(false); 
 
   useEffect(() => {
     if (!uniCode) return;
@@ -213,7 +213,6 @@ const UniversityHomeBody = ({ uniCode }) => {
         return false;
       }
   
-  
       // If the response status is 400, the teacher **does NOT exist**, continue with the process
       console.log("Student ID is available, proceeding with creation...");
 
@@ -235,7 +234,7 @@ const UniversityHomeBody = ({ uniCode }) => {
       const transcriptData = await transcriptResponse.json();
       const transcriptHash = transcriptData.hash;
 
-      if (transcriptResponse.ok) {//Register into the students and studies tables
+      if (transcriptResponse.ok) { // Register into the students and studies tables
         console.log("Transcript modified successfully:", transcriptHash);
         const dbResponseTranscript = await fetch(`http://localhost:5000/api/students`, {
             method: "POST",
@@ -455,7 +454,7 @@ const addCourse = async (course) => {
       const teacher = newTeacher;
       success = await addTeacher(teacher);
     } 
-    else if(type === "degrees"){//TODO: da un error al añadir un degree
+    else if(type === "degrees"){
       const degree = newDegree;
       success = await addDegree(degree);
     }else if(type==="courses"){
@@ -465,7 +464,6 @@ const addCourse = async (course) => {
     else {
       if (!newEntry) return;
     }
-    /*--------------------------------------------------------------------------- */
     
     // Update state after successful addition to the DB
     if(success){
@@ -511,10 +509,10 @@ const addCourse = async (course) => {
           uniCode: uniCode,
           degreeId: degreeId,
           courseId: courseId,
-          studentId: studentId, // You can include the student ID here if needed in the request body
+          studentId: studentId, 
           academicYear: year,
           erasmus: 0,
-          provisional: 0, // Assuming provisional is still part of the request
+          provisional: 0, 
           teacherId: teacherId,
           uniCodeSrc: null,
           degreeIdSrc: null,
@@ -522,7 +520,7 @@ const addCourse = async (course) => {
         }),
       });
       
-      // Handle the response from the database (optional)
+      // Handle the response from the database 
       if (dbResponse.ok) {
         const responseJson = await dbResponse.json();
         console.log('Course assignment response:', responseJson);
@@ -578,7 +576,7 @@ const addCourse = async (course) => {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-              file: transcriptHash, //cambiar por el return de la llamada a la db del transcript de un estudiante
+              file: transcriptHash, 
               addressStudent: studentAddress,
               address: universityAddress,
               type: 2,
@@ -910,7 +908,7 @@ const addCourse = async (course) => {
                   <td>{student.name || "N/A"}</td>
                   <td>{student.studentid}</td>
                   <td>{new Date(student.dob).toLocaleDateString()}</td>
-                  {/*<td>{student.degreeid}</td>*/}
+
                   <td>
                   <button onClick={() => handleAssignCourse(student)}> Assign Course </button>
                   </td>
@@ -1017,7 +1015,7 @@ const addCourse = async (course) => {
               <select
               onChange={(e) => {
                 const newDegreeId = e.target.value;
-                setSelectedDegreeId(newDegreeId); // Update selectedDegreeId
+                setSelectedDegreeId(newDegreeId); 
                 console.log("selectedDegreeId updated to:", newDegreeId); 
                 setNewStudent({ ...newStudent, degreeid: newDegreeId})
               }}
@@ -1067,7 +1065,6 @@ const addCourse = async (course) => {
                   setSelectedCourseId(selectedCourseId);
                   console.log("selectedCourseId updated to:", selectedCourseId);
                   setSelectedTeacherId(selectedCourse.teacherid); 
-                  //setNewStudent({ ...newStudent, courseid: selectedCourseId})
                 } 
               }}
               style={inputStyle}  
@@ -1138,9 +1135,9 @@ const addCourse = async (course) => {
                   }); 
                   
                   console.log('Course assigned successfully'); 
-                  // Reset form or close modal after submit (optional) 
+                  // Reset form or close modal after submit  
                   setSelectedStudent(null); 
-                  // Reset the selected student (optional) 
+                  // Reset the selected student 
                   setNewStudent({});
                   // Reset checkbox  
                   setErasmus(false); 
@@ -1170,7 +1167,7 @@ const addCourse = async (course) => {
               <select
                 onChange={(e) => {
                   const newTeacherRole = e.target.value;
-                  setSelectedTeacherRole(newTeacherRole); // Update selectedCourseId
+                  setSelectedTeacherRole(newTeacherRole); 
                   console.log("selectedTeacherRole updated to:", newTeacherRole); 
                   setNewTeacher({ ...newTeacher, role: newTeacherRole})
                 }}
@@ -1204,7 +1201,7 @@ const addCourse = async (course) => {
               <select
               onChange={(e) => {
                 const newDegreeId = e.target.value;
-                setSelectedDegreeId(newDegreeId); // Update selectedCourseId
+                setSelectedDegreeId(newDegreeId); 
                 console.log("selectedDegreeId updated to:", newDegreeId); 
                 setNewCourse({ ...newCourse, degreeid: newDegreeId });
               }}
@@ -1271,7 +1268,6 @@ const addCourse = async (course) => {
 
               <button
               onClick={() => {
-                // Wrap in a try/catch to handle async errors
                 handleTransferValidations(
                   teachers.find(t => t.teacherid === teacher1),
                   teachers.find(t => t.teacherid === teacher2)
@@ -1279,8 +1275,6 @@ const addCourse = async (course) => {
                   console.error("Validation transfer failed:", err);
                 });
 
-
-                // Optionally close modal
                 setShowTeacherModal(false);
               }}
                 >
@@ -1322,7 +1316,6 @@ const modalStyle = { position: "fixed", top: 0, left: 0, width: "100%", height: 
 const formStyle = { background: "white", padding: "20px", borderRadius: "5px", display: "flex", flexDirection: "column", gap: "10px" };
 const inputStyle = { padding: "8px", border: "1px solid #333", borderRadius: "4px" };
 const buttonStyle = { backgroundColor: '#4CAF50', color: 'white',  padding: '10px 20px', border: 'none', borderRadius: '5px', cursor: 'pointer', fontSize: '16px', transition: 'background-color 0.3s ease'};
-const formContainerStyle = { maxWidth: '1000px', margin: 'auto', padding: '20px', border: '1px solid #ccc', borderRadius: '8px',boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)'};
 const formTitleStyle = {textAlign: 'center', marginBottom: '20px'};
 const formGroupStyle = {marginBottom: '15px'};
 const labelStyle = {fontWeight: 'bold',marginBottom: '5px',display: 'block'};
