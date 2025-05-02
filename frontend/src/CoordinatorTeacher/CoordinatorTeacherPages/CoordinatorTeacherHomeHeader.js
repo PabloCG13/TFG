@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import perfil from '../../Logo/perfil.png'; // Import the image from Logo folder
 import { Link, useLocation } from 'react-router-dom'; // Import Link to redirect
 
-const CoordinatorTeacherHomeHeader = ({teacherId}) => {
+const CoordinatorTeacherHomeHeader = ({teacherId, logout}) => {
 
   const location =  useLocation();
   const { participantAddress } = location.state || {}; // Extract data
@@ -110,6 +110,7 @@ const CoordinatorTeacherHomeHeader = ({teacherId}) => {
             to={`/`} // Route where it links to
             style={backButtonStyle} 
             onClick={(e) => {
+              logout();
               e.preventDefault(); // Prevent immediate navigation
               handleBackCourse(); // Call the function
               setTimeout(() => {

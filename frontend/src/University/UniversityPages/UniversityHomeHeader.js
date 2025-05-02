@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import perfil from '../../Logo/perfil.png'; // Import the image from Logo folder
 import { Link } from 'react-router-dom'; // Import Link to redirect
 
-const UniversityHomeHeader = () => {
+const UniversityHomeHeader = ( { logout } ) => {
   // State to control modal visibility
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -37,6 +37,13 @@ const UniversityHomeHeader = () => {
           <Link
             to={`/`} // Route where it links to
             style={backButtonStyle} 
+                onClick={(e) => {
+              logout();
+              e.preventDefault();
+              setTimeout(() => {
+                window.location.href = "/";
+              }, 500);
+            }}
             onMouseOver={(e) => Object.assign(e.target.style, hoverStyle)} 
             onMouseOut={(e) => Object.assign(e.target.style, backButtonStyle)} 
             >

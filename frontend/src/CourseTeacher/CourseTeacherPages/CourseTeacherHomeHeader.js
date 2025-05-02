@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import perfil from '../../Logo/perfil.png';
 import { Link } from 'react-router-dom';
 
-const CourseTeacherHomeHeader = ({ teacherId }) => {
+const CourseTeacherHomeHeader = ({ teacherId, logout }) => {
   const [validations, setValidations] = useState([]);
   const [selectedValidation, setSelectedValidation] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -148,6 +148,7 @@ const CourseTeacherHomeHeader = ({ teacherId }) => {
             to={`/`} 
             style={backButtonStyle} 
             onClick={(e) => {
+              logout();
               e.preventDefault();
               handleBackCourse();
               setTimeout(() => {

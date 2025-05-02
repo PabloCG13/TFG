@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom'; // Import useNavigate for controlled redirection
 
-const UniversityLogin = () => {
+const UniversityLogin = ( { login } ) => {
   const [user, setUser] = useState('');
   const [passwd, setPasswd] = useState('');
   const [message, setMessage] = useState(null); 
@@ -36,6 +36,9 @@ const UniversityLogin = () => {
 
       if (data.success && data.result === true) {
         console.log(response);
+        
+        login(user, passwd);
+        
         navigate(`/University/UniversityPages/UniversityHome/${user}`, {
           state: {
             universityAddress: universityAddress

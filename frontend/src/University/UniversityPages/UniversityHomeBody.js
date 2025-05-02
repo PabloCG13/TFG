@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useLocation } from 'react-router-dom';
 
-const UniversityHomeBody = ({ uniCode }) => {
+const UniversityHomeBody = ({ uniCode} ) => {
   const [activeTab, setActiveTab] = useState("STUDENTS");
   const [students, setStudents] = useState([]);
   const [teachers, setTeachers] = useState([]);

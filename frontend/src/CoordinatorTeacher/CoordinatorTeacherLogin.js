@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom'; // Import useNavigate for controlled redirection
 
-const CourseTeacherLogin = () => {
+const CourseTeacherLogin = ({ login }) => {
   const [teacherId, setTeacherId] = useState('');
   const [password, setPassword] = useState('');
   const [message, setMessage] = useState(null); // State for error messages
@@ -44,6 +44,7 @@ const CourseTeacherLogin = () => {
       if (data.success && data.result === true) {
         console.log(response);
         // Navigate to CourseTeacher Home Page on successful login
+        login(teacherId, password);
         navigate(`/CoordinatorTeacher/CoordinatorTeacherPages/CoordinatorTeacherHome/${teacherId}`, {
           state: { teacherId, participantAddress }
         });

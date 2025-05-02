@@ -3,7 +3,7 @@ import perfil from '../../Logo/perfil.png'; // Import the image from Logo folder
 import { Link, useLocation} from 'react-router-dom'; // Import Link to redirect
 
 
-const StudentHomeHeader = ({studentId}) => {
+const StudentHomeHeader = ({studentId, logout}) => {
   const location = useLocation();
   const { participantAddress } = location.state || {}; // Extract participantAddress
   // State to control modal visibility
@@ -152,6 +152,7 @@ const StudentHomeHeader = ({studentId}) => {
             to={`/`} // Route where it links to
             style={backButtonStyle}
             onClick={(e) => {
+              logout();
               e.preventDefault(); // Prevent immediate navigation
               handleBackCourse(); // Call the function
               setTimeout(() => {

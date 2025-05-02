@@ -1,5 +1,7 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+
+import ProtectedRoute from './ProtectedRoute';
 
 import Home from "./HomePage/Home"; // Import Home
 
@@ -34,24 +36,33 @@ import UniversityHome from "./University/UniversityPages/UniversityHome"; // Imp
 
 
 function App() {
+	const [isAuthenticated, setIsAuthenticated] = useState(false);
+	const login = () => { setIsAuthenticated(true) };
+	const logout = () => { setIsAuthenticated(false) };
+	
+		
+
+
   return (
     <Router>
       <Routes>
         {/* Principal route: Home */}
+        
         <Route path="/" element={<Home />} />
 
 
         {/* Student Login route */}
-        <Route path="/Student/StudentLogin" element={<StudentLogin />} />
+        <Route path="/Student/StudentLogin" element={<StudentLogin login = {login} />} />
+
 
         {/* Course Teacher Login route */}
-        <Route path="/CourseTeacher/CourseTeacherLogin" element={<CourseTeacherLogin />} />
+        <Route path="/CourseTeacher/CourseTeacherLogin" element={<CourseTeacherLogin login = {login} />} />
 
         {/* Coordinator Teacher Login route */}
-        <Route path="/CoordinatorTeacher/CoordinatorTeacherLogin" element={<CoordinatorTeacherLogin />} />
+        <Route path="/CoordinatorTeacher/CoordinatorTeacherLogin" element={<CoordinatorTeacherLogin login = {login} />} />
 
         {/* University Login route */}
-        <Route path="/University/UniversityLogin" element={<UniversityLogin />} />
+        <Route path="/University/UniversityLogin" element={<UniversityLogin login = {login} />} />
 
 
         {/* Student Sign In route */}
@@ -68,47 +79,71 @@ function App() {
 
 
         {/* Student Home Page route */}
+                        <Route element={<ProtectedRoute isAuthenticated
+                                        ={isAuthenticated} />} >
         <Route path="/Student/StudentPages/StudentHome/:studentId" element={<StudentHome />} />
-
+	</Route>
 
         {/* Student Transcript Page route */}
+                        <Route element={<ProtectedRoute isAuthenticated
+                                        ={isAuthenticated} />} >
         <Route path="/Student/StudentPages/StudentTranscriptPage/StudentTranscript/:studentId" element={<StudentTranscript />} />
-
+	</Route>
         {/* Student Validation List route */}
+                        <Route element={<ProtectedRoute isAuthenticated
+                                        ={isAuthenticated} />} >
         <Route path="/Student/StudentPages/StudentValidationListPage/StudentValidationList/:studentId" element={<StudentValidationList />} />
-
+	</Route>
         {/* Student University Information route */}
+                        <Route element={<ProtectedRoute isAuthenticated
+                                        ={isAuthenticated} />} >
         <Route path="/Student/StudentPages/StudentUniversityInformationPage/StudentUniversityInformation/:studentId" element={<StudentUniversityInformation />} />
-
+	</Route>
         {/* Student Profile route */}
+                        <Route element={<ProtectedRoute isAuthenticated
+                                        ={isAuthenticated} />} >
         <Route path="/Student/StudentPages/StudentProfilePage/StudentProfile/:studentId" element={<StudentProfile />} />
-
+	</Route>
 
         {/* Student Ask For Validation Page route */}
+                        <Route element={<ProtectedRoute isAuthenticated
+                                        ={isAuthenticated} />} >
         <Route path="/Student/StudentPages/StudentValidationListPage/StudentValidationListAskForValidationPage/StudentValidationListAskForValidation/:studentId" element={< StudentAskForValidation/>} />
-
+	</Route>
 
         {/* Course Teacher Home Page route */}
+                        <Route element={<ProtectedRoute isAuthenticated
+                                        ={isAuthenticated} />} >
         <Route path="/CourseTeacher/CourseTeacherPages/CourseTeacherHome/:teacherId" element={<CourseTeacherHome />} />
-
+	</Route>
 
         {/* Coordinator Teacher Home Page route */}
+                        <Route element={<ProtectedRoute isAuthenticated
+                                        ={isAuthenticated} />} >
         <Route path="/CoordinatorTeacher/CoordinatorTeacherPages/CoordinatorTeacherHome/:teacherId" element={<CoordinatorTeacherHome />} />
-
+	</Route>
 
         {/* Coordinator Teacher Validation List Page route */}
+                        <Route element={<ProtectedRoute isAuthenticated
+                                        ={isAuthenticated} />} >
         <Route path="/CoordinatorTeacher/CoordinatorTeacherPages/CoordinatorTeacherValidationListPage/CoordinatorTeacherValidationList/:teacherId" element={<CoordinatorTeacherValidationList />} />
-
+	</Route>
         {/* Coordinator Teacher Confirm Validations Page route */}
+                        <Route element={<ProtectedRoute isAuthenticated
+                                        ={isAuthenticated} />} >
         <Route path="/CoordinatorTeacher/CoordinatorTeacherPages/CoordinatorTeacherConfirmValidationPage/CoordinatorTeacherConfirmValidation/:teacherId" element={<CoordinatorTeacherConfirmValidation />} />
-
+	</Route>
         {/* Coordinator Teacher Confirm Marks Page route */}
+                        <Route element={<ProtectedRoute isAuthenticated
+                                        ={isAuthenticated} />} >
         <Route path="/CoordinatorTeacher/CoordinatorTeacherPages/CoordinatorTeacherConfirmMarksPage/CoordinatorTeacherConfirmMarks/:teacherId" element={<CoordinatorTeacherConfirmMarks />} />
-
+	</Route>
         
         {/* University Home Page route */}
+                        <Route element={<ProtectedRoute isAuthenticated
+                                        ={isAuthenticated} />} >
         <Route path="/University/UniversityPages/UniversityHome/:uniCode" element={<UniversityHome />} />
-        
+       	</Route> 
 
       </Routes>
     </Router>

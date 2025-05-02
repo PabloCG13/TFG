@@ -231,6 +231,8 @@ useEffect(() => {
       console.error(`Failed to add validate entry to DB. Status: ${dbResponseValidates.status}`);
       return false;
     }
+    
+      setRefreshKey(prev => prev +1);
   };
   
   const handleBlockchain = async (validatid, year, unicodesrc, degreeidsrc, courseidsrc, unicodedst, degreeiddst, courseiddst) => {
