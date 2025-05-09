@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import perfil from '../../Logo/perfil.png';
-import { Link } from 'react-router-dom';
+import React, { useState, useEffect } from "react";
+import perfil from "../../Logo/perfil.png";
+import { Link } from "react-router-dom";
 
 const CourseTeacherHomeHeader = ({ teacherId, logout }) => {
   const [validations, setValidations] = useState([]);
@@ -10,7 +10,7 @@ const CourseTeacherHomeHeader = ({ teacherId, logout }) => {
   const [dstCourse, setDstCourse] = useState("");
 
   const arrayBufferToBase64 = (buffer) => {
-    let binary = '';
+    let binary = "";
     const bytes = new Uint8Array(buffer);
     const len = bytes.byteLength;
     for (let i = 0; i < len; i++) {
@@ -32,30 +32,37 @@ const CourseTeacherHomeHeader = ({ teacherId, logout }) => {
       .catch((error) => console.error("Error fetching course info:", error));
   }, [teacherId]);
 
+  // Method to get the validation petitions that the course coordinator has
   const fetchValidations = () => {
     fetch(`http://localhost:5000/api/courses/teacher/${teacherId}`)
-      .then(response => {
+      .then((response) => {
         if (!response.ok) {
-          throw new Error(`Failed to fetch courses. Status: ${response.status}`);
+          throw new Error(
+            `Failed to fetch courses. Status: ${response.status}`
+          );
         }
         return response.json();
       })
-      .then(data => {
+      .then((data) => {
         if (!data.courseid) {
           throw new Error("courseid is missing in API response");
         }
-        return fetch(`http://localhost:5000/api/validations/provisional/requests/${data.unicode}/${data.degreeid}/${data.courseid}`);
+        return fetch(
+          `http://localhost:5000/api/validations/provisional/requests/${data.unicode}/${data.degreeid}/${data.courseid}`
+        );
       })
-      .then(response => {
+      .then((response) => {
         if (!response.ok) {
-          throw new Error(`Failed to fetch students. Status: ${response.status}`);
+          throw new Error(
+            `Failed to fetch students. Status: ${response.status}`
+          );
         }
         return response.json();
       })
-      .then(validData => {
+      .then((validData) => {
         setValidations(validData);
       })
-      .catch(error => console.error("Error:", error));
+      .catch((error) => console.error("Error:", error));
   };
 
   useEffect(() => {
@@ -65,15 +72,18 @@ const CourseTeacherHomeHeader = ({ teacherId, logout }) => {
     return () => clearInterval(interval);
   }, [teacherId]);
 
+  // Function to open modal
   const openModal = () => {
     setIsModalOpen(true);
   };
 
+  // Function to close modal
   const closeModal = () => {
     setIsModalOpen(false);
     setSelectedValidation(null);
   };
 
+  //Method to update the lastAccessDate of the Course Coordinator
   const handleBackCourse = () => {
     const currentTimestamp = new Date().toISOString();
     fetch(`http://localhost:5000/api/teachers/${teacherId}`, {
@@ -81,14 +91,16 @@ const CourseTeacherHomeHeader = ({ teacherId, logout }) => {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ lastAccess: currentTimestamp }),
     })
-      .then(response => {
+      .then((response) => {
         if (!response.ok) {
-          throw new Error(`Failed to update lastAccess. Status: ${response.status}`);
+          throw new Error(
+            `Failed to update lastAccess. Status: ${response.status}`
+          );
         }
         return response.json();
       })
-      .then(data => console.log("Successfully updated lastAccess:", data))
-      .catch(error => console.error("Error updating lastAccess:", error));
+      .then((data) => console.log("Successfully updated lastAccess:", data))
+      .catch((error) => console.error("Error updating lastAccess:", error));
   };
 
   const handleDstCourse = (validation) => {
@@ -97,43 +109,53 @@ const CourseTeacherHomeHeader = ({ teacherId, logout }) => {
     const degreeId = validation.degreeiddst;
     const courseId = validation.courseiddst;
 
-    fetch(`http://localhost:5000/api/courses/${uniCode}/${degreeId}/${courseId}`)
-      .then(response => {
+    fetch(
+      `http://localhost:5000/api/courses/${uniCode}/${degreeId}/${courseId}`
+    )
+      .then((response) => {
         if (!response.ok) {
-          throw new Error(`Failed to fetch destination course. Status: ${response.status}`);
+          throw new Error(
+            `Failed to fetch destination course. Status: ${response.status}`
+          );
         }
         return response.json();
       })
-      .then(data => {
+      .then((data) => {
         if (data.syllabus_pdf && data.syllabus_pdf.data) {
           data.syllabus_pdf = arrayBufferToBase64(data.syllabus_pdf.data);
         }
         setDstCourse(data);
       })
-      .catch(error => console.error("Error accessing dstCourse:", error));
+      .catch((error) => console.error("Error accessing dstCourse:", error));
   };
 
+  // method to update the database with the course coordinator answer
   const handlePetition = (answer, valid) => {
-    fetch(`http://localhost:5000/api/validations/${valid.unicodesrc}/${valid.degreeidsrc}/${valid.courseidsrc}/${valid.unicodedst}/${valid.degreeiddst}/${valid.courseiddst}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ provisional: answer }),
-    })
-      .then(response => {
+    fetch(
+      `http://localhost:5000/api/validations/${valid.unicodesrc}/${valid.degreeidsrc}/${valid.courseidsrc}/${valid.unicodedst}/${valid.degreeiddst}/${valid.courseiddst}`,
+      {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ provisional: answer }),
+      }
+    )
+      .then((response) => {
         if (!response.ok) {
-          throw new Error(`Failed to update provisional. Status: ${response.status}`);
+          throw new Error(
+            `Failed to update provisional. Status: ${response.status}`
+          );
         }
         return response.json();
       })
-      .then(data => {
+      .then((data) => {
         fetchValidations();
       })
-      .catch(error => console.error("Error updating provisional:", error));
+      .catch((error) => console.error("Error updating provisional:", error));
     closeModal();
   };
 
   return (
-    <div> 
+    <div>
       <header style={headerStyle}>
         <div style={containerStyle}>
           <a href="/" style={buttonStyle}>
@@ -145,8 +167,8 @@ const CourseTeacherHomeHeader = ({ teacherId, logout }) => {
           </div>
 
           <Link
-            to={`/`} 
-            style={backButtonStyle} 
+            to={`/`}
+            style={backButtonStyle}
             onClick={(e) => {
               logout();
               e.preventDefault();
@@ -155,15 +177,15 @@ const CourseTeacherHomeHeader = ({ teacherId, logout }) => {
                 window.location.href = "/";
               }, 500);
             }}
-            onMouseOver={(e) => Object.assign(e.target.style, hoverStyle)} 
-            onMouseOut={(e) => Object.assign(e.target.style, backButtonStyle)} 
+            onMouseOver={(e) => Object.assign(e.target.style, hoverStyle)}
+            onMouseOut={(e) => Object.assign(e.target.style, backButtonStyle)}
           >
             Log Out
           </Link>
 
           <div style={notificationStyle} className="notifications">
-            <button 
-              style={starButtonStyle} 
+            <button
+              style={starButtonStyle}
               aria-label="Notifications"
               onClick={openModal}
             >
@@ -184,9 +206,10 @@ const CourseTeacherHomeHeader = ({ teacherId, logout }) => {
               <ul style={notificationListStyle}>
                 {validations.map((validation, index) => (
                   <li key={index} style={notificationItemStyle}>
-                    There is a new validation request for the course <strong>{validation.courseidsrc}</strong>  
-                    <button 
-                      style={viewDetailsButtonStyle} 
+                    There is a new validation request for the course{" "}
+                    <strong>{validation.courseidsrc}</strong>
+                    <button
+                      style={viewDetailsButtonStyle}
                       onClick={() => handleDstCourse(validation)}
                     >
                       View More
@@ -197,17 +220,22 @@ const CourseTeacherHomeHeader = ({ teacherId, logout }) => {
             ) : (
               <p>No new notifications</p>
             )}
-            <button onClick={closeModal} style={closeButtonStyle}>Close</button>
+            <button onClick={closeModal} style={closeButtonStyle}>
+              Close
+            </button>
           </div>
         </div>
       )}
 
       {selectedValidation && (
-        <div style={modalOverlayStyle} onClick={() => setSelectedValidation(null)}>
+        <div
+          style={modalOverlayStyle}
+          onClick={() => setSelectedValidation(null)}
+        >
           <div style={validationModalContainerStyle}>
             <div style={validationModalContentStyle}>
               <h2>Validation Details</h2>
-              
+
               <div style={comparisonTablesContainer}>
                 <div style={comparisonTableWrapper}>
                   <h3 style={comparisonTableTitle}>My Course</h3>
@@ -221,27 +249,37 @@ const CourseTeacherHomeHeader = ({ teacherId, logout }) => {
                     <tbody>
                       <tr>
                         <td style={universityTableCellStyle}>University</td>
-                        <td style={universityTableCellStyle}>{srcCourse.unicode}</td>
+                        <td style={universityTableCellStyle}>
+                          {srcCourse.unicode}
+                        </td>
                       </tr>
                       <tr>
                         <td style={universityTableCellStyle}>Degree</td>
-                        <td style={universityTableCellStyle}>{srcCourse.degreeid}</td>
+                        <td style={universityTableCellStyle}>
+                          {srcCourse.degreeid}
+                        </td>
                       </tr>
                       <tr>
                         <td style={universityTableCellStyle}>Course ID</td>
-                        <td style={universityTableCellStyle}>{srcCourse.courseid}</td>
+                        <td style={universityTableCellStyle}>
+                          {srcCourse.courseid}
+                        </td>
                       </tr>
                       <tr>
                         <td style={universityTableCellStyle}>Period</td>
-                        <td style={universityTableCellStyle}>{srcCourse.period}</td>
+                        <td style={universityTableCellStyle}>
+                          {srcCourse.period}
+                        </td>
                       </tr>
                       <tr>
                         <td style={universityTableCellStyle}>Credits</td>
-                        <td style={universityTableCellStyle}>{srcCourse.credits}</td>
+                        <td style={universityTableCellStyle}>
+                          {srcCourse.credits}
+                        </td>
                       </tr>
                     </tbody>
                   </table>
-                  
+
                   <h4 style={syllabusTitleStyle}>Syllabus:</h4>
                   {srcCourse.syllabus_pdf ? (
                     <embed
@@ -266,27 +304,37 @@ const CourseTeacherHomeHeader = ({ teacherId, logout }) => {
                     <tbody>
                       <tr>
                         <td style={universityTableCellStyle}>University</td>
-                        <td style={universityTableCellStyle}>{dstCourse.unicode}</td>
+                        <td style={universityTableCellStyle}>
+                          {dstCourse.unicode}
+                        </td>
                       </tr>
                       <tr>
                         <td style={universityTableCellStyle}>Degree</td>
-                        <td style={universityTableCellStyle}>{dstCourse.degreeid}</td>
+                        <td style={universityTableCellStyle}>
+                          {dstCourse.degreeid}
+                        </td>
                       </tr>
                       <tr>
                         <td style={universityTableCellStyle}>Course ID</td>
-                        <td style={universityTableCellStyle}>{dstCourse.courseid}</td>
+                        <td style={universityTableCellStyle}>
+                          {dstCourse.courseid}
+                        </td>
                       </tr>
                       <tr>
                         <td style={universityTableCellStyle}>Period</td>
-                        <td style={universityTableCellStyle}>{dstCourse.period}</td>
+                        <td style={universityTableCellStyle}>
+                          {dstCourse.period}
+                        </td>
                       </tr>
                       <tr>
                         <td style={universityTableCellStyle}>Credits</td>
-                        <td style={universityTableCellStyle}>{dstCourse.credits}</td>
+                        <td style={universityTableCellStyle}>
+                          {dstCourse.credits}
+                        </td>
                       </tr>
                     </tbody>
                   </table>
-                  
+
                   <h4 style={syllabusTitleStyle}>Syllabus:</h4>
                   {dstCourse.syllabus_pdf ? (
                     <embed
@@ -305,14 +353,23 @@ const CourseTeacherHomeHeader = ({ teacherId, logout }) => {
             <div style={fixedFooterStyle}>
               <div style={actionButtonsContainer}>
                 <div style={decisionButtonsContainer}>
-                  <button onClick={() => handlePetition(3, selectedValidation)} style={acceptButtonStyle}>
+                  <button
+                    onClick={() => handlePetition(3, selectedValidation)}
+                    style={acceptButtonStyle}
+                  >
                     Accept
                   </button>
-                  <button onClick={() => handlePetition(4, selectedValidation)} style={rejectButtonStyle}>
+                  <button
+                    onClick={() => handlePetition(4, selectedValidation)}
+                    style={rejectButtonStyle}
+                  >
                     Reject
                   </button>
                 </div>
-                <button onClick={() => setSelectedValidation(null)} style={closeButtonStyle}>
+                <button
+                  onClick={() => setSelectedValidation(null)}
+                  style={closeButtonStyle}
+                >
                   Close
                 </button>
               </div>
@@ -326,155 +383,155 @@ const CourseTeacherHomeHeader = ({ teacherId, logout }) => {
 
 // Styles
 const headerStyle = {
-  background: '#282c34',
-  color: 'white',
-  padding: '10px',
-  textAlign: 'center',
+  background: "#282c34",
+  color: "white",
+  padding: "10px",
+  textAlign: "center",
 };
 
 const containerStyle = {
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'space-between',
-  maxWidth: '1200px',
-  margin: '0 auto',
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "space-between",
+  maxWidth: "1200px",
+  margin: "0 auto",
 };
 
 const buttonStyle = {
-  textDecoration: 'none',
+  textDecoration: "none",
 };
 
 const imageStyle = {
-  width: '80px',
-  height: '80px',
+  width: "80px",
+  height: "80px",
 };
 
 const titleStyle = {
   flex: 1,
-  textAlign: 'center',
+  textAlign: "center",
 };
 
 const notificationStyle = {
-  position: 'relative',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  cursor: 'pointer',
+  position: "relative",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  cursor: "pointer",
 };
 
 const starButtonStyle = {
-  background: 'transparent',
-  border: 'none',
-  color: 'white',
-  fontSize: '30px',
-  cursor: 'pointer',
-  position: 'relative',
+  background: "transparent",
+  border: "none",
+  color: "white",
+  fontSize: "30px",
+  cursor: "pointer",
+  position: "relative",
 };
 
 const notificationBadgeStyle = {
-  position: 'absolute',
-  top: '-5px',
-  right: '-5px',
-  background: 'red',
-  color: 'white',
-  borderRadius: '50%',
-  width: '18px',
-  height: '18px',
-  fontSize: '12px',
-  textAlign: 'center',
-  fontWeight: 'bold',
-  lineHeight: '18px',
+  position: "absolute",
+  top: "-5px",
+  right: "-5px",
+  background: "red",
+  color: "white",
+  borderRadius: "50%",
+  width: "18px",
+  height: "18px",
+  fontSize: "12px",
+  textAlign: "center",
+  fontWeight: "bold",
+  lineHeight: "18px",
 };
 
 const backButtonStyle = {
-  textDecoration: 'none',
-  backgroundColor: '#ff4c4c',
-  color: 'white',
-  padding: '10px 20px',
-  borderRadius: '5px',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  transition: 'background-color 0.3s',
+  textDecoration: "none",
+  backgroundColor: "#ff4c4c",
+  color: "white",
+  padding: "10px 20px",
+  borderRadius: "5px",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  transition: "background-color 0.3s",
 };
 
 const modalOverlayStyle = {
-  position: 'fixed',
+  position: "fixed",
   top: 0,
   left: 0,
-  width: '100%',
-  height: '100%',
-  backgroundColor: 'rgba(0, 0, 0, 0.5)', 
-  display: 'flex',
-  justifyContent: 'center',
-  alignItems: 'center',
+  width: "100%",
+  height: "100%",
+  backgroundColor: "rgba(0, 0, 0, 0.5)",
+  display: "flex",
+  justifyContent: "center",
+  alignItems: "center",
   zIndex: 1000,
 };
 
 const modalStyle = {
-  backgroundColor: 'white',
-  padding: '20px',
-  borderRadius: '8px',
-  textAlign: 'center',
-  width: '80%',
-  maxWidth: '700px',
-  maxHeight: '90vh',
-  overflowY: 'auto',
+  backgroundColor: "white",
+  padding: "20px",
+  borderRadius: "8px",
+  textAlign: "center",
+  width: "80%",
+  maxWidth: "700px",
+  maxHeight: "90vh",
+  overflowY: "auto",
 };
 
 const validationModalContainerStyle = {
-  display: 'flex',
-  flexDirection: 'column',
-  backgroundColor: 'white',
-  borderRadius: '8px',
-  width: '90%',
-  maxWidth: '1200px',
-  maxHeight: '90vh',
-  position: 'relative',
+  display: "flex",
+  flexDirection: "column",
+  backgroundColor: "white",
+  borderRadius: "8px",
+  width: "90%",
+  maxWidth: "1200px",
+  maxHeight: "90vh",
+  position: "relative",
 };
 
 const validationModalContentStyle = {
-  padding: '20px',
-  overflowY: 'auto',
+  padding: "20px",
+  overflowY: "auto",
   flex: 1,
-  marginBottom: '120px', // Increased space for fixed buttons
+  marginBottom: "120px", // Increased space for fixed buttons
 };
 
 const fixedFooterStyle = {
-  position: 'absolute',
+  position: "absolute",
   bottom: 0,
   left: 0,
   right: 0,
-  backgroundColor: '#fff',
-  padding: '15px',
-  boxShadow: '0 -2px 5px rgba(0,0,0,0.1)',
-  borderBottomLeftRadius: '8px',
-  borderBottomRightRadius: '8px',
-  display: 'flex',
-  justifyContent: 'center',
+  backgroundColor: "#fff",
+  padding: "15px",
+  boxShadow: "0 -2px 5px rgba(0,0,0,0.1)",
+  borderBottomLeftRadius: "8px",
+  borderBottomRightRadius: "8px",
+  display: "flex",
+  justifyContent: "center",
 };
 
 const actionButtonsContainer = {
-  display: 'flex',
-  flexDirection: 'column',
-  alignItems: 'center',
-  gap: '10px',
+  display: "flex",
+  flexDirection: "column",
+  alignItems: "center",
+  gap: "10px",
 };
 
 const decisionButtonsContainer = {
-  display: 'flex',
-  gap: '15px',
+  display: "flex",
+  gap: "15px",
 };
 
 const closeButtonStyle = {
-  backgroundColor: '#f44336',
-  color: 'white',
-  border: 'none',
-  padding: '10px 20px',
-  borderRadius: '5px',
-  cursor: 'pointer',
-  width: '50%',
-  maxWidth: '100px',
+  backgroundColor: "#f44336",
+  color: "white",
+  border: "none",
+  padding: "10px 20px",
+  borderRadius: "5px",
+  cursor: "pointer",
+  width: "50%",
+  maxWidth: "100px",
 };
 
 const hoverStyle = {
@@ -482,100 +539,100 @@ const hoverStyle = {
 };
 
 const notificationListStyle = {
-  listStyle: 'none',
+  listStyle: "none",
   padding: 0,
 };
 
 const notificationItemStyle = {
-  margin: '10px 0',
-  padding: '10px',
-  backgroundColor: '#f8f9fa',
-  borderRadius: '5px',
+  margin: "10px 0",
+  padding: "10px",
+  backgroundColor: "#f8f9fa",
+  borderRadius: "5px",
 };
 
 const viewDetailsButtonStyle = {
-  marginLeft: '10px',
-  padding: '5px 10px',
-  fontSize: '12px',
-  backgroundColor: '#28a745',
-  color: 'white',
-  border: 'none',
-  cursor: 'pointer',
+  marginLeft: "10px",
+  padding: "5px 10px",
+  fontSize: "12px",
+  backgroundColor: "#28a745",
+  color: "white",
+  border: "none",
+  cursor: "pointer",
 };
 
 const comparisonTablesContainer = {
-  display: 'flex',
-  gap: '20px',
-  width: '100%',
-  marginBottom: '20px',
+  display: "flex",
+  gap: "20px",
+  width: "100%",
+  marginBottom: "20px",
 };
 
 const comparisonTableWrapper = {
   flex: 1,
-  display: 'flex',
-  flexDirection: 'column',
-  gap: '15px',
+  display: "flex",
+  flexDirection: "column",
+  gap: "15px",
 };
 
 const comparisonTableTitle = {
-  color: '#007bff',
-  marginBottom: '10px',
-  textAlign: 'center',
+  color: "#007bff",
+  marginBottom: "10px",
+  textAlign: "center",
 };
 
 const universityTableStyle = {
-  width: '100%',
-  borderCollapse: 'collapse',
-  margin: '10px 0',
-  fontSize: '14px',
+  width: "100%",
+  borderCollapse: "collapse",
+  margin: "10px 0",
+  fontSize: "14px",
 };
 
 const universityTableHeaderStyle = {
-  backgroundColor: '#007bff',
-  color: 'white',
-  padding: '10px',
-  textAlign: 'left',
-  fontWeight: 'bold',
+  backgroundColor: "#007bff",
+  color: "white",
+  padding: "10px",
+  textAlign: "left",
+  fontWeight: "bold",
 };
 
 const universityTableCellStyle = {
-  padding: '10px',
-  borderBottom: '1px solid #ddd',
-  textAlign: 'left',
+  padding: "10px",
+  borderBottom: "1px solid #ddd",
+  textAlign: "left",
 };
 
 const syllabusTitleStyle = {
-  marginTop: '0',
-  color: '#007bff',
+  marginTop: "0",
+  color: "#007bff",
 };
 
 const pdfEmbedStyle = {
-  width: '100%',
-  height: '400px',
-  marginTop: '10px',
-  border: '1px solid #ddd',
+  width: "100%",
+  height: "400px",
+  marginTop: "10px",
+  border: "1px solid #ddd",
 };
 
 const acceptButtonStyle = {
-  backgroundColor: 'green',
-  color: 'white',
-  padding: '10px 20px',
-  border: 'none',
-  borderRadius: '5px',
-  cursor: 'pointer',
-  width: '100%',
-  maxWidth: '150px',
+  backgroundColor: "green",
+  color: "white",
+  padding: "10px 20px",
+  border: "none",
+  borderRadius: "5px",
+  cursor: "pointer",
+  width: "100%",
+  maxWidth: "150px",
 };
 
 const rejectButtonStyle = {
-  backgroundColor: 'red',
-  color: 'white',
-  padding: '10px 20px',
-  border: 'none',
-  borderRadius: '5px',
-  cursor: 'pointer',
-  width: '100%',
-  maxWidth: '150px',
+  backgroundColor: "red",
+  color: "white",
+  padding: "10px 20px",
+  border: "none",
+  borderRadius: "5px",
+  cursor: "pointer",
+  width: "100%",
+  maxWidth: "150px",
 };
 
 export default CourseTeacherHomeHeader;

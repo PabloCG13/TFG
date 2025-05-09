@@ -1,54 +1,57 @@
-import React, { useState, useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
+import React, { useState, useEffect } from "react";
+import { useLocation } from "react-router-dom";
 
-const StudentTranscriptBody= ({studentId}) => {
-  
+const StudentTranscriptBody = ({ studentId }) => {
   const [studentCourse, setStudentCourses] = useState([]);
   const location = useLocation();
-  const { participantAddress } = location.state || {}; // Extract participantAddress
+  const { participantAddress } = location.state || {};
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalMessage, setModalMessage] = useState("");
-  
+
   useEffect(() => {
     //Call to get all the courses in which the student is enrolled
     fetch(`http://localhost:5000/api/transcripts/${studentId}`)
-      .then((response) =>{
+      .then((response) => {
         if (!response.ok) {
-          throw new Error(`Failed to fetch validations. Status: ${response.status}`);
+          throw new Error(
+            `Failed to fetch validations. Status: ${response.status}`
+          );
         }
         return response.json();
       })
-      .then((data) =>{ 
+      .then((data) => {
         if (!data.length) {
           throw new Error("No validations found.");
         }
         setStudentCourses(data);
       })
-      .catch((error) => console.error("Error fetching student's courses:", error));
+      .catch((error) =>
+        console.error("Error fetching student's courses:", error)
+      );
   }, [studentId]);
 
-  const handleTranscript = async () =>{
-    console.log("He pulsado el boton con address", participantAddress);
-    try{
-      console.log("El transcript es ", studentCourse);
+  // Method to get the hash of the student
+  const handleTranscript = async () => {
+    console.log("Address button with", participantAddress);
+    try {
+      console.log("The transcript is", studentCourse);
       const response = await fetch("http://localhost:4000/askForTranscript", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ 
-          addressStudent: participantAddress, 
-          file: studentCourse
+        body: JSON.stringify({
+          addressStudent: participantAddress,
+          file: studentCourse,
         }),
       });
-  
+
       const data = await response.json();
-      console.log("askForTranscript:",data);
+      console.log("askForTranscript:", data);
       if (data.success && data.result === true) {
-        console.log("hash",data.hash);
-        // Show on the
-        setModalMessage(`Hash of the transcript: ${data.hash}` );
+        console.log("hash", data.hash);
+        setModalMessage(`Hash of the transcript: ${data.hash}`);
       } else {
-        console.log("hash",data.hash);
+        console.log("hash", data.hash);
         setModalMessage("Not the correct transcript. Please try again.");
       }
     } catch (error) {
@@ -59,7 +62,6 @@ const StudentTranscriptBody= ({studentId}) => {
     setIsModalOpen(true);
   };
 
-
   return (
     <div style={containerStyle}>
       {/* Main content */}
@@ -67,46 +69,53 @@ const StudentTranscriptBody= ({studentId}) => {
         <div style={tableContainer}>
           <h2 style={tableTitle}>Courses</h2>
           <table style={tableStyle}>
-          <thead>
-            <tr>
-              <th style={thStyle}>Degree ID</th>
-              <th style={thStyle}>Course ID</th>
-              <th style={thStyle}>Mark</th>
-              <th style={thStyle}>Provisional</th>
-              <th style={thStyle}>Academic Year</th>
-              <th style={thStyle}>Erasmus</th>
-            </tr>
-          </thead>
-          <tbody>
-          {studentCourse.map((course) => (
-            <React.Fragment key={course.courseid}>
+            <thead>
               <tr>
-                <td style={tdStyle}>{course.degreeid}</td>
-                <td style={tdStyle}>{course.courseid}</td>
-                <td style={tdStyle}>{course.mark}</td>
-                <td style={tdStyle}>
-                  <span style={lockIconStyle}>
-                    {course.provisional === 0 ? "🔓" : "🔒"} 
-                  </span>
-                </td>
-                <td style={tdStyle}>{course.academicyear}</td>
-                <td style={tdStyle}>{course.erasmus ? "✅" : "❌"}</td>
+                <th style={thStyle}>Degree ID</th>
+                <th style={thStyle}>Course ID</th>
+                <th style={thStyle}>Mark</th>
+                <th style={thStyle}>Provisional</th>
+                <th style={thStyle}>Academic Year</th>
+                <th style={thStyle}>Erasmus</th>
               </tr>
-              {course.erasmus === 1 && (
-                <tr>
-                  <td colSpan={6} style={{ textAlign: 'center', color: '#007bff', fontStyle: 'italic' }}>
-                    This course has been validated by {course.degreeidsrc}, {course.courseidsrc}
-                  </td>
-                </tr>
-              )}
-            </React.Fragment>
-          ))}
-
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {studentCourse.map((course) => (
+                <React.Fragment key={course.courseid}>
+                  <tr>
+                    <td style={tdStyle}>{course.degreeid}</td>
+                    <td style={tdStyle}>{course.courseid}</td>
+                    <td style={tdStyle}>{course.mark}</td>
+                    <td style={tdStyle}>
+                      <span style={lockIconStyle}>
+                        {course.provisional === 0 ? "🔓" : "🔒"}
+                      </span>
+                    </td>
+                    <td style={tdStyle}>{course.academicyear}</td>
+                    <td style={tdStyle}>{course.erasmus ? "✅" : "❌"}</td>
+                  </tr>
+                  {course.erasmus === 1 && (
+                    <tr>
+                      <td
+                        colSpan={6}
+                        style={{
+                          textAlign: "center",
+                          color: "#007bff",
+                          fontStyle: "italic",
+                        }}
+                      >
+                        This course has been validated by {course.degreeidsrc},{" "}
+                        {course.courseidsrc}
+                      </td>
+                    </tr>
+                  )}
+                </React.Fragment>
+              ))}
+            </tbody>
+          </table>
         </div>
         <div style={buttonContainerStyle}>
-          <button style={buttonStyle} onClick={()=> handleTranscript()}>
+          <button style={buttonStyle} onClick={() => handleTranscript()}>
             Print Transcript
           </button>
         </div>
@@ -117,7 +126,12 @@ const StudentTranscriptBody= ({studentId}) => {
           <div style={modalStyle} onClick={(e) => e.stopPropagation()}>
             <h2>Transcript Verification</h2>
             <p>{modalMessage}</p>
-            <button style={closeButtonStyle} onClick={() => setIsModalOpen(false)}>Close</button>
+            <button
+              style={closeButtonStyle}
+              onClick={() => setIsModalOpen(false)}
+            >
+              Close
+            </button>
           </div>
         </div>
       )}
@@ -169,9 +183,9 @@ const tdStyle = {
 };
 
 const lockIconStyle = {
-  width: '20px',
-  height: '20px',
-  verticalAlign: 'middle', // Para alinear el ícono con el checkbox
+  width: "20px",
+  height: "20px",
+  verticalAlign: "middle", // Para alinear el ícono con el checkbox
 };
 
 /* Button Container */
@@ -181,20 +195,20 @@ const buttonContainerStyle = {
   alignItems: "center",
   height: "100vh", // Full screen height
   gap: "40px", // Space between buttons
-    lexWrap: "wrap", // Prevents overflow on small screens
+  lexWrap: "wrap", // Prevents overflow on small screens
 };
-   
+
 /* Transcript Button */
 const buttonStyle = {
   padding: "12px 24px",
   fontSize: "30px",
   border: "none",
   backgroundColor: "#007bff",
-  color: "white", 
+  color: "white",
   borderRadius: "8px",
   cursor: "pointer",
   transition: "background 0.3s ease, transform 0.2s ease",
-  textDecoration: "none"
+  textDecoration: "none",
 };
 
 const modalOverlayStyle = {
@@ -227,6 +241,5 @@ const closeButtonStyle = {
   cursor: "pointer",
   width: "100px",
 };
-
 
 export default StudentTranscriptBody;

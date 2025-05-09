@@ -1,75 +1,86 @@
 import React, { useState, useEffect, useMemo } from "react";
-import { useLocation } from 'react-router-dom';
+import { useLocation } from "react-router-dom";
 
-const CourseTeacherHomeBody = ({teacherId}) => {
+const CourseTeacherHomeBody = ({ teacherId }) => {
   const [selectedYear, setSelectedYear] = useState("All");
   const [students, setStudents] = useState([]);
   const [teacher, setTeacher] = useState([]);
-  const [course, setCourse] = useState({ degreeid:"", courseid:"", name:"", credits:"", period:"", teacherid:""});
+  const [course, setCourse] = useState({
+    degreeid: "",
+    courseid: "",
+    name: "",
+    credits: "",
+    period: "",
+    teacherid: "",
+  });
   const [newEntry, setNewEntry] = useState("");
-  const [message, setMessage] = useState(''); 
-  const location =  useLocation();
+  const [message, setMessage] = useState("");
+  const location = useLocation();
   const { participantAddress } = location.state || {}; // Extract data
-  const [oldPasswd, setOldPasswd] = useState('');
-  const [newPasswd, setNewPasswd] = useState('');
-  
-  
+  const [oldPasswd, setOldPasswd] = useState("");
+  const [newPasswd, setNewPasswd] = useState("");
+
   // State to toggle grade display mode
   const [viewMode, setViewMode] = useState("Letter");
 
   // Modal state
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedStudent, setSelectedStudent] = useState(null);
-  
-  const filteredStudents = selectedYear === "All" 
-    ? students 
-    : students.filter(student => student.academicyear === selectedYear);
+
+  const filteredStudents =
+    selectedYear === "All"
+      ? students
+      : students.filter((student) => student.academicyear === selectedYear);
 
   useEffect(() => {
     if (!teacherId) return;
 
     fetch(`http://localhost:5000/api/courses/teacher/${teacherId}`)
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`Failed to fetch courses. Status: ${response.status}`);
-            }
-            return response.json();
-        })
-        .then(data => {
-            // Extract ONLY the 'courseid' field
-            const courseId = data.courseid;  // Assuming the API always returns a single object
-            const degreeId = data.degreeid;
-            const uniCode = data.unicode;
-            if (!courseId) {
-                throw new Error("courseid is missing in API response");
-            }
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error(
+            `Failed to fetch courses. Status: ${response.status}`
+          );
+        }
+        return response.json();
+      })
+      .then((data) => {
+        // Extract ONLY the 'courseid' field
+        const courseId = data.courseid; // Assuming the API always returns a single object
+        const degreeId = data.degreeid;
+        const uniCode = data.unicode;
+        if (!courseId) {
+          throw new Error("courseid is missing in API response");
+        }
 
-            console.log("Extracted course ID:", courseId);
-            setCourse(data);
-            // Now fetch students for this courseId
-            return fetch(`http://localhost:5000/api/transcripts/students-in-course/${uniCode}/${degreeId}/${courseId}`);
-        })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`Failed to fetch students. Status: ${response.status}`);
-            }
-            return response.json();
-        })
-        .then((studentData) => setStudents(studentData))
-        .catch(error => console.error("Error:", error));
-	//Call to get the teacher data for the profile:
+        console.log("Extracted course ID:", courseId);
+        setCourse(data);
+        // Now fetch students for this courseId
+        return fetch(
+          `http://localhost:5000/api/transcripts/students-in-course/${uniCode}/${degreeId}/${courseId}`
+        );
+      })
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error(
+            `Failed to fetch students. Status: ${response.status}`
+          );
+        }
+        return response.json();
+      })
+      .then((studentData) => setStudents(studentData))
+      .catch((error) => console.error("Error:", error));
+    //Call to get the teacher data for the profile:
     fetch(`http://localhost:5000/api/teachers/${teacherId}`)
       .then((response) => response.json())
       .then((data) => setTeacher(data))
       .catch((error) => console.error("Error fetching teacher info:", error));
-      
-}, [teacherId]);
-  	
+  }, [teacherId]);
+
   //;
   const years = useMemo(() => {
-  	return [...new Set(students.map(student => student.academicyear))];
+    return [...new Set(students.map((student) => student.academicyear))];
   }, [students]);
-
 
   // Function to open modal
   const openModal = (student) => {
@@ -87,126 +98,148 @@ const CourseTeacherHomeBody = ({teacherId}) => {
     setSelectedStudent({ ...selectedStudent, mark: event.target.value });
     //setStudents({...selectedStudent, mark: event.target.value });
   };
-  
+
   // Function to confirm the new grade
-const handleConfirm = async () => {
-  // Actualizar la nota en el estado de students sin hacer un nuevo fetch
-  
-  try {
-    const prov = selectedStudent.erasmus === 0 ? 1 : 0;
+  const handleConfirm = async () => {
+    try {
+      const prov = selectedStudent.erasmus === 0 ? 1 : 0;
 
+      const dbResponseAddress = await fetch(
+        `http://localhost:5000/api/addresses/participant/${selectedStudent.studentid}`
+      );
+      if (!dbResponseAddress.ok) {
+        throw new Error(
+          `Failed to fetch student address. Status: ${dbResponseAddress.status}`
+        );
+      }
 
-    const dbResponseAddress = await fetch(`http://localhost:5000/api/addresses/participant/${selectedStudent.studentid}`);
-    if (!dbResponseAddress.ok) {
-      throw new Error(`Failed to fetch student address. Status: ${dbResponseAddress.status}`);
-    }
+      const dbData = await dbResponseAddress.json();
+      console.log("Student address:", dbData);
 
-    const dbData = await dbResponseAddress.json();
-    console.log("Student address:", dbData);
+      const dbResponseTranscript = await fetch(
+        `http://localhost:5000/api/transcripts/${selectedStudent.studentid}`
+      );
+      if (!dbResponseTranscript.ok) {
+        throw new Error(
+          `Failed to fetch transcript. Status: ${dbResponseTranscript.status}`
+        );
+      }
 
-    const dbResponseTranscript = await fetch(`http://localhost:5000/api/transcripts/${selectedStudent.studentid}`);
-    if (!dbResponseTranscript.ok) {
-      throw new Error(`Failed to fetch transcript. Status: ${dbResponseTranscript.status}`);
-    }
+      let transcriptHash = await dbResponseTranscript.json();
+      console.log("Got this transcript before modification:", transcriptHash);
+      const currentTimestamp = new Date().toISOString();
 
-    let transcriptHash = await dbResponseTranscript.json();
-    console.log("Got this transcript before modification:", transcriptHash);
-    const currentTimestamp = new Date().toISOString();
-
-    // Find the specific entry that matches selectedStudent
-    let updatedTranscript = transcriptHash.map(entry => {
+      // Find the specific entry that matches selectedStudent
+      let updatedTranscript = transcriptHash.map((entry) => {
         if (
-            entry.unicode === selectedStudent.unicode &&
-            entry.degreeid === selectedStudent.degreeid &&
-            entry.courseid === selectedStudent.courseid &&
-            entry.studentid === selectedStudent.studentid &&
-            entry.academicyear === selectedStudent.academicyear
+          entry.unicode === selectedStudent.unicode &&
+          entry.degreeid === selectedStudent.degreeid &&
+          entry.courseid === selectedStudent.courseid &&
+          entry.studentid === selectedStudent.studentid &&
+          entry.academicyear === selectedStudent.academicyear
         ) {
-            return {
-                ...entry,
-                provisional: prov,  // Update provisional field
-                mark: parseInt(selectedStudent.mark,10),  // Update mark field
-                lastaccess: currentTimestamp //Update the timestamp
-            };
+          return {
+            ...entry,
+            provisional: prov, // Update provisional field
+            mark: parseInt(selectedStudent.mark, 10), // Update mark field
+            lastaccess: currentTimestamp, //Update the timestamp
+          };
         }
         return entry;
-    });
+      });
 
+      console.log("Updated transcript:", updatedTranscript);
 
-    console.log("Updated transcript:", updatedTranscript);
+      // Step 2: Modify transcript on the blockchain
+      const transcriptResponse = await fetch(
+        "http://localhost:4000/modifyTranscript",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            file: updatedTranscript,
+            addressStudent: dbData.addressid,
+            address: participantAddress,
+            type: 1,
+          }),
+        }
+      );
 
-
-    // Step 2: Modify transcript on the blockchain
-    const transcriptResponse = await fetch("http://localhost:4000/modifyTranscript", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        file: updatedTranscript,
-        addressStudent: dbData.addressid,
-        address: participantAddress,
-        type: 1,
-      }),
-    });
-
-    if (!transcriptResponse.ok) {
-      throw new Error(`Failed to modify transcript. Status: ${transcriptResponse.status}`);
-    }
-
-    const transcriptData = await transcriptResponse.json();
-    const transcriptHashModified = transcriptData.hash;
-    console.log("Transcript modified successfully:", transcriptHashModified);
-
-    
-    const dbResponse = await fetch(`http://localhost:5000/api/transcripts/${selectedStudent.unicode}/${selectedStudent.degreeid}/${selectedStudent.courseid}/${selectedStudent.studentid}/${selectedStudent.academicyear}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        provisional: prov, // Assuming provisional is still part of the request
-        mark: selectedStudent.mark,
-        lastAccess: currentTimestamp,
-      }),
-    });
-
-    // Handle the response from the database 
-    if (dbResponse.ok) {
-      const responseJson = await dbResponse.json();
-      console.log('New mark updated response:', responseJson);
-    } else {
-      throw new Error('Failed to update mark');
-    }
-
-    const updateResponse = await fetch(`http://localhost:5000/api/students/${selectedStudent.studentid}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ transcriptHash: transcriptHashModified }),
-    });
-
-    if (!updateResponse.ok) {
-      throw new Error(`Failed to update student ${selectedStudent.studentid}. Status: ${updateResponse.status}`);
-    }
-
-    const updateData = await updateResponse.json();
-    console.log(`Student ${selectedStudent.studentid} updated successfully with transcriptHash:`, updateData);
-   
-    setStudents(prevStudents => prevStudents.map(student => {
-      if (student.studentid === selectedStudent.studentid) {
-        return { ...student, mark: selectedStudent.mark, provisional: prov }; // Actualiza solo la nota del estudiante modificado
+      if (!transcriptResponse.ok) {
+        throw new Error(
+          `Failed to modify transcript. Status: ${transcriptResponse.status}`
+        );
       }
-      return student;
-    }));
-  } catch (error) {
-    console.error("Error:", error);
-    setMessage("There was an error updating the grade.");
-  }
 
-  closeModal();
-};
+      const transcriptData = await transcriptResponse.json();
+      const transcriptHashModified = transcriptData.hash;
+      console.log("Transcript modified successfully:", transcriptHashModified);
 
+      // Step 3: Update the mark on the database
+      const dbResponse = await fetch(
+        `http://localhost:5000/api/transcripts/${selectedStudent.unicode}/${selectedStudent.degreeid}/${selectedStudent.courseid}/${selectedStudent.studentid}/${selectedStudent.academicyear}`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            provisional: prov,
+            mark: selectedStudent.mark,
+            lastAccess: currentTimestamp,
+          }),
+        }
+      );
+
+      // Handle the response from the database
+      if (dbResponse.ok) {
+        const responseJson = await dbResponse.json();
+        console.log("New mark updated response:", responseJson);
+      } else {
+        throw new Error("Failed to update mark");
+      }
+      //Step 4: Update the hash of the transcript
+      const updateResponse = await fetch(
+        `http://localhost:5000/api/students/${selectedStudent.studentid}`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ transcriptHash: transcriptHashModified }),
+        }
+      );
+
+      if (!updateResponse.ok) {
+        throw new Error(
+          `Failed to update student ${selectedStudent.studentid}. Status: ${updateResponse.status}`
+        );
+      }
+
+      const updateData = await updateResponse.json();
+      console.log(
+        `Student ${selectedStudent.studentid} updated successfully with transcriptHash:`,
+        updateData
+      );
+
+      setStudents((prevStudents) =>
+        prevStudents.map((student) => {
+          if (student.studentid === selectedStudent.studentid) {
+            return {
+              ...student,
+              mark: selectedStudent.mark,
+              provisional: prov,
+            }; // Actualiza solo la nota del estudiante modificado
+          }
+          return student;
+        })
+      );
+    } catch (error) {
+      console.error("Error:", error);
+      setMessage("There was an error updating the grade.");
+    }
+
+    closeModal();
+  };
 
   // Function to change the password
   const changePasswordCall = async () => {
-
-
     try {
       const response = await fetch("http://localhost:4000/consult", {
         method: "POST",
@@ -216,42 +249,46 @@ const handleConfirm = async () => {
           user: teacherId,
           passwd: oldPasswd,
           role: 2,
-          type: 2 
+          type: 2,
         }),
       });
 
       const data = await response.json();
       console.log(data);
       if (data.success && data.result === true) {
-        const response = await fetch("http://localhost:4000/changeParticipant", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          address: participantAddress,
-          user: teacherId,
-          passwd: newPasswd
-        }),
-      });
-      const participantData = await response.json();
-    console.log(participantData);
-      const teacherHash = participantData.hash;
-      if(teacherHash !== "Error"){
-        const dbResponse = await fetch(`http://localhost:5000/api/teachers/${teacherId}`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-              hash: teacherHash
-          }),
-      });
+        const response = await fetch(
+          "http://localhost:4000/changeParticipant",
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              address: participantAddress,
+              user: teacherId,
+              passwd: newPasswd,
+            }),
+          }
+        );
+        const participantData = await response.json();
+        console.log(participantData);
+        const teacherHash = participantData.hash;
+        if (teacherHash !== "Error") {
+          const dbResponse = await fetch(
+            `http://localhost:5000/api/teachers/${teacherId}`,
+            {
+              method: "PUT",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                hash: teacherHash,
+              }),
+            }
+          );
 
-      const dbData = await dbResponse.json();
-      console.log(dbData);
-      
-      
-      } else {
-        setMessage("Invalid credentials. Please try again.");
+          const dbData = await dbResponse.json();
+          console.log(dbData);
+        } else {
+          setMessage("Invalid credentials. Please try again.");
+        }
       }
-}
     } catch (error) {
       console.error("Error making API request:", error);
       setMessage("Server error. Please try again later.");
@@ -267,19 +304,19 @@ const handleConfirm = async () => {
       if (mark === "D") return "60-69";
       if (mark === "E") return "50-59";
       if (mark === "F") return "0-49";
-      return mark;  // En caso de que ya sea un número, lo retornamos tal cual
+      return mark; // En caso de que ya sea un número, lo retornamos tal cual
     } else {
       // Si estamos en modo letra, convertimos el número en una letra correspondiente.
       const numericMark = parseInt(mark, 10);
-  
+
       if (numericMark >= 90) return "A";
       if (numericMark >= 80) return "B";
       if (numericMark >= 70) return "C";
       if (numericMark >= 60) return "D";
       if (numericMark >= 50) return "E";
-      if (numericMark < 50) return "F";  // Cualquier número menor a 50 se considera F
+      if (numericMark < 50) return "F"; // Cualquier número menor a 50 se considera F
     }
-  }
+  };
 
   return (
     <div style={containerStyle}>
@@ -290,9 +327,23 @@ const handleConfirm = async () => {
           <h2 style={profileTitle}>PROFILE</h2>
           <h2 style={profileTitle}>ID = {teacher.teacherid}</h2>
           <h2 style={profileTitle}>NAME = {teacher.name}</h2>
-          <input type="password" placeholder="Old password" style={inputStyle} value={oldPasswd} onChange={(e) => setOldPasswd(e.target.value)}/>
-          <input type="password" placeholder="New password" style={inputStyle} value={newPasswd} onChange={(e) => setNewPasswd(e.target.value)} />
-          <button onClick={changePasswordCall} style={buttonStyle}>Modify password</button > 
+          <input
+            type="password"
+            placeholder="Old password"
+            style={inputStyle}
+            value={oldPasswd}
+            onChange={(e) => setOldPasswd(e.target.value)}
+          />
+          <input
+            type="password"
+            placeholder="New password"
+            style={inputStyle}
+            value={newPasswd}
+            onChange={(e) => setNewPasswd(e.target.value)}
+          />
+          <button onClick={changePasswordCall} style={buttonStyle}>
+            Modify password
+          </button>
         </div>
       </div>
 
@@ -302,81 +353,116 @@ const handleConfirm = async () => {
           <h2 style={tableTitle}>Course: {course.courseid}</h2>
 
           {/* Wrapper to align dropdown above "Mark" */}
-          <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: "10px", alignItems: "center" }}>
-          <label style={{ fontWeight: "bold", marginRight: "10px" }}>View grades as:</label>
-          <select style={{ ...inputStyle, width: "150px" }} value={viewMode} onChange={(e) => setViewMode(e.target.value)}>
-          <option value="Letter">Letter (A/B/C)</option>
-          <option value="Numeric">Numeric (0-100)</option>
-          </select>
-        </div>
-	<label htmlFor="yearFilter">Filter by Academic Year: </label>
-      <select
-        id="yearFilter"
-        value={selectedYear}
-        onChange={(e) => setSelectedYear(e.target.value)}
-      >
-        <option value="All">All</option>
-        {years.map((year, index) => (
-          <option key={index} value={year}>{year}</option>
-        ))}
-      </select>
-        <table style={tableStyle}>
-          <thead>
-            <tr>
-              <th style={thStyle}>ID</th>
-              <th style={thStyle}>Degree</th>
-              <th style={thStyle}>Grade</th>
-              <th style={thStyle}>Provisional</th>
-              <th style={thStyle}>Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredStudents.map((student, index) => (
-              <tr key={index}>
-                <td style={tdStyle}>{student.studentid}</td>
-                <td style={tdStyle}>{student.degreeid}</td>
-                <td style={tdStyle}>{convertMark(student.mark)}</td>
-                <td style={tdStyle}>
-                  <span style={lockIconStyle}>
-                    {student.provisional === 0 ? "🔓" : "🔒"} 
-                  </span>
-                </td>
-
-                {student.mark !== null ? (
-                      <span style={{ color: "green", fontWeight: "bold",display: "inline-block", padding: "10px 0" }}>Mark Confirmed</span>
-                    ) : (
-                  <>
-                  <td style={tdStyle}>
-                  <button style={buttonStyle} onClick={() => openModal(student)}>
-                  Modify
-                  </button>
-                </td>
-               
-                  </>
-                )}
-              </tr>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "flex-end",
+              marginBottom: "10px",
+              alignItems: "center",
+            }}
+          >
+            <label style={{ fontWeight: "bold", marginRight: "10px" }}>
+              View grades as:
+            </label>
+            <select
+              style={{ ...inputStyle, width: "150px" }}
+              value={viewMode}
+              onChange={(e) => setViewMode(e.target.value)}
+            >
+              <option value="Letter">Letter (A/B/C)</option>
+              <option value="Numeric">Numeric (0-100)</option>
+            </select>
+          </div>
+          <label htmlFor="yearFilter">Filter by Academic Year: </label>
+          <select
+            id="yearFilter"
+            value={selectedYear}
+            onChange={(e) => setSelectedYear(e.target.value)}
+          >
+            <option value="All">All</option>
+            {years.map((year, index) => (
+              <option key={index} value={year}>
+                {year}
+              </option>
             ))}
-          </tbody>
-        </table>
+          </select>
+          <table style={tableStyle}>
+            <thead>
+              <tr>
+                <th style={thStyle}>ID</th>
+                <th style={thStyle}>Degree</th>
+                <th style={thStyle}>Grade</th>
+                <th style={thStyle}>Provisional</th>
+                <th style={thStyle}>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredStudents.map((student, index) => (
+                <tr key={index}>
+                  <td style={tdStyle}>{student.studentid}</td>
+                  <td style={tdStyle}>{student.degreeid}</td>
+                  <td style={tdStyle}>{convertMark(student.mark)}</td>
+                  <td style={tdStyle}>
+                    <span style={lockIconStyle}>
+                      {student.provisional === 0 ? "🔓" : "🔒"}
+                    </span>
+                  </td>
+
+                  {student.mark !== null ? (
+                    <span
+                      style={{
+                        color: "green",
+                        fontWeight: "bold",
+                        display: "inline-block",
+                        padding: "10px 0",
+                      }}
+                    >
+                      Mark Confirmed
+                    </span>
+                  ) : (
+                    <>
+                      <td style={tdStyle}>
+                        <button
+                          style={buttonStyle}
+                          onClick={() => openModal(student)}
+                        >
+                          Modify
+                        </button>
+                      </td>
+                    </>
+                  )}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
-    </div>
 
-    {/* Modal */}
-    {isModalOpen && selectedStudent && (
-      <div style={modalOverlayStyle} onClick={closeModal}>
-        <div style={modalStyle} onClick={(e) => e.stopPropagation()}>
-           <h2>Modify Grade</h2>
+      {/* Modal */}
+      {isModalOpen && selectedStudent && (
+        <div style={modalOverlayStyle} onClick={closeModal}>
+          <div style={modalStyle} onClick={(e) => e.stopPropagation()}>
+            <h2>Modify Grade</h2>
 
+            <label style={labelStyle}>Student ID:</label>
+            <input
+              type="text"
+              value={selectedStudent.studentid}
+              readOnly
+              style={readOnlyInputStyle}
+            />
 
-           <label style={labelStyle}>Student ID:</label>
-           <input type="text" value={selectedStudent.studentid} readOnly style={readOnlyInputStyle} />
+            <label style={labelStyle}>Grade:</label>
+            <input
+              type="text"
+              value={selectedStudent.mark}
+              onChange={handleMarkChange}
+              style={inputStyle}
+            />
 
-           <label style={labelStyle}>Grade:</label>
-           <input type="text" value={selectedStudent.mark} onChange={handleMarkChange} style={inputStyle} />
-
-           <button style={confirmButtonStyle} onClick={handleConfirm}>
-            Confirm
-           </button>
+            <button style={confirmButtonStyle} onClick={handleConfirm}>
+              Confirm
+            </button>
           </div>
         </div>
       )}
@@ -407,8 +493,7 @@ const profileContainer = {
   flexDirection: "column",
   alignItems: "center",
   width: "100%",
- };
- 
+};
 
 const profileImage = {
   width: "200px",
@@ -524,15 +609,15 @@ const confirmButtonStyle = {
 };
 
 const checkboxStyle = {
-  width: '20px',
-  height: '20px',
-  marginRight: '10px',
+  width: "20px",
+  height: "20px",
+  marginRight: "10px",
 };
 
 const lockIconStyle = {
-  width: '20px',
-  height: '20px',
-  verticalAlign: 'middle', // Para alinear el ícono con el checkbox
+  width: "20px",
+  height: "20px",
+  verticalAlign: "middle", // Para alinear el ícono con el checkbox
 };
 
 export default CourseTeacherHomeBody;

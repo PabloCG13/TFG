@@ -27,9 +27,11 @@ const UniversitySignIn = () => {
     console.log("Ciudad:", city);
     console.log("Contraseña:", password);
 
-    try { 
-      const addressResponse = await fetch(`http://localhost:5000/api/addresses/any-participant/null-participant`); 
-        
+    try {
+      const addressResponse = await fetch(
+        `http://localhost:5000/api/addresses/any-participant/null-participant`
+      );
+
       const addressData = await addressResponse.json();
       console.log("Addressdata: ", addressData);
       if (!addressResponse.ok || !addressData.addressid) {
@@ -37,84 +39,93 @@ const UniversitySignIn = () => {
         console.error("Address fetch error:", addressData);
         return;
       }
-      
+
       const universityAddress = addressData.addressid; // Retrieved from API
       console.log("Retrieved University Address:", universityAddress);
-      
+
       const response = await fetch("http://localhost:4000/addUniversity", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           address: universityAddress,
           username: user,
-          password: password
+          password: password,
         }),
       });
 
       const data = await response.json();
-      
 
       if (data.success && data.hash !== "Error") {
-        setMessage(`University added successfully to the Blockchain! Hash: ${data.hash}`);
+        setMessage(
+          `University added successfully to the Blockchain! Hash: ${data.hash}`
+        );
         console.log("University added successfully. Hash:", data.hash);
-      
 
-      const universityHash = data.hash;
-      if(universityHash !== "Error"){
-        const dbResponse = await fetch("http://localhost:5000/api/universities", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-              uniCode: user,  
-              name: name,
-              location: `${city}, ${country}`,
-              hash: universityHash
-          }),
-      });
+        const universityHash = data.hash;
+        if (universityHash !== "Error") {
+          const dbResponse = await fetch(
+            "http://localhost:5000/api/universities",
+            {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                uniCode: user,
+                name: name,
+                location: `${city}, ${country}`,
+                hash: universityHash,
+              }),
+            }
+          );
 
-      const dbData = await dbResponse.json();
-      console.log(dbData);
-      if (dbResponse.ok) {
-        
-        try {
-          const updateResponse = await fetch(`http://localhost:5000/api/addresses/${universityAddress}`, {
-            method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ participantId: user, addressId: universityAddress }),  // Pass the user as body
-          });
-    
-          if (updateResponse.ok) {
-            console.log(`Address ${universityAddress} successfully updated with user: ${user}`);
+          const dbData = await dbResponse.json();
+          console.log(dbData);
+          if (dbResponse.ok) {
+            try {
+              const updateResponse = await fetch(
+                `http://localhost:5000/api/addresses/${universityAddress}`,
+                {
+                  method: "PUT",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({
+                    participantId: user,
+                    addressId: universityAddress,
+                  }),
+                }
+              );
+
+              if (updateResponse.ok) {
+                console.log(
+                  `Address ${universityAddress} successfully updated with user: ${user}`
+                );
+              } else {
+                console.error(`Failed to update address: ${universityAddress}`);
+              }
+            } catch (error) {
+              console.error("Failed to update address in the DB:", error);
+            }
+
+            setMessage(
+              `University registered successfully! ID: ${dbData.unicode}`
+            );
+            console.log("Stored University:", dbData);
           } else {
-            console.error(`Failed to update address: ${universityAddress}`);
+            setMessage(`Failed to create a new entry in the Database error`);
+            console.error("Database error:", dbData.error);
           }
-        } catch (error) {
-          console.error("Failed to update address in the DB:", error);
         }
-        
-          setMessage(`University registered successfully! ID: ${dbData.unicode}`);
-          console.log("Stored University:", dbData);
       } else {
-          setMessage(`Failed to create a new entry in the Database error`);
-          console.error("Database error:", dbData.error);
+        if (data.hash === "Error") {
+          setMessage(`Failed to add university: ${data.hash}`);
+          console.error("Failed to add university:", data.hash);
+        } else {
+          setMessage(`Failed to add university: ${data.error}`);
+          console.error("Failed to add university:", data.error);
+        }
       }
-      }
-
-    } else {
-      if(data.hash === "Error"){
-        setMessage(`Failed to add university: ${data.hash}`);
-        console.error("Failed to add university:", data.hash);
-      }else{
-        setMessage(`Failed to add university: ${data.error}`);
-        console.error("Failed to add university:", data.error);
-      }
-
-    }
     } catch (error) {
-        setMessage("API request failed.");
-        console.error("Error:", error);
+      setMessage("API request failed.");
+      console.error("Error:", error);
     }
-
   };
 
   return (
@@ -122,7 +133,9 @@ const UniversitySignIn = () => {
       <h2>University Sign In</h2>
       <form onSubmit={handleSubmit} style={formStyle}>
         <div style={inputGroupStyle}>
-          <label htmlFor="user" style={labelStyle}>User:</label>
+          <label htmlFor="user" style={labelStyle}>
+            User:
+          </label>
           <input
             type="text"
             id="user"
@@ -133,7 +146,9 @@ const UniversitySignIn = () => {
           />
         </div>
         <div style={inputGroupStyle}>
-          <label htmlFor="name" style={labelStyle}>Name:</label>
+          <label htmlFor="name" style={labelStyle}>
+            Name:
+          </label>
           <input
             type="text"
             id="name"
@@ -144,7 +159,9 @@ const UniversitySignIn = () => {
           />
         </div>
         <div style={inputGroupStyle}>
-          <label htmlFor="city" style={labelStyle}>City:</label>
+          <label htmlFor="city" style={labelStyle}>
+            City:
+          </label>
           <input
             type="text"
             id="city"
@@ -155,7 +172,9 @@ const UniversitySignIn = () => {
           />
         </div>
         <div style={inputGroupStyle}>
-          <label htmlFor="country" style={labelStyle}>Country:</label>
+          <label htmlFor="country" style={labelStyle}>
+            Country:
+          </label>
           <input
             type="text"
             id="country"
@@ -166,7 +185,9 @@ const UniversitySignIn = () => {
           />
         </div>
         <div style={inputGroupStyle}>
-          <label htmlFor="password" style={labelStyle}>Password:</label>
+          <label htmlFor="password" style={labelStyle}>
+            Password:
+          </label>
           <input
             type="password"
             id="password"
@@ -177,7 +198,9 @@ const UniversitySignIn = () => {
           />
         </div>
         <div style={inputGroupStyle}>
-          <label htmlFor="confirmPassword" style={labelStyle}>Confirm Password:</label>
+          <label htmlFor="confirmPassword" style={labelStyle}>
+            Confirm Password:
+          </label>
           <input
             type="password"
             id="confirmPassword"
@@ -187,14 +210,18 @@ const UniversitySignIn = () => {
             style={inputStyle}
           />
         </div>
-        <button type="submit" style={submitButtonStyle}>Submit</button>
+        <button type="submit" style={submitButtonStyle}>
+          Submit
+        </button>
       </form>
 
       {/* Display messages */}
       {message && <p style={messageStyle}>{message}</p>}
 
       <div>
-        <Link to="/University/UniversityLogIn" style={loginLinkStyle}>Go to Login</Link>
+        <Link to="/University/UniversityLogIn" style={loginLinkStyle}>
+          Go to Login
+        </Link>
       </div>
     </div>
   );
@@ -262,6 +289,5 @@ const loginLinkStyle = {
   textDecoration: "none",
   color: "#007bff",
 };
-
 
 export default UniversitySignIn;
